@@ -14,6 +14,14 @@ class PatientDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
 
+class DoctorListCreateView(generics.ListCreateAPIView):
+    queryset = Doctor.objects.all()
+    serializer_class = DoctorSerializer
+
+class DoctorDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Doctor.objects.all()
+    serializer_class = DoctorSerializer
+    
 # --- Visit Views (Consultations) ---
 class VisitListCreateView(generics.ListCreateAPIView):
     queryset = Visit.objects.all().order_by('-visit_date')

@@ -1,0 +1,24 @@
+export interface Patient {
+    id?: number;            // DB Primary Key
+    patient_id: string;     // Hospital ID
+    first_name: string;
+    last_name: string;
+    dob: string;            // Matches backend 'dob'
+    gender: string;
+    phone: string;          // Matches backend 'phone'
+    address: string;
+}
+
+export interface Doctor { 
+    id?: number;
+    user?: {
+        id: number;
+        username: string;
+        first_name: string;
+        last_name: string;
+        email: string;
+    };
+    specialization: string;
+    license_number: string;
+    is_available: boolean;
+}

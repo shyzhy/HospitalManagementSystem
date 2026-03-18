@@ -84,7 +84,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'medflow',
         'USER': 'postgres',
-        'PASSWORD': 'shuri',
+        'PASSWORD': 'admin',
         'HOST': 'localhost',  # Or the IP/hostname of your PostgreSQL server
         'PORT': '5432',      # Default PostgreSQL port
     }

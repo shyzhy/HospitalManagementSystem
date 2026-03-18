@@ -6,6 +6,10 @@ urlpatterns = [
     path('patients/', views.PatientListCreateView.as_view(), name='patient-list'),
     path('patients/<int:pk>/', views.PatientDetailView.as_view(), name='patient-detail'),
 
+    # Doctors <--- ADDED THESE TWO LINES
+    path('doctors/', views.DoctorListCreateView.as_view(), name='doctor-list'),
+    path('doctors/<int:pk>/', views.DoctorDetailView.as_view(), name='doctor-detail'),
+
     # Visits
     path('visits/', views.VisitListCreateView.as_view(), name='visit-list'),
     path('visits/<int:pk>/', views.VisitDetailView.as_view(), name='visit-detail'),
