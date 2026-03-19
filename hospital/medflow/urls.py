@@ -1,26 +1,16 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from . import views
 
+# This automatically creates the 'patients/', 'doctors/', and 'consultations/' doors
+router = DefaultRouter()
+router.register(r'patients', views.PatientViewSet, basename='patient')
+router.register(r'doctors', views.DoctorViewSet, basename='doctor')
+router.register(r'consultations', views.ConsultationViewSet, basename='consultation')
+
 urlpatterns = [
-    # Patients
-    path('patients/', views.PatientListCreateView.as_view(), name='patient-list'),
-    path('patients/<int:pk>/', views.PatientDetailView.as_view(), name='patient-detail'),
-
-    # Doctors <--- ADDED THESE TWO LINES
-    path('doctors/', views.DoctorListCreateView.as_view(), name='doctor-list'),
-    path('doctors/<int:pk>/', views.DoctorDetailView.as_view(), name='doctor-detail'),
-
-    # Visits
+    path('', include(router.urls)),
+    # These are your extra custom views
     path('visits/', views.VisitListCreateView.as_view(), name='visit-list'),
-    path('visits/<int:pk>/', views.VisitDetailView.as_view(), name='visit-detail'),
-
-    # Medical Records
-    path('records/<int:pk>/', views.MedicalRecordDetailView.as_view(), name='record-detail'),
-
-    # Prescriptions
-    path('prescriptions/', views.PrescriptionCreateView.as_view(), name='prescription-create'),
-    path('visits/<int:visit_id>/prescriptions/', views.PrescriptionByVisitView.as_view(), name='visit-prescriptions'),
-
-    # Treatments
-    path('treatments/<int:pk>/', views.TreatmentUpdateView.as_view(), name='treatment-update'),
+    path('prescriptions/visit/<int:visit_id>/', views.PrescriptionByVisitView.as_view(), name='prescription-by-visit'),
 ]

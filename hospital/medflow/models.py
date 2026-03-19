@@ -17,7 +17,6 @@ class Patient(models.Model):
         return f"{self.first_name} {self.last_name} ({self.patient_id})"
 
 class Doctor(models.Model):
-    # Links to Django's Auth User (Username/Password)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='doctor_profile')
     specialization = models.CharField(max_length=100)
     license_number = models.CharField(max_length=50, unique=True)
@@ -28,17 +27,29 @@ class Doctor(models.Model):
 
 class Visit(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='visits')
+    # This related_name='consultations' was the source of your error. 
+    # It's okay to keep it as long as the Consultation model below uses something else.
     doctor = models.ForeignKey(Doctor, on_delete=models.SET_NULL, null=True, related_name='consultations')
     visit_date = models.DateTimeField(auto_now_add=True)
     reason_for_visit = models.TextField()
-    # Using JSONField for flexible vitals (BP, Temp, Weight)
     vitals = models.JSONField(default=dict, blank=True)
 
     def __str__(self):
         return f"Visit: {self.patient.last_name} | {self.visit_date.strftime('%Y-%m-%d')}"
 
+# YOUR NEW MODEL (RECORD CONSULTATION)
+class Consultation(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='patient_records')
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='doctor_records')
+    consultation_date = models.DateField(auto_now_add=True)
+    symptoms = models.TextField()
+    diagnosis = models.TextField()
+    notes = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Consultation for {self.patient.last_name} on {self.consultation_date}"
+
 class MedicalRecord(models.Model):
-    # One record per visit
     visit = models.OneToOneField(Visit, on_delete=models.CASCADE, related_name='medical_record')
     symptoms = models.TextField()
     diagnosis = models.TextField()

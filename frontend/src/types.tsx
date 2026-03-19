@@ -22,3 +22,16 @@ export interface Doctor {
     license_number: string;
     is_available: boolean;
 }
+
+export interface Consultation {
+    id: number;
+    patient: number;
+    patient_name?: string;
+    patient_last_name?: string;
+    doctor: number;
+    doctor_name?: string;
+    consultation_date: string;
+    symptoms: string;
+    diagnosis: string;
+    notes?: string;
+}

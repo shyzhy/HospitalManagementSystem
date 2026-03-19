@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Patient, Doctor, Visit, MedicalRecord, Prescription, Treatment
+from .models import Patient, Doctor, Visit, MedicalRecord, Prescription, Treatment, Consultation
 
 # --- User & Doctor Serializers ---
 class UserSerializer(serializers.ModelSerializer):
@@ -11,7 +11,6 @@ class UserSerializer(serializers.ModelSerializer):
 class DoctorSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     
-    # FIX: Added required=False so updates don't fail without these fields
     username = serializers.CharField(write_only=True, required=False)
     password = serializers.CharField(write_only=True, required=False)
     first_name = serializers.CharField(write_only=True, required=False)
@@ -26,7 +25,6 @@ class DoctorSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        # Username and password are required for new users
         username = validated_data.pop('username')
         password = validated_data.pop('password')
         first_name = validated_data.pop('first_name', '')
@@ -43,22 +41,17 @@ class DoctorSerializer(serializers.ModelSerializer):
         return Doctor.objects.create(user=user, **validated_data)
 
     def update(self, instance, validated_data):
-        # 1. Update the linked User object first
         user = instance.user
-        
-        # We use .get() to see if the frontend sent new values
         user.first_name = validated_data.pop('first_name', user.first_name)
         user.last_name = validated_data.pop('last_name', user.last_name)
         user.email = validated_data.pop('email', user.email)
         
-        # Only update password if it's actually provided
         password = validated_data.pop('password', None)
         if password:
             user.set_password(password)
         
         user.save()
 
-        # 2. Update the Doctor fields (specialization, license, etc.)
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         
@@ -102,4 +95,22 @@ class VisitSerializer(serializers.ModelSerializer):
             'id', 'patient', 'doctor', 'patient_details', 'doctor_details', 
             'visit_date', 'reason_for_visit', 'vitals', 
             'medical_record', 'prescriptions', 'treatments'
+        ]
+
+# --- Consultation Serializer (FIXED VERSION) ---
+class ConsultationSerializer(serializers.ModelSerializer):
+    # These fields look at the related Patient and Doctor models
+    # to find the specific fields you want to display in the list.
+    patient_name = serializers.CharField(source='patient.first_name', read_only=True)
+    patient_last_name = serializers.CharField(source='patient.last_name', read_only=True)
+    
+    # Since Doctor is linked to a User, we go: Doctor -> User -> last_name
+    doctor_name = serializers.CharField(source='doctor.user.last_name', read_only=True)
+
+    class Meta:
+        model = Consultation
+        fields = [
+            'id', 'patient', 'patient_name', 'patient_last_name', 
+            'doctor', 'doctor_name', 'symptoms', 'diagnosis', 
+            'notes', 'consultation_date'
         ]

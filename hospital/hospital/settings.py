@@ -46,6 +46,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -82,10 +83,10 @@ WSGI_APPLICATION = 'hospital.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'medflow',
+        'NAME': 'hospital_db',
         'USER': 'postgres',
-        'PASSWORD': 'admin',
-        'HOST': 'localhost',  # Or the IP/hostname of your PostgreSQL server
+        'PASSWORD': 'Blessedme08',
+        'HOST': '127.0.0.1',  # Or the IP/hostname of your PostgreSQL server
         'PORT': '5432',      # Default PostgreSQL port
     }
 }
@@ -121,6 +122,8 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 
 # Static files (CSS, JavaScript, Images)
