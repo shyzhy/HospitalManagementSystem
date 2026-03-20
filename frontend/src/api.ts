@@ -1,7 +1,8 @@
 import axios from "axios";
 import { Patient, Doctor, Consultation, Prescription } from "./types";
 
-const API_URL = "http://127.0.0.1:8000/api/v1";
+// Siguruha nga husto ang URL base sa imong Django setup
+const API_URL = "http://127.0.0.1:8000/api/v1"; 
 
 const API = axios.create({
     baseURL: API_URL, 
@@ -64,42 +65,33 @@ export const getConsultations = async (): Promise<Consultation[]> => {
 };
 
 // ==================== PRESCRIPTIONS ====================
-
-// 1. Get all prescriptions
 export const getPrescriptions = async (): Promise<Prescription[]> => {
     const response = await API.get<Prescription[]>("prescriptions/");
     return response.data;
 };
 
-// 2. Get prescriptions for a specific consultation
-export const getPrescriptionsByConsultation = async (consultationId: number): Promise<Prescription[]> => {
-    const response = await API.get<Prescription[]>(`prescriptions/?consultation=${consultationId}`);
+export const createPrescription = async (data: Partial<Prescription>): Promise<Prescription> => {
+    const response = await API.post<Prescription>("prescriptions/", data);
     return response.data;
 };
 
-// 3. Create a new prescription
-export const createPrescription = async (data: Partial<Prescription>): Promise<Prescription> => {
-    try {
-        const response = await API.post<Prescription>("prescriptions/", data);
-        return response.data;
-    } catch (error) {
-        console.error("Prescription API Error:", error);
-        throw error;
-    }
-};
-
-// 4. UPDATE prescription (FIX: Added this to remove red errors in App.tsx)
+// MAO NI ANG NAWALA NGA FUNCTIONS MAO NGA NAG-ERROR:
 export const updatePrescription = async (id: number, data: Partial<Prescription>): Promise<Prescription> => {
-    try {
-        const response = await API.put<Prescription>(`prescriptions/${id}/`, data);
-        return response.data;
-    } catch (error) {
-        console.error("Update Prescription Error:", error);
-        throw error;
-    }
+    const response = await API.put<Prescription>(`prescriptions/${id}/`, data);
+    return response.data;
 };
 
-// 5. Delete a prescription
 export const deletePrescription = async (id: number): Promise<void> => {
     await API.delete(`prescriptions/${id}/`);
+};
+
+// ==================== TREATMENTS ====================
+export const getTreatmentsByPatient = async (patientId: number): Promise<any[]> => {
+    const response = await API.get<any[]>(`treatments/?patient=${patientId}`);
+    return response.data;
+};
+
+export const createTreatment = async (data: any): Promise<any> => {
+    const response = await API.post<any>("treatments/", data);
+    return response.data;
 };

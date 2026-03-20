@@ -5,9 +5,10 @@ interface Props {
   patients: Patient[];
   onUpdate: (patient: Patient) => void;
   onDelete: (id: number) => void;
+  onTrack: (patient: Patient) => void; // Gidugang para sa Track Treatment
 }
 
-const PatientList: React.FC<Props> = ({ patients, onUpdate, onDelete }) => {
+const PatientList: React.FC<Props> = ({ patients, onUpdate, onDelete, onTrack }) => {
   return (
     <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
       <table className="w-full text-left border-collapse">
@@ -39,20 +40,27 @@ const PatientList: React.FC<Props> = ({ patients, onUpdate, onDelete }) => {
                   </span>
                 </td>
                 <td className="px-6 py-4 text-sm text-slate-500">
-                  {/* FIX: Using 'dob' instead of 'date_of_birth' */}
                   {p.dob} | {p.gender === 'M' ? 'Male' : p.gender === 'F' ? 'Female' : 'Other'}
                 </td>
                 <td className="px-6 py-4 text-sm text-slate-500">
-                  {/* FIX: Using 'phone' instead of 'contact_number' */}
                   {p.phone}
                 </td>
                 <td className="px-6 py-4 text-right space-x-4">
+                  {/* BAG-O: Track Treatment Button */}
+                  <button 
+                    onClick={() => onTrack(p)} 
+                    className="text-blue-600 font-black hover:underline text-xs"
+                  >
+                    TRACK
+                  </button>
+                  
                   <button 
                     onClick={() => onUpdate(p)} 
                     className="text-emerald-600 font-black hover:underline text-xs"
                   >
                     EDIT
                   </button>
+                  
                   <button 
                     onClick={() => onDelete(p.id!)} 
                     className="text-red-400 font-black hover:text-red-600 text-xs"

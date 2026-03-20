@@ -1,11 +1,12 @@
 from rest_framework import viewsets
-from .models import Patient, Doctor, Visit, Consultation, Prescription
+from .models import Patient, Doctor, Visit, Consultation, Prescription, Treatment # GIDUGANG: Treatment
 from .serializers import (
     PatientSerializer, 
     DoctorSerializer, 
     VisitSerializer, 
     ConsultationSerializer, 
-    PrescriptionSerializer
+    PrescriptionSerializer,
+    TreatmentSerializer 
 )
 
 class PatientViewSet(viewsets.ModelViewSet):
@@ -27,3 +28,8 @@ class ConsultationViewSet(viewsets.ModelViewSet):
 class PrescriptionViewSet(viewsets.ModelViewSet):
     queryset = Prescription.objects.all()
     serializer_class = PrescriptionSerializer
+
+
+class TreatmentViewSet(viewsets.ModelViewSet):
+    queryset = Treatment.objects.all()
+    serializer_class = TreatmentSerializer

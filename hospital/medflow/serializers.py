@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Patient, Doctor, Visit, Consultation, Prescription
+from .models import Patient, Doctor, Visit, Consultation, Prescription, Treatment
 
 class PatientSerializer(serializers.ModelSerializer):
     class Meta:
@@ -35,4 +35,12 @@ class VisitSerializer(serializers.ModelSerializer):
 class ConsultationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Consultation
+        fields = '__all__'
+
+# --- TREATMENT SERIALIZER ---
+class TreatmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Treatment
+        # Ang '__all__' mo-detect sa tanang fields sa imong model:
+        # id, patient, diagnosis, medication, notes, treatment_date
         fields = '__all__'

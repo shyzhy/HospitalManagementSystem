@@ -34,13 +34,9 @@ class Consultation(models.Model):
     diagnosis = models.TextField()
 
 class Prescription(models.Model):
-    # Fixed: Added null=True/blank=True to handle optional connections
     visit = models.ForeignKey(Visit, on_delete=models.CASCADE, null=True, blank=True)
     consultation = models.ForeignKey(Consultation, on_delete=models.CASCADE, null=True, blank=True)
-    
-    # CRITICAL: Added medication_name field which was missing
     medication_name = models.CharField(max_length=255) 
-    
     dosage = models.CharField(max_length=100)
     frequency = models.CharField(max_length=100)
     duration = models.CharField(max_length=100)
@@ -48,3 +44,14 @@ class Prescription(models.Model):
 
     def __str__(self):
         return f"{self.medication_name} - {self.dosage}"
+
+
+class Treatment(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='treatments')
+    diagnosis = models.CharField(max_length=255)
+    medication = models.TextField()
+    treatment_date = models.DateField(auto_now_add=True)
+    notes = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Treatment for {self.patient.first_name} - {self.diagnosis}"
