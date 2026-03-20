@@ -1,7 +1,6 @@
 import axios from "axios";
-import { Patient, Doctor, Consultation } from "./types";
+import { Patient, Doctor, Consultation, Prescription } from "./types";
 
-// Defining this variable fixes the 'API_URL is not defined' error in your screenshot
 const API_URL = "http://127.0.0.1:8000/api/v1";
 
 const API = axios.create({
@@ -51,17 +50,56 @@ export const deleteDoctor = async (id: number): Promise<void> => {
 // ==================== CONSULTATIONS ====================
 export const createConsultation = async (data: any) => {
     try {
-        // Using API.post ensures we hit port 8000, not port 3000
         const response = await API.post("consultations/", data);
         return response.data;
     } catch (error) {
         console.error("API Error:", error);
         throw error;
     }
-    
 };
 
 export const getConsultations = async (): Promise<Consultation[]> => {
     const response = await API.get<Consultation[]>("consultations/");
     return response.data;
+};
+
+// ==================== PRESCRIPTIONS ====================
+
+// 1. Get all prescriptions
+export const getPrescriptions = async (): Promise<Prescription[]> => {
+    const response = await API.get<Prescription[]>("prescriptions/");
+    return response.data;
+};
+
+// 2. Get prescriptions for a specific consultation
+export const getPrescriptionsByConsultation = async (consultationId: number): Promise<Prescription[]> => {
+    const response = await API.get<Prescription[]>(`prescriptions/?consultation=${consultationId}`);
+    return response.data;
+};
+
+// 3. Create a new prescription
+export const createPrescription = async (data: Partial<Prescription>): Promise<Prescription> => {
+    try {
+        const response = await API.post<Prescription>("prescriptions/", data);
+        return response.data;
+    } catch (error) {
+        console.error("Prescription API Error:", error);
+        throw error;
+    }
+};
+
+// 4. UPDATE prescription (FIX: Added this to remove red errors in App.tsx)
+export const updatePrescription = async (id: number, data: Partial<Prescription>): Promise<Prescription> => {
+    try {
+        const response = await API.put<Prescription>(`prescriptions/${id}/`, data);
+        return response.data;
+    } catch (error) {
+        console.error("Update Prescription Error:", error);
+        throw error;
+    }
+};
+
+// 5. Delete a prescription
+export const deletePrescription = async (id: number): Promise<void> => {
+    await API.delete(`prescriptions/${id}/`);
 };

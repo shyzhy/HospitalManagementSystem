@@ -35,3 +35,15 @@ export interface Consultation {
     diagnosis: string;
     notes?: string;
 }
+
+// types.ts
+export interface Prescription {
+    id?: number;
+    medication_name: string;
+    dosage: string;
+    frequency: string;
+    duration: string;
+    instructions?: string;
+    visit?: number | null;        // Allow null here
+    consultation?: number | null; // Allow null here
+}
