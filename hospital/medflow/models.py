@@ -10,17 +10,19 @@ class Patient(models.Model):
     phone = models.CharField(max_length=15)
     address = models.TextField()
 
-    def __str__(self):
+    def name(self):
         return f"{self.first_name} {self.last_name}"
 
 class Doctor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='doctor_profile')
     specialization = models.CharField(max_length=100)
     license_number = models.CharField(max_length=50, unique=True)
+    
+    # YOU MUST HAVE THIS LINE:
+    is_available = models.BooleanField(default=True) 
 
     def __str__(self):
-        return f"Dr. {self.user.last_name}"
-
+        return f"Dr. {self.user.last_name} - {self.specialization}"
 class Visit(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='visits')
     doctor = models.ForeignKey(Doctor, on_delete=models.SET_NULL, null=True)
@@ -32,26 +34,31 @@ class Consultation(models.Model):
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
     consultation_date = models.DateField(auto_now_add=True)
     diagnosis = models.TextField()
+    symptoms = models.CharField(max_length=1000, default='')
 
 class Prescription(models.Model):
-    visit = models.ForeignKey(Visit, on_delete=models.CASCADE, null=True, blank=True)
-    consultation = models.ForeignKey(Consultation, on_delete=models.CASCADE, null=True, blank=True)
-    medication_name = models.CharField(max_length=255) 
-    dosage = models.CharField(max_length=100)
-    frequency = models.CharField(max_length=100)
-    duration = models.CharField(max_length=100)
-    instructions = models.TextField(blank=True)
+    # Adding null=True, blank=True avoids the "provide a default" prompt
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='prescriptions', null=True, blank=True)
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='prescriptions_issued', null=True, blank=True)
+    
+    # Adding default='' or null=True for text fields
+    medication = models.CharField(max_length=200, default='') 
+    dosage = models.CharField(max_length=100, default='')
+    frequency = models.CharField(max_length=100, default='')
+    duration = models.CharField(max_length=100, default='')
+    
+    date_prescribed = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.medication_name} - {self.dosage}"
-
+        return f"{self.medication} - {self.patient.name if self.patient else 'No Patient'}"
 
 class Treatment(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='treatments')
-    diagnosis = models.CharField(max_length=255)
-    medication = models.TextField()
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='treatments', null=True, blank=True)
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='treatments_given', null=True, blank=True)
+    
+    treatment_name = models.CharField(max_length=200, default='')
+    description = models.TextField(default='') 
     treatment_date = models.DateField(auto_now_add=True)
-    notes = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"Treatment for {self.patient.first_name} - {self.diagnosis}"
+        return f"{self.treatment_name}"

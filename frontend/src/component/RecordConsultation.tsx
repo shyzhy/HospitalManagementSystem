@@ -1,140 +1,129 @@
 import React, { useState, useEffect } from 'react';
-import { getPatients, getDoctors, createConsultation } from '../api';
-import { Patient, Doctor } from '../types';
+import axios from 'axios';
 
-const RecordConsultation = () => {
-    // 1. State for the dropdown lists
-    const [patients, setPatients] = useState<Patient[]>([]);
-    const [doctors, setDoctors] = useState<Doctor[]>([]);
-    
-    // 2. State for the form fields
-    const [formData, setFormData] = useState({
-        patient: '',
-        doctor: '',
-        symptoms: '',
-        diagnosis: '',
-        notes: ''
-    });
+interface RecordConsultationProps {
+  initialData?: any | null;
+  onSuccess: () => void;
+}
 
-    const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState({ type: '', text: '' });
+const RecordConsultation: React.FC<RecordConsultationProps> = ({ initialData, onSuccess }) => {
+  const [patients, setPatients] = useState<any[]>([]);
+  const [doctors, setDoctors] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
-    // 3. FETCH DATA ON LOAD - This fixes the empty select lists
-    useEffect(() => {
-        const loadInitialData = async () => {
-            try {
-                const [patientData, doctorData] = await Promise.all([
-                    getPatients(),
-                    getDoctors()
-                ]);
-                setPatients(patientData);
-                setDoctors(doctorData);
-            } catch (error) {
-                console.error("Error loading selection data:", error);
-                setMessage({ type: 'error', text: 'Failed to load patients or doctors.' });
-            }
-        };
-        loadInitialData();
-    }, []);
+  // MATCHING YOUR DJANGO MODEL: patient, doctor, diagnosis, symptoms
+  const [formData, setFormData] = useState({
+    patient: '',
+    doctor: '',
+    diagnosis: '',
+    symptoms: '' 
+  });
 
-    // 4. Handle Form Submission
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setMessage({ type: '', text: '' });
-
-        try {
-            await createConsultation(formData);
-            setMessage({ type: 'success', text: 'Consultation recorded successfully!' });
-            // Clear form
-            setFormData({ patient: '', doctor: '', symptoms: '', diagnosis: '', notes: '' });
-        } catch (error) {
-            setMessage({ type: 'error', text: 'Failed to save record. Check server connection.' });
-        } finally {
-            setLoading(false);
-        }
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [patRes, docRes] = await Promise.all([
+          axios.get('http://127.0.0.1:8000/api/v1/patients/'),
+          axios.get('http://127.0.0.1:8000/api/v1/doctors/')
+        ]);
+        setPatients(patRes.data);
+        setDoctors(docRes.data.filter((d: any) => d.is_available || (initialData && d.id === initialData.doctor)));
+      } catch (e) { console.error("Fetch Error:", e); }
     };
+    fetchData();
 
-    return (
-        <div className="max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
-            <h2 className="text-2xl font-black text-emerald-700 mb-6 uppercase tracking-tight">
-                New Consultation Entry
-            </h2>
+    if (initialData) {
+      setFormData({
+        patient: String(initialData.patient),
+        doctor: String(initialData.doctor),
+        diagnosis: initialData.diagnosis || '',
+        symptoms: initialData.symptoms || '' // Updated from consultation_notes
+      });
+    }
+  }, [initialData]);
 
-            {message.text && (
-                <div className={`mb-4 p-4 rounded-lg font-bold text-sm ${message.type === 'success' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
-                    {message.text}
-                </div>
-            )}
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const payload = {
+        patient: Number(formData.patient),
+        doctor: Number(formData.doctor),
+        diagnosis: formData.diagnosis,
+        symptoms: formData.symptoms // Updated key
+      };
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-xs font-black text-slate-500 uppercase mb-2">Patient</label>
-                        <select 
-                            required
-                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-                            value={formData.patient}
-                            onChange={(e) => setFormData({...formData, patient: e.target.value})}
-                        >
-                            <option value="">Select Patient</option>
-                            {patients.map((p) => (
-                                <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>
-                            ))}
-                        </select>
-                    </div>
+      if (initialData?.id) {
+        await axios.put(`http://127.0.0.1:8000/api/v1/consultations/${initialData.id}/`, payload);
+      } else {
+        await axios.post('http://127.0.0.1:8000/api/v1/consultations/', payload);
+      }
+      onSuccess();
+    } catch (err: any) {
+      console.error("Save Error:", err.response?.data);
+      alert("Error saving record: " + JSON.stringify(err.response?.data));
+    } finally { setLoading(false); }
+  };
 
-                    <div>
-                        <label className="block text-xs font-black text-slate-500 uppercase mb-2">Attending Doctor</label>
-                        <select 
-                            required
-                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-                            value={formData.doctor}
-                            onChange={(e) => setFormData({...formData, doctor: e.target.value})}
-                        >
-                            <option value="">Select Doctor</option>
-                            {doctors.map((d) => (
-                                <option key={d.id} value={d.id}>
-                                    {/* Handle nested user object if it exists */}
-                                    Dr. {d.user?.last_name || d.license_number}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label className="block text-xs font-black text-slate-500 uppercase mb-2">Symptoms</label>
-                    <textarea 
-                        required
-                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl h-24 resize-none focus:ring-2 focus:ring-emerald-500 outline-none"
-                        placeholder="Enter patient complaints..."
-                        value={formData.symptoms}
-                        onChange={(e) => setFormData({...formData, symptoms: e.target.value})}
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-xs font-black text-slate-500 uppercase mb-2">Diagnosis</label>
-                    <textarea 
-                        required
-                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl h-24 resize-none focus:ring-2 focus:ring-emerald-500 outline-none"
-                        placeholder="Enter medical findings..."
-                        value={formData.diagnosis}
-                        onChange={(e) => setFormData({...formData, diagnosis: e.target.value})}
-                    />
-                </div>
-
-                <button 
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl shadow-lg shadow-emerald-200 transition-all active:scale-95 disabled:opacity-50"
-                >
-                    {loading ? 'SAVING...' : 'SAVE MEDICAL RECORD'}
-                </button>
-            </form>
+  return (
+    <div className="p-8 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-6">
+      <div className="border-b border-slate-100 pb-4">
+        <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">
+          {initialData ? '📝 Edit Consultation' : '➕ Record New Consultation'}
+        </h3>
+        <p className="text-slate-400 text-[10px] font-bold uppercase mt-1">Clinical Data Entry</p>
+      </div>
+      
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-1">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Patient</label>
+            <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none" 
+              value={formData.patient} onChange={(e) => setFormData({...formData, patient: e.target.value})} required>
+              <option value="">Select Patient</option>
+              {patients.map(p => <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>)}
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Attending Doctor</label>
+            <select className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-blue-600 focus:ring-2 focus:ring-emerald-500 outline-none" 
+              value={formData.doctor} onChange={(e) => setFormData({...formData, doctor: e.target.value})} required>
+              <option value="">Select Doctor</option>
+              {doctors.map(d => <option key={d.id} value={d.id}>Dr. {d.user_details?.first_name} {d.user_details?.last_name}</option>)}
+            </select>
+          </div>
         </div>
-    );
+
+        <div className="space-y-1">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Diagnosis</label>
+          <input 
+            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" 
+            placeholder="e.g. Hypertension, Type 2 Diabetes"
+            value={formData.diagnosis} 
+            onChange={(e) => setFormData({...formData, diagnosis: e.target.value})} 
+            required 
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Patient Symptoms</label>
+          <textarea 
+            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl h-32 focus:ring-2 focus:ring-emerald-500 outline-none" 
+            placeholder="Describe the symptoms reported by the patient..."
+            value={formData.symptoms} 
+            onChange={(e) => setFormData({...formData, symptoms: e.target.value})} 
+            required
+          />
+        </div>
+
+        <div className="pt-4">
+          <button type="submit" disabled={loading} className="w-full py-4 bg-emerald-600 text-white font-black rounded-xl uppercase tracking-widest shadow-lg shadow-emerald-50 active:scale-95 transition-all">
+            {loading ? 'Syncing with Database...' : initialData ? 'Update Consultation' : 'Save Consultation'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
 };
 
 export default RecordConsultation;

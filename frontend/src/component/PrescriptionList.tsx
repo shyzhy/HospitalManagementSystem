@@ -26,12 +26,10 @@ const PrescriptionList: React.FC<PrescriptionListProps> = ({ onUpdate }) => {
         fetchPrescriptions();
     }, []);
 
-    // CRUD: Delete Operation
     const handleDelete = async (id: number) => {
-        if (window.confirm("Are you sure you want to delete this prescription record?")) {
+        if (window.confirm("Are you sure you want to delete this prescription?")) {
             try {
                 await deletePrescription(id);
-                // Refresh the list after deletion to reflect changes in UI
                 fetchPrescriptions(); 
             } catch (error) {
                 alert("Failed to delete the record.");
@@ -47,9 +45,11 @@ const PrescriptionList: React.FC<PrescriptionListProps> = ({ onUpdate }) => {
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <table className="w-full text-left">
+            <table className="w-full text-left border-collapse">
                 <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
+                        <th className="px-6 py-3 text-xs font-black text-slate-500 uppercase">Patient</th>
+                        <th className="px-6 py-3 text-xs font-black text-slate-500 uppercase">Doctor</th>
                         <th className="px-6 py-3 text-xs font-black text-slate-500 uppercase">Medication</th>
                         <th className="px-6 py-3 text-xs font-black text-slate-500 uppercase">Dosage</th>
                         <th className="px-6 py-3 text-xs font-black text-slate-500 uppercase">Frequency</th>
@@ -60,28 +60,45 @@ const PrescriptionList: React.FC<PrescriptionListProps> = ({ onUpdate }) => {
                 <tbody className="divide-y divide-slate-100">
                     {prescriptions.length === 0 ? (
                         <tr>
-                            {/* Updated colSpan to 5 to match the total number of table headers */}
-                            <td colSpan={5} className="px-6 py-10 text-center text-slate-400 font-bold italic">
-                                No medical records found.
+                            <td colSpan={7} className="px-6 py-10 text-center text-slate-400 font-bold italic">
+                                No prescription records found.
                             </td>
                         </tr>
                     ) : (
                         prescriptions.map((p) => (
                             <tr key={p.id} className="hover:bg-slate-50 transition-colors group">
-                                <td className="px-6 py-4 font-bold text-slate-800">{p.medication_name}</td>
-                                <td className="px-6 py-4 text-slate-600 font-medium">{p.dosage}</td>
-                                <td className="px-6 py-4 text-slate-600">{p.frequency}</td>
-                                <td className="px-6 py-4 text-slate-600">{p.duration}</td>
+                                {/* PATIENT NAME COLUMN */}
+                                <td className="px-6 py-4 font-bold text-slate-800">
+                                    {p.patient_name || `Patient ID: ${p.patient}`}
+                                </td>
+
+                                {/* DOCTOR NAME COLUMN */}
+                                <td className="px-6 py-4 text-slate-600 italic font-medium">
+                                    {p.doctor_name || `Doctor ID: ${p.doctor}`}
+                                </td>
+
+                                {/* MEDICATION DETAILS */}
+                                <td className="px-6 py-4 font-bold text-purple-600">
+                                    {p.medication}
+                                </td>
+                                <td className="px-6 py-4 text-slate-600">
+                                    {p.dosage}
+                                </td>
+                                <td className="px-6 py-4 text-slate-600">
+                                    {p.frequency}
+                                </td>
+                                <td className="px-6 py-4 text-slate-600">
+                                    {p.duration}
+                                </td>
+                                
+                                {/* ACTION BUTTONS */}
                                 <td className="px-6 py-4 text-right space-x-4">
-                                    {/* Edit Button - Triggers the modal in App.tsx */}
                                     <button 
                                         onClick={() => onUpdate(p)}
                                         className="text-blue-500 hover:text-blue-700 font-black text-[10px] uppercase tracking-widest transition-colors"
                                     >
                                         Edit
                                     </button>
-                                    
-                                    {/* Delete Button */}
                                     <button 
                                         onClick={() => p.id && handleDelete(p.id)}
                                         className="text-red-400 hover:text-red-600 font-black text-[10px] uppercase tracking-widest transition-colors"

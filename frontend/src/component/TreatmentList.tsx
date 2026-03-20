@@ -1,71 +1,81 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-
-interface Treatment {
-  id: number;
-  diagnosis: string;
-  medication: string;
-  treatment_date: string;
-  patient: number;
-}
+// Removed Treatment import to fix warning
 
 interface TreatmentListProps {
   patientId: string | number;
+  onUpdate: (treatment: any) => void;
 }
 
-const TreatmentList: React.FC<TreatmentListProps> = ({ patientId }) => {
-  const [treatments, setTreatments] = useState<Treatment[]>([]);
+const TreatmentList: React.FC<TreatmentListProps> = ({ patientId, onUpdate }) => {
+  const [treatments, setTreatments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  
-  const fetchTreatments = async () => {
-    try {
-      
-      const response = await axios.get(`http://127.0.0.1:8000/api/v1/treatments/?patient=${patientId}`);
-      setTreatments(response.data);
-    } catch (error) {
-      console.error("Error fetching treatments:", error);
-    } finally {
-      setLoading(false);
+  // We move this inside useEffect or wrap in useCallback to fix the warning
+  useEffect(() => {
+    const fetchTreatments = async () => {
+      setLoading(true);
+      try {
+        const url = patientId && patientId !== 0 
+          ? `http://127.0.0.1:8000/api/v1/treatments/?patient=${patientId}`
+          : `http://127.0.0.1:8000/api/v1/treatments/`;
+        const response = await axios.get(url);
+        setTreatments(response.data);
+      } catch (error) {
+        console.error("Error fetching treatments:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTreatments();
+  }, [patientId]); // Dependency is fine now
+
+  const handleDelete = async (id: number) => {
+    if (window.confirm("Are you sure you want to delete this treatment record?")) {
+      try {
+        await axios.delete(`http://127.0.0.1:8000/api/v1/treatments/${id}/`);
+        // Trigger a local refresh by filtering the state
+        setTreatments(prev => prev.filter(t => t.id !== id));
+      } catch (error) {
+        alert("Failed to delete record.");
+      }
     }
   };
 
-  useEffect(() => {
-    fetchTreatments();
-  }, [patientId]);
-
-  if (loading) return <p className="p-4 text-gray-500">Loading records...</p>;
+  if (loading) return <p className="p-10 text-center text-slate-400 font-bold uppercase text-xs">Syncing Treatments...</p>;
 
   return (
-    <div className="mt-6">
-      <h3 className="text-xl font-bold text-gray-800 mb-4">Past Treatment Records</h3>
-      
-      {treatments.length === 0 ? (
-        <p className="text-gray-500 italic bg-gray-50 p-4 rounded-lg border">
-          No treatment records found for this patient.
-        </p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">Date</th>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">Diagnosis</th>
-                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">Medication</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {treatments.map((t) => (
-                <tr key={t.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3 text-sm text-gray-700">{t.treatment_date}</td>
-                  <td className="px-4 py-3 text-sm font-medium text-gray-900">{t.diagnosis}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{t.medication}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+    <div className="overflow-hidden">
+      <table className="w-full text-left border-collapse">
+        <thead className="bg-slate-50 border-b border-slate-200">
+          <tr>
+            <th className="px-6 py-3 text-xs font-black text-slate-500 uppercase">Patient</th>
+            <th className="px-6 py-3 text-xs font-black text-slate-500 uppercase">Doctor</th>
+            <th className="px-6 py-3 text-xs font-black text-slate-500 uppercase">Diagnosis</th>
+            <th className="px-6 py-3 text-xs font-black text-slate-500 uppercase">Plan</th>
+            <th className="px-6 py-3 text-xs font-black text-slate-500 uppercase text-right">Date</th>
+            <th className="px-6 py-3 text-xs font-black text-slate-500 uppercase text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-100">
+          {treatments.map((t) => (
+            <tr key={t.id} className="hover:bg-slate-50 transition-colors">
+              <td className="px-6 py-4 text-sm font-bold text-slate-800">{t.patient_name || `ID: ${t.patient}`}</td>
+              <td className="px-6 py-4 text-sm text-slate-600 italic">{t.doctor_name || `ID: ${t.doctor}`}</td>
+              <td className="px-6 py-4 text-sm font-medium text-teal-700">{t.treatment_name}</td>
+              <td className="px-6 py-4 text-sm text-slate-600">{t.description}</td>
+              <td className="px-6 py-4 text-sm text-slate-400 text-right font-mono">
+                {t.treatment_date ? new Date(t.treatment_date).toLocaleDateString() : 'N/A'}
+              </td>
+              <td className="px-6 py-4 text-right space-x-3">
+                <button onClick={() => onUpdate(t)} className="text-blue-500 font-black text-[10px] uppercase tracking-widest">Edit</button>
+                <button onClick={() => handleDelete(t.id)} className="text-red-400 font-black text-[10px] uppercase tracking-widest">Delete</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };

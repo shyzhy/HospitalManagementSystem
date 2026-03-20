@@ -83,9 +83,9 @@ WSGI_APPLICATION = 'hospital.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'hospital_db',
+        'NAME': 'medflow',
         'USER': 'postgres',
-        'PASSWORD': 'MARYNEL',
+        'PASSWORD': 'shuri',
         'HOST': '127.0.0.1',  # Or the IP/hostname of your PostgreSQL server
         'PORT': '5432',      # Default PostgreSQL port
     }

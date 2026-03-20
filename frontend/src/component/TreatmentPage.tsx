@@ -1,51 +1,43 @@
 import React, { useState } from 'react';
 import TreatmentForm from './TreatmentForm'; 
 import TreatmentList from './TreatmentList'; 
+import { Treatment } from '../types';
 
 const TreatmentPage: React.FC = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [showForm, setShowForm] = useState(false);
-
-  
-  const patientId = 2; 
+  const [selectedTreatment, setSelectedTreatment] = useState<Treatment | null>(null);
 
   const handleRefresh = () => {
-
     setRefreshKey(prev => prev + 1); 
     setShowForm(false); 
+    setSelectedTreatment(null);
+  };
+
+  const handleEdit = (treatment: Treatment) => {
+    setSelectedTreatment(treatment);
+    setShowForm(true);
   };
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
-      <div className="flex justify-between items-center mb-6 border-b pb-4">
-        <div>
-          <h2 className="text-3xl font-extrabold text-teal-800 uppercase tracking-tight">
-            Patient Treatment Records
-          </h2>
-          <p className="text-gray-500 mt-1">Viewing records for: <span className="font-bold text-gray-700">Marynel Wacan</span></p>
-        </div>
-        
-        <button  
-          onClick={() => setShowForm(!showForm)}
-          className={`${
-            showForm ? 'bg-red-500 hover:bg-red-600' : 'bg-slate-800 hover:bg-slate-900'
-          } text-white px-6 py-2 rounded-lg font-bold transition-all shadow-md`}
+    <div className="space-y-6">
+      <div className="flex justify-between items-center bg-white p-6 rounded-xl border border-slate-200">
+        <h2 className="text-2xl font-black text-pink-600 uppercase">Treatment Registry</h2>
+        <button   
+          onClick={() => { setSelectedTreatment(null); setShowForm(!showForm); }}
+          className={`${showForm ? 'bg-slate-200 text-slate-700' : 'bg-pink-600 text-white'} px-6 py-2 rounded-lg font-bold`}
         >
-          {showForm ? 'CANCEL' : 'ADD NEW RECORD'}
+          {showForm ? 'VIEW LIST' : 'ADD NEW RECORD'}
         </button>
       </div>
 
-      {/* 1. form */}
-      {showForm && (
-        <div className="mb-10 animate-in fade-in slide-in-from-top-4 duration-300">
-          <TreatmentForm patientId={patientId} onSuccess={handleRefresh} />
+      {showForm ? (
+          <TreatmentForm initialData={selectedTreatment} onSuccess={handleRefresh} />
+      ) : (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+          <TreatmentList key={refreshKey} patientId={0} onUpdate={handleEdit} />
         </div>
       )}
-
-      {/* 2. the list */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-        <TreatmentList key={refreshKey} patientId={patientId} />
-      </div>
     </div>
   );
 };

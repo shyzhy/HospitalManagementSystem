@@ -64,6 +64,16 @@ export const getConsultations = async (): Promise<Consultation[]> => {
     return response.data;
 };
 
+export const deleteConsultation = async (id: number) => {
+    const response = await axios.delete(`${API_URL}/consultations/${id}/`);
+    return response.data;
+};
+
+export const updateConsultation = async (id: number, data: any): Promise<Consultation> => {
+    const response = await API.put<Consultation>(`consultations/${id}/`, data);
+    return response.data;
+};
+
 // ==================== PRESCRIPTIONS ====================
 export const getPrescriptions = async (): Promise<Prescription[]> => {
     const response = await API.get<Prescription[]>("prescriptions/");
@@ -74,6 +84,7 @@ export const createPrescription = async (data: Partial<Prescription>): Promise<P
     const response = await API.post<Prescription>("prescriptions/", data);
     return response.data;
 };
+
 
 // MAO NI ANG NAWALA NGA FUNCTIONS MAO NGA NAG-ERROR:
 export const updatePrescription = async (id: number, data: Partial<Prescription>): Promise<Prescription> => {

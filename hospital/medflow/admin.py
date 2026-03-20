@@ -1,6 +1,6 @@
 from django.contrib import admin
 # Cleaned up imports: removed MedicalRecord and Treatment
-from .models import Patient, Doctor, Visit, Consultation, Prescription
+from .models import Patient, Doctor, Visit, Consultation, Prescription, Treatment
 
 @admin.register(Patient)
 class PatientAdmin(admin.ModelAdmin):
@@ -20,5 +20,9 @@ class ConsultationAdmin(admin.ModelAdmin):
 
 @admin.register(Prescription)
 class PrescriptionAdmin(admin.ModelAdmin):
-    # medication_name must be here to match your updated model
-    list_display = ('medication_name', 'dosage', 'duration', 'visit')
+    # Match these to the fields in the model above
+    list_display = ('medication', 'dosage', 'frequency', 'duration', 'patient', 'doctor')
+
+@admin.register(Treatment)
+class TreatmentAdmin(admin.ModelAdmin):
+    list_display = ('treatment_name', 'patient', 'doctor', 'treatment_date')
