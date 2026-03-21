@@ -75,3 +75,36 @@ export interface Prescription {
     doctor_name?: string;  // Add this
     date_prescribed?: string;
 }
+
+// --- API RESPONSE TYPES (Optional but useful) ---
+export interface ApiResponse<T> {
+    data: T;
+    message?: string;
+    status: string;
+}
+
+export interface PaginatedResponse<T> {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: T[];
+}
+
+// --- FORM DATA TYPES (For creating/updating) ---
+export interface MedicalRecord {
+    id?: number;
+    patient: number;                    // Patient ID
+    patient_name?: string;              // Added: Display name from backend (like Consultation)
+    patient_details?: Patient;          // Optional: Full nested patient object
+    blood_type: string;
+    allergies: string;
+    chronic_conditions: string;
+    medical_history: string;
+    emergency_contact_name: string;
+    emergency_contact_phone: string;
+    attachment?: string;
+    created_at?: string;
+    updated_at?: string;
+    treatments?: Treatment[];
+    prescriptions?: Prescription[];
+}

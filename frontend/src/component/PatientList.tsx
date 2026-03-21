@@ -5,10 +5,16 @@ interface Props {
   patients: Patient[];
   onUpdate: (patient: Patient) => void;
   onDelete: (id: number) => void;
-  onTrack: (patient: Patient) => void; // Gidugang para sa Track Treatment
+  onTrack: (patient: Patient) => void;
 }
 
 const PatientList: React.FC<Props> = ({ patients, onUpdate, onDelete, onTrack }) => {
+  // Helper to truncate long addresses
+  const truncateAddress = (address: string, maxLength: number = 25) => {
+    if (!address) return '-';
+    return address.length > maxLength ? address.substring(0, maxLength) + '...' : address;
+  };
+
   return (
     <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
       <table className="w-full text-left border-collapse">
@@ -18,13 +24,14 @@ const PatientList: React.FC<Props> = ({ patients, onUpdate, onDelete, onTrack })
             <th className="px-6 py-4">Patient Name</th>
             <th className="px-6 py-4">DOB | Gender</th>
             <th className="px-6 py-4">Contact</th>
+            <th className="px-6 py-4">Address</th>
             <th className="px-6 py-4 text-right">Actions</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
           {patients.length === 0 ? (
             <tr>
-              <td colSpan={5} className="px-6 py-10 text-center text-slate-400 text-sm italic">
+              <td colSpan={6} className="px-6 py-10 text-center text-slate-400 text-sm italic">
                 No patients found in the registry.
               </td>
             </tr>
@@ -45,8 +52,10 @@ const PatientList: React.FC<Props> = ({ patients, onUpdate, onDelete, onTrack })
                 <td className="px-6 py-4 text-sm text-slate-500">
                   {p.phone}
                 </td>
+                <td className="px-6 py-4 text-sm text-slate-600 max-w-xs" title={p.address}>
+                  {truncateAddress(p.address)}
+                </td>
                 <td className="px-6 py-4 text-right space-x-4">
-                  {/* BAG-O: Track Treatment Button */}
                   <button 
                     onClick={() => onTrack(p)} 
                     className="text-blue-600 font-black hover:underline text-xs"

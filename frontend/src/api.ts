@@ -1,11 +1,11 @@
 import axios from "axios";
-import { Patient, Doctor, Consultation, Prescription } from "./types";
+import { Patient, Doctor, Consultation, Prescription, Treatment, MedicalRecord } from "./types";
 
-// Siguruha nga husto ang URL base sa imong Django setup
-const API_URL = "http://127.0.0.1:8000/api/v1"; 
+// Base URL to match your Django DRF setup
+const API_URL = "http://127.0.0.1:8000/api/v1";
 
 const API = axios.create({
-    baseURL: API_URL, 
+    baseURL: API_URL,
 });
 
 // ==================== PATIENTS ====================
@@ -14,7 +14,7 @@ export const getPatients = async (): Promise<Patient[]> => {
     return response.data;
 };
 
-export const createPatients = async (data: Partial<Patient>): Promise<Patient> => {
+export const createPatient = async (data: Partial<Patient>): Promise<Patient> => {
     const response = await API.post<Patient>("patients/", data);
     return response.data;
 };
@@ -24,7 +24,7 @@ export const updatePatient = async (id: number, data: Partial<Patient>): Promise
     return response.data;
 };
 
-export const deletePatients = async (id: number): Promise<void> => {
+export const deletePatient = async (id: number): Promise<void> => {
     await API.delete(`patients/${id}/`);
 };
 
@@ -34,12 +34,12 @@ export const getDoctors = async (): Promise<Doctor[]> => {
     return response.data;
 };
 
-export const createDoctor = async (data: any): Promise<Doctor> => {
+export const createDoctor = async (data: Partial<Doctor>): Promise<Doctor> => {
     const response = await API.post<Doctor>("doctors/", data);
     return response.data;
 };
 
-export const updateDoctor = async (id: number, data: any): Promise<Doctor> => {
+export const updateDoctor = async (id: number, data: Partial<Doctor>): Promise<Doctor> => {
     const response = await API.put<Doctor>(`doctors/${id}/`, data);
     return response.data;
 };
@@ -49,29 +49,23 @@ export const deleteDoctor = async (id: number): Promise<void> => {
 };
 
 // ==================== CONSULTATIONS ====================
-export const createConsultation = async (data: any) => {
-    try {
-        const response = await API.post("consultations/", data);
-        return response.data;
-    } catch (error) {
-        console.error("API Error:", error);
-        throw error;
-    }
-};
-
 export const getConsultations = async (): Promise<Consultation[]> => {
     const response = await API.get<Consultation[]>("consultations/");
     return response.data;
 };
 
-export const deleteConsultation = async (id: number) => {
-    const response = await axios.delete(`${API_URL}/consultations/${id}/`);
+export const createConsultation = async (data: Partial<Consultation>): Promise<Consultation> => {
+    const response = await API.post<Consultation>("consultations/", data);
     return response.data;
 };
 
-export const updateConsultation = async (id: number, data: any): Promise<Consultation> => {
+export const updateConsultation = async (id: number, data: Partial<Consultation>): Promise<Consultation> => {
     const response = await API.put<Consultation>(`consultations/${id}/`, data);
     return response.data;
+};
+
+export const deleteConsultation = async (id: number): Promise<void> => {
+    await API.delete(`consultations/${id}/`);
 };
 
 // ==================== PRESCRIPTIONS ====================
@@ -85,8 +79,6 @@ export const createPrescription = async (data: Partial<Prescription>): Promise<P
     return response.data;
 };
 
-
-// MAO NI ANG NAWALA NGA FUNCTIONS MAO NGA NAG-ERROR:
 export const updatePrescription = async (id: number, data: Partial<Prescription>): Promise<Prescription> => {
     const response = await API.put<Prescription>(`prescriptions/${id}/`, data);
     return response.data;
@@ -97,12 +89,62 @@ export const deletePrescription = async (id: number): Promise<void> => {
 };
 
 // ==================== TREATMENTS ====================
-export const getTreatmentsByPatient = async (patientId: number): Promise<any[]> => {
-    const response = await API.get<any[]>(`treatments/?patient=${patientId}`);
+export const getTreatments = async (): Promise<Treatment[]> => {
+    const response = await API.get<Treatment[]>("treatments/");
     return response.data;
 };
 
-export const createTreatment = async (data: any): Promise<any> => {
-    const response = await API.post<any>("treatments/", data);
+export const getTreatmentsByPatient = async (patientId: number): Promise<Treatment[]> => {
+    const response = await API.get<Treatment[]>(`treatments/?patient=${patientId}`);
     return response.data;
+};
+
+export const createTreatment = async (data: Partial<Treatment>): Promise<Treatment> => {
+    const response = await API.post<Treatment>("treatments/", data);
+    return response.data;
+};
+
+export const updateTreatment = async (id: number, data: Partial<Treatment>): Promise<Treatment> => {
+    const response = await API.put<Treatment>(`treatments/${id}/`, data);
+    return response.data;
+};
+
+export const deleteTreatment = async (id: number): Promise<void> => {
+    await API.delete(`treatments/${id}/`);
+};
+
+// ==================== MEDICAL RECORDS ====================
+
+export const getMedicalRecords = async (): Promise<MedicalRecord[]> => {
+    const response = await API.get<MedicalRecord[]>("medical-records/");
+    return response.data;
+};
+
+export const getMedicalRecord = async (id: number): Promise<MedicalRecord> => {
+    const response = await API.get<MedicalRecord>(`medical-records/${id}/`);
+    return response.data;
+};
+
+// Get medical record by Patient ID (OneToOne relationship)
+export const getMedicalRecordByPatient = async (patientId: number): Promise<MedicalRecord> => {
+    const response = await API.get<MedicalRecord>(`medical-records/?patient=${patientId}`);
+    // Since it's OneToOne, return first result or handle appropriately
+    return Array.isArray(response.data) ? response.data[0] : response.data;
+};
+
+// For file uploads (attachment), use FormData
+export const createMedicalRecord = async (data: FormData | Partial<MedicalRecord>): Promise<MedicalRecord> => {
+    const config = data instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {};
+    const response = await API.post<MedicalRecord>("medical-records/", data, config);
+    return response.data;
+};
+
+export const updateMedicalRecord = async (id: number, data: FormData | Partial<MedicalRecord>): Promise<MedicalRecord> => {
+    const config = data instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {};
+    const response = await API.put<MedicalRecord>(`medical-records/${id}/`, data, config);
+    return response.data;
+};
+
+export const deleteMedicalRecord = async (id: number): Promise<void> => {
+    await API.delete(`medical-records/${id}/`);
 };

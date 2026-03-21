@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Patient } from '../types';
 
 interface ConsultationListProps {
   onUpdate: (consultation: any) => void;
+  patients: Patient[];  // Add this line
 }
 
-const ConsultationList: React.FC<ConsultationListProps> = ({ onUpdate }) => {
+const ConsultationList: React.FC<ConsultationListProps> = ({ onUpdate, patients }) => {
   const [consultations, setConsultations] = useState<any[]>([]);
 
   const fetchConsultations = async () => {
@@ -16,6 +18,15 @@ const ConsultationList: React.FC<ConsultationListProps> = ({ onUpdate }) => {
   };
 
   useEffect(() => { fetchConsultations(); }, []);
+
+  // Helper to get patient name from ID
+  const getPatientName = (patientId: number) => {
+    const patient = patients.find(p => p.id === patientId);
+    if (patient) {
+      return patient.first_name + ' ' + patient.last_name;
+    }
+    return 'Patient #' + patientId;
+  };
 
   const handleRemove = async (id: number) => {
     if (window.confirm("Remove this consultation record?")) {
@@ -38,43 +49,42 @@ const ConsultationList: React.FC<ConsultationListProps> = ({ onUpdate }) => {
             <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
           </tr>
         </thead>
-                <tbody className="divide-y divide-slate-100">
-                {consultations.map((c) => (
-                    <tr key={c.id} className="hover:bg-slate-50 transition-colors group">
-                    <td className="px-6 py-4 text-sm text-slate-500 font-mono">
-                        {c.consultation_date}
-                    </td>
-                    <td className="px-6 py-4 text-sm font-black text-slate-800">
-                        {c.patient_name}
-                    </td>
-                    
-                    {/* UPDATED DOCTOR COLUMN */}
-                    <td className="px-6 py-4 text-sm font-bold text-blue-600">
-                        {c.doctor_name?.toLowerCase().startsWith('dr.') 
-                        ? c.doctor_name 
-                        : `Dr. ${c.doctor_name}`}
-                    </td>
+        <tbody className="divide-y divide-slate-100">
+          {consultations.map((c) => (
+            <tr key={c.id} className="hover:bg-slate-50 transition-colors group">
+              <td className="px-6 py-4 text-sm text-slate-500 font-mono">
+                {c.consultation_date}
+              </td>
+              <td className="px-6 py-4 text-sm font-black text-slate-800">
+                {getPatientName(c.patient)}
+              </td>
+              
+              <td className="px-6 py-4 text-sm font-bold text-blue-600">
+                {c.doctor_name?.toLowerCase().startsWith('dr.') 
+                  ? c.doctor_name 
+                  : `Dr. ${c.doctor_name}`}
+              </td>
 
-                    <td className="px-6 py-4 text-sm text-slate-600 font-medium">
-                        {c.diagnosis}
-                    </td>
-                    <td className="px-6 py-4 text-right space-x-4">
-                        <button 
-                        onClick={() => onUpdate(c)} 
-                        className="text-emerald-500 hover:text-emerald-700 font-black text-[10px] uppercase tracking-widest transition-colors"
-                        >
-                        Edit
-                        </button>
-                        <button 
-                        onClick={() => handleRemove(c.id)} 
-                        className="text-red-400 hover:text-red-600 font-black text-[10px] uppercase tracking-widest transition-colors"
-                        >
-                        Remove
-                        </button>
-                    </td>
-                    </tr>
-                ))}
-                </tbody>
+              <td className="px-6 py-4 text-sm text-slate-600 font-medium">
+                {c.diagnosis}
+              </td>
+              <td className="px-6 py-4 text-right space-x-4">
+                <button 
+                  onClick={() => onUpdate(c)} 
+                  className="text-emerald-500 hover:text-emerald-700 font-black text-[10px] uppercase tracking-widest transition-colors"
+                >
+                  Edit
+                </button>
+                <button 
+                  onClick={() => handleRemove(c.id)} 
+                  className="text-red-400 hover:text-red-600 font-black text-[10px] uppercase tracking-widest transition-colors"
+                >
+                  Remove
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
       </table>
     </div>
   );

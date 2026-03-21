@@ -11,12 +11,17 @@ import TreatmentList from './component/TreatmentList';
 import RecordConsultation from './component/RecordConsultation'; 
 import ConsultationList from './component/ConsultationList';
 
-import { getPatients, deletePatients } from './api';
+import { getPatients, deletePatient } from './api';
 import { getDoctors, deleteDoctor } from './api';
 import { Patient, Doctor, Prescription, Consultation, Treatment } from './types'; 
 
+import MedicalRecordsList from './component/MedicalRecordsList';
+import MedicalRecordsForm from './component/MedicalRecordsForm';
+import { MedicalRecord } from './types';
+import { getMedicalRecords } from './api';
+
 function App() {
-  const [activeTab, setActiveTab] = useState<'patients' | 'doctors' | 'consultations' | 'prescriptions' | 'treatment'>('patients');
+   const [activeTab, setActiveTab] = useState<'patients' | 'doctors' | 'consultations' | 'prescriptions' | 'treatment' | 'medical_records'>('patients');
   const [patients, setPatients] = useState<Patient[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   
@@ -26,6 +31,7 @@ function App() {
   const [showConsultationForm, setShowConsultationForm] = useState(false); 
   const [showPrescriptionForm, setShowPrescriptionForm] = useState(false);
   const [showTreatmentForm, setShowTreatmentForm] = useState(false);
+  const [showMedicalRecordForm, setShowMedicalRecordForm] = useState(false);
 
   // Data States for Editing
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
@@ -33,6 +39,9 @@ function App() {
   const [selectedPrescription, setSelectedPrescription] = useState<Prescription | null>(null);
   const [selectedConsultation, setSelectedConsultation] = useState<Consultation | null>(null);
   const [selectedTreatment, setSelectedTreatment] = useState<Treatment | null>(null);
+  const [selectedMedicalRecord, setSelectedMedicalRecord] = useState<MedicalRecord | null>(null);
+
+  const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([]);
   
   // refreshKey triggers a re-fetch in child components
   const [refreshKey, setRefreshKey] = useState(0);
@@ -43,6 +52,7 @@ function App() {
       try {
         if (activeTab === 'patients') setPatients(await getPatients());
         else if (activeTab === 'doctors') setDoctors(await getDoctors());
+        else if (activeTab === 'medical_records') setMedicalRecords(await getMedicalRecords());
       } catch (e) {
         console.error("Sync Error:", e);
       }
@@ -62,19 +72,20 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
             <span className="font-black text-xl text-emerald-600 cursor-pointer tracking-tighter" onClick={() => setActiveTab('patients')}>MED FLOW</span>
             <div className="flex space-x-1">
-                {(['patients', 'doctors', 'consultations', 'prescriptions', 'treatment'] as const).map((tab) => (
+                {(['patients', 'doctors', 'consultations', 'prescriptions', 'treatment', 'medical_records'] as const).map((tab) => (
                   <button 
                     key={tab}
                     onClick={() => {
                       setActiveTab(tab);
                       setShowConsultationForm(false);
                       setShowTreatmentForm(false);
+                      setShowMedicalRecordForm(false);
                     }} 
                     className={`px-4 py-2 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all ${
                       activeTab === tab ? 'bg-slate-900 text-white' : 'text-slate-400 hover:bg-slate-50'
                     }`}
                   >
-                    {tab}
+                    {tab === 'medical_records' ? 'Medical Records' : tab}
                   </button>
                 ))}
             </div>
@@ -87,6 +98,8 @@ function App() {
             <h1 className="text-3xl font-black uppercase text-slate-800 tracking-tight">
               {activeTab === 'treatment' && selectedPatient 
                 ? `History: ${selectedPatient.first_name} ${selectedPatient.last_name}` 
+                : activeTab === 'medical_records'
+                ? 'Medical Records'
                 : activeTab}
             </h1>
             <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1 italic">Authorized Personnel Only</p>
@@ -100,10 +113,16 @@ function App() {
               else if(activeTab === 'prescriptions') { setSelectedPrescription(null); setShowPrescriptionForm(true); }
               else if(activeTab === 'treatment') { setSelectedTreatment(null); setShowTreatmentForm(!showTreatmentForm); }
               else if(activeTab === 'consultations') { setSelectedConsultation(null); setShowConsultationForm(!showConsultationForm); }
+              else if(activeTab === 'medical_records') { 
+                setSelectedMedicalRecord(null); 
+                setShowMedicalRecordForm(!showMedicalRecordForm); 
+              }
             }}
             className="px-8 py-3 rounded-xl bg-emerald-600 text-white font-black text-xs uppercase tracking-widest transition-all hover:bg-emerald-700 shadow-xl shadow-emerald-100 active:scale-95"
           >
-            {(activeTab === 'consultations' && showConsultationForm) || (activeTab === 'treatment' && showTreatmentForm) 
+            {(activeTab === 'consultations' && showConsultationForm) || 
+             (activeTab === 'treatment' && showTreatmentForm) ||
+             (activeTab === 'medical_records' && showMedicalRecordForm)
               ? 'BACK TO LIST' 
               : 'REGISTER NEW'}
           </button>
@@ -118,25 +137,64 @@ function App() {
                   onSuccess={() => { setShowConsultationForm(false); setSelectedConsultation(null); setRefreshKey(k => k + 1); }} 
                />
             ) : (
-               <ConsultationList key={refreshKey} onUpdate={(c) => { setSelectedConsultation(c); setShowConsultationForm(true); }} />
+               <ConsultationList 
+                  key={refreshKey} 
+                  patients={patients}  // <-- ADDED THIS PROP
+                  onUpdate={(c) => { setSelectedConsultation(c); setShowConsultationForm(true); }} 
+               />
             )}
            </div>
         )}
 
         {/* TREATMENTS */}
         {activeTab === 'treatment' && (
-           <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
-            {showTreatmentForm ? (
-               <TreatmentForm initialData={selectedTreatment} onSuccess={() => { setShowTreatmentForm(false); setSelectedTreatment(null); setRefreshKey(k => k + 1); }} />
-            ) : (
-               <TreatmentList key={refreshKey} patientId={selectedPatient?.id || 0} onUpdate={(t) => { setSelectedTreatment(t); setShowTreatmentForm(true); }} />
-            )}
-           </div>
-        )}
+   <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
+    {showTreatmentForm ? (
+       <TreatmentForm initialData={selectedTreatment} onSuccess={() => { setShowTreatmentForm(false); setSelectedTreatment(null); setRefreshKey(k => k + 1); }} />
+    ) : (
+       <TreatmentList 
+          key={refreshKey} 
+          patientId={selectedPatient?.id || 0} 
+          patients={patients}  // ADD THIS
+          onUpdate={(t) => { setSelectedTreatment(t); setShowTreatmentForm(true); }} 
+       />
+    )}
+   </div>
+)}
+
+        {/* MEDICAL RECORDS */}
+        {activeTab === 'medical_records' && (
+   <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
+    {showMedicalRecordForm ? (
+       <MedicalRecordsForm 
+          record={selectedMedicalRecord} 
+          patients={patients}
+          onSuccess={() => { 
+            setShowMedicalRecordForm(false); 
+            setSelectedMedicalRecord(null); 
+            setRefreshKey(k => k + 1); 
+          }} 
+          onCancel={() => {
+            setShowMedicalRecordForm(false);
+            setSelectedMedicalRecord(null);
+          }}
+       />
+    ) : (
+       <MedicalRecordsList 
+          key={refreshKey} 
+          patients={patients}
+          onUpdate={(record) => { 
+            setSelectedMedicalRecord(record); 
+            setShowMedicalRecordForm(true); 
+          }} 
+       />
+    )}
+   </div>
+)}
 
         {/* PATIENTS */}
         {activeTab === 'patients' && (
-          <PatientList patients={patients} onUpdate={(p) => {setSelectedPatient(p); setShowPatientForm(true);}} onDelete={(id) => deletePatients(id).then(() => setRefreshKey(k => k + 1))} onTrack={handleTrackTreatment} />
+          <PatientList patients={patients} onUpdate={(p) => {setSelectedPatient(p); setShowPatientForm(true);}} onDelete={(id) => deletePatient(id).then(() => setRefreshKey(k => k + 1))} onTrack={handleTrackTreatment} />
         )}
 
         {/* DOCTORS */}
