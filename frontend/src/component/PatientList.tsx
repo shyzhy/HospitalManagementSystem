@@ -1,89 +1,81 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Patient } from '../types';
 
-interface Props {
-  patients: Patient[];
-  onUpdate: (patient: Patient) => void;
-  onDelete: (id: number) => void;
-  onTrack: (patient: Patient) => void;
+interface PatientListProps {
+    patients: Patient[];
+    onUpdate: (patient: Patient) => void;
+    onDelete: (id: number) => void;
+    onTrack: (patient: Patient) => void;
 }
 
-const PatientList: React.FC<Props> = ({ patients, onUpdate, onDelete, onTrack }) => {
-  // Helper to truncate long addresses
-  const truncateAddress = (address: string, maxLength: number = 25) => {
-    if (!address) return '-';
-    return address.length > maxLength ? address.substring(0, maxLength) + '...' : address;
-  };
+const PatientList: React.FC<PatientListProps> = ({ patients, onUpdate, onDelete, onTrack }) => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const userRole = localStorage.getItem('role');
 
-  return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-      <table className="w-full text-left border-collapse">
-        <thead className="bg-emerald-50 text-emerald-800 text-[10px] uppercase font-black tracking-widest">
-          <tr>
-            <th className="px-6 py-4">Hospital ID</th>
-            <th className="px-6 py-4">Patient Name</th>
-            <th className="px-6 py-4">DOB | Gender</th>
-            <th className="px-6 py-4">Contact</th>
-            <th className="px-6 py-4">Address</th>
-            <th className="px-6 py-4 text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100">
-          {patients.length === 0 ? (
-            <tr>
-              <td colSpan={6} className="px-6 py-10 text-center text-slate-400 text-sm italic">
-                No patients found in the registry.
-              </td>
-            </tr>
-          ) : (
-            patients.map((p) => (
-              <tr key={p.id} className="hover:bg-emerald-50/30 transition-colors group">
-                <td className="px-6 py-4 text-xs font-mono text-slate-400">
-                  {p.patient_id}
-                </td>
-                <td className="px-6 py-4">
-                  <span className="font-bold text-slate-800">
-                    {p.first_name} {p.last_name}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-sm text-slate-500">
-                  {p.dob} | {p.gender === 'M' ? 'Male' : p.gender === 'F' ? 'Female' : 'Other'}
-                </td>
-                <td className="px-6 py-4 text-sm text-slate-500">
-                  {p.phone}
-                </td>
-                <td className="px-6 py-4 text-sm text-slate-600 max-w-xs" title={p.address}>
-                  {truncateAddress(p.address)}
-                </td>
-                <td className="px-6 py-4 text-right space-x-4">
-                  <button 
-                    onClick={() => onTrack(p)} 
-                    className="text-blue-600 font-black hover:underline text-xs"
-                  >
-                    TRACK
-                  </button>
-                  
-                  <button 
-                    onClick={() => onUpdate(p)} 
-                    className="text-emerald-600 font-black hover:underline text-xs"
-                  >
-                    EDIT
-                  </button>
-                  
-                  <button 
-                    onClick={() => onDelete(p.id!)} 
-                    className="text-red-400 font-black hover:text-red-600 text-xs"
-                  >
-                    REMOVE
-                  </button>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-    </div>
-  );
+    // Filter patients based on first or last name
+    const filteredPatients = patients.filter(patient => 
+        patient.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        patient.last_name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    return (
+        <div className="space-y-6">
+            {/* SEARCH BAR */}
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                <span className="text-xl pl-2">🔍</span>
+                <input 
+                    type="text" 
+                    placeholder="Search patients by name..." 
+                    className="w-full bg-transparent outline-none font-bold text-slate-700 placeholder:text-slate-300"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <table className="w-full text-left border-collapse">
+                    <thead>
+                        <tr className="bg-slate-50/50 border-b border-slate-100">
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Name</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden md:table-cell">Contact</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden lg:table-cell">Address</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                        {filteredPatients.length === 0 ? (
+                            <tr><td colSpan={4} className="px-6 py-12 text-center text-slate-400 font-bold text-xs uppercase tracking-widest">No patients found</td></tr>
+                        ) : (
+                            filteredPatients.map((patient) => (
+                                <tr key={patient.id} className="hover:bg-slate-50/50 transition-colors group">
+                                    <td className="px-6 py-4 font-bold text-slate-800">{patient.first_name} {patient.last_name}</td>
+                                    <td className="px-6 py-4 font-medium text-slate-500 hidden md:table-cell">{patient.phone}</td>
+                                    <td className="px-6 py-4 font-medium text-slate-500 hidden lg:table-cell truncate max-w-[200px]">{patient.address}</td>
+                                    <td className="px-6 py-4 text-right space-x-3">
+                                        <button onClick={() => onTrack(patient)} className="text-emerald-600 hover:text-emerald-800 font-black text-[10px] uppercase tracking-widest transition-colors">
+                                            Track
+                                        </button>
+                                        {(userRole === 'admin' || userRole === 'doctor') && (
+                                            <>
+                                                <button onClick={() => onUpdate(patient)} className="text-blue-500 hover:text-blue-700 font-black text-[10px] uppercase tracking-widest transition-colors">
+                                                    Edit
+                                                </button>
+                                                {userRole === 'admin' && (
+                                                    <button onClick={() => patient.id && onDelete(patient.id)} className="text-red-400 hover:text-red-600 font-black text-[10px] uppercase tracking-widest transition-colors">
+                                                        Remove
+                                                    </button>
+                                                )}
+                                            </>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
 };
 
 export default PatientList;

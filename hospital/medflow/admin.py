@@ -1,12 +1,11 @@
 from django.contrib import admin
-from .models import Patient, Doctor, Visit, Consultation, Prescription, Treatment, MedicalRecord
+from .models import Patient, Doctor, Consultation, Prescription, Treatment, MedicalRecord
 
 
 # ----------------- PATIENT -----------------
 @admin.register(Patient)
 class PatientAdmin(admin.ModelAdmin):
-    list_display = ('patient_id', 'first_name', 'last_name')
-    search_fields = ('patient_id', 'first_name', 'last_name')
+    list_display = ('id', 'first_name', 'last_name', 'dob', 'gender', 'phone')
 
 
 # ----------------- DOCTOR -----------------
@@ -17,20 +16,11 @@ class DoctorAdmin(admin.ModelAdmin):
     list_filter = ('specialization', 'is_available')
 
 
-# ----------------- VISIT -----------------
-@admin.register(Visit)
-class VisitAdmin(admin.ModelAdmin):
-    list_display = ('patient', 'doctor', 'visit_date')
-    search_fields = ('patient__first_name', 'patient__last_name', 'doctor__user__first_name')
-    list_filter = ('visit_date',)
-
-
 # ----------------- CONSULTATION -----------------
-@admin.register(Consultation)
 class ConsultationAdmin(admin.ModelAdmin):
-    list_display = ('patient', 'doctor', 'consultation_date', 'diagnosis')
-    search_fields = ('patient__first_name', 'patient__last_name', 'doctor__user__first_name')
-    list_filter = ('consultation_date',)
+    list_display = ('patient', 'doctor', 'consultation_date') 
+    list_filter = ('consultation_date', 'doctor') 
+    search_fields = ('patient__first_name', 'patient__last_name', 'diagnosis')
 
 
 # ----------------- PRESCRIPTION -----------------

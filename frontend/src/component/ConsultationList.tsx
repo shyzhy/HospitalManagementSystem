@@ -1,93 +1,121 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Patient } from '../types';
+import React, { useState, useEffect } from 'react';
+import { getConsultations, deleteConsultation } from '../api';
+import { Consultation, Patient } from '../types';
 
 interface ConsultationListProps {
-  onUpdate: (consultation: any) => void;
-  patients: Patient[];  // Add this line
+    patients: Patient[];
+    onUpdate: (consultation: Consultation) => void;
 }
 
-const ConsultationList: React.FC<ConsultationListProps> = ({ onUpdate, patients }) => {
-  const [consultations, setConsultations] = useState<any[]>([]);
+const ConsultationList: React.FC<ConsultationListProps> = ({ patients, onUpdate }) => {
+    const [consultations, setConsultations] = useState<Consultation[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    
 
-  const fetchConsultations = async () => {
-    try {
-      const res = await axios.get('http://127.0.0.1:8000/api/v1/consultations/');
-      setConsultations(res.data);
-    } catch (e) { console.error(e); }
-  };
-
-  useEffect(() => { fetchConsultations(); }, []);
-
-  // Helper to get patient name from ID
-  const getPatientName = (patientId: number) => {
-    const patient = patients.find(p => p.id === patientId);
-    if (patient) {
-      return patient.first_name + ' ' + patient.last_name;
-    }
-    return 'Patient #' + patientId;
-  };
-
-  const handleRemove = async (id: number) => {
-    if (window.confirm("Remove this consultation record?")) {
-      try {
-        await axios.delete(`http://127.0.0.1:8000/api/v1/consultations/${id}/`);
+    useEffect(() => {
         fetchConsultations();
-      } catch (e) { alert("Failed to remove."); }
-    }
-  };
+    }, []);
 
-  return (
-    <div className="overflow-hidden">
-      <table className="w-full text-left">
-        <thead className="bg-slate-50 border-b border-slate-200">
-          <tr>
-            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Date</th>
-            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Patient</th>
-            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Attending Doctor</th>
-            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Diagnosis</th>
-            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100">
-          {consultations.map((c) => (
-            <tr key={c.id} className="hover:bg-slate-50 transition-colors group">
-              <td className="px-6 py-4 text-sm text-slate-500 font-mono">
-                {c.consultation_date}
-              </td>
-              <td className="px-6 py-4 text-sm font-black text-slate-800">
-                {getPatientName(c.patient)}
-              </td>
-              
-              <td className="px-6 py-4 text-sm font-bold text-blue-600">
-                {c.doctor_name?.toLowerCase().startsWith('dr.') 
-                  ? c.doctor_name 
-                  : `Dr. ${c.doctor_name}`}
-              </td>
+    const fetchConsultations = async () => {
+        try {
+            const data = await getConsultations();
+            setConsultations(data);
+        } catch (error) {
+            console.error("Error fetching consultations:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-              <td className="px-6 py-4 text-sm text-slate-600 font-medium">
-                {c.diagnosis}
-              </td>
-              <td className="px-6 py-4 text-right space-x-4">
-                <button 
-                  onClick={() => onUpdate(c)} 
-                  className="text-emerald-500 hover:text-emerald-700 font-black text-[10px] uppercase tracking-widest transition-colors"
-                >
-                  Edit
-                </button>
-                <button 
-                  onClick={() => handleRemove(c.id)} 
-                  className="text-red-400 hover:text-red-600 font-black text-[10px] uppercase tracking-widest transition-colors"
-                >
-                  Remove
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+    const handleDelete = async (id: number) => {
+        if (window.confirm("Are you sure you want to remove this consultation?")) {
+            try {
+                await deleteConsultation(id);
+                fetchConsultations();
+            } catch (error) {
+                console.error("Error deleting consultation:", error);
+                alert("Failed to delete consultation.");
+            }
+        }
+    };
+
+    // Filter consultations based on patient name or doctor name
+    const filteredConsultations = consultations.filter(consultation => 
+        consultation.patient_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        consultation.doctor_name?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    if (loading) return <div className="p-8 text-center text-slate-500 font-bold uppercase tracking-widest text-xs">Loading records...</div>;
+
+    return (
+        <div className="space-y-6">
+            {/* SEARCH BAR */}
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                <span className="text-xl pl-2">🔍</span>
+                <input 
+                    type="text" 
+                    placeholder="Search consultations..." 
+                    className="w-full bg-transparent outline-none font-bold text-slate-700 placeholder:text-slate-300"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <table className="w-full text-left border-collapse">
+                    <thead>
+                        <tr className="bg-slate-50/50 border-b border-slate-100">
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Date</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Patient</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Attending Doctor</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Diagnosis</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                        </tr>
+                    </thead>
+                          <tbody className="divide-y divide-slate-100">
+                              {filteredConsultations.length === 0 ? (
+                                  <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-400 font-bold text-xs uppercase tracking-widest">No consultations found</td></tr>
+                              ) : (
+                                  filteredConsultations.map((consultation) => (
+                                      <tr key={consultation.id} className="hover:bg-slate-50/50 transition-colors group">
+                                          <td className="px-6 py-4 font-medium text-slate-400 text-xs">
+                                              {consultation.consultation_date ? new Date(consultation.consultation_date).toLocaleDateString() : 'N/A'}
+                                          </td>
+                                          <td className="px-6 py-4 font-black text-slate-800 uppercase tracking-tight text-sm">
+                                              {consultation.patient_name}
+                                          </td>
+                                          <td className="px-6 py-4 font-bold text-blue-600 text-sm">
+                                              {consultation.doctor_name}
+                                          </td>
+                                          <td className="px-6 py-4 font-medium text-slate-300 italic text-sm">
+                                              {consultation.diagnosis || "Pending..."}
+                                          </td>
+                                          <td className="px-6 py-4 text-right space-x-4">
+                                              {/* Primary VIEW/EDIT Action */}
+                                              <button 
+                                                  onClick={() => onUpdate(consultation)} 
+                                                  className="text-emerald-500 hover:text-emerald-700 font-black text-[10px] uppercase tracking-widest transition-all hover:scale-105"
+                                              >
+                                                  View
+                                              </button>
+
+                                              {/* CANCEL/REMOVE Action */}
+                                              <button 
+                                                  onClick={() => consultation.id && handleDelete(consultation.id)} 
+                                                  className="text-red-400 hover:text-red-600 font-black text-[10px] uppercase tracking-widest transition-all hover:scale-105"
+                                              >
+                                                  Remove
+                                              </button>
+                                          </td>
+                                      </tr>
+                                  ))
+                              )}
+                          </tbody>
+                </table>
+            </div>
+        </div>
+    );
 };
 
 export default ConsultationList;

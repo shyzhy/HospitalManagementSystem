@@ -1,4 +1,4 @@
-// --- USER DETAILS (Used inside Doctor) ---
+// --- USER DETAILS  ---
 export interface UserDetails {
   username: string;
   first_name: string;
@@ -7,33 +7,35 @@ export interface UserDetails {
 
 // --- PATIENT ---
 export interface Patient {
-    id?: number;            // DB Primary Key
-    patient_id: string;     // Hospital ID
+    id?: number;
     first_name: string;
     last_name: string;
-    dob: string;            // Matches backend 'dob'
     gender: string;
-    phone: string;          // Matches backend 'phone'
-    address: string;
+    address?: string;
+    dob: string;
+    phone?: string;
+
+    username?: string;
+    password?: string;
+    user_details?: {
+        username: string;
+    }
 }
 
 // --- DOCTOR ---
-export interface Doctor { 
-    id?: number;
+export interface Doctor {
+    id: number;
     specialization: string;
     license_number: string;
     is_available: boolean;
     
-    // This allows the frontend to see the name sent by Django!
-    user_details?: UserDetails; 
-    
-    // Kept just in case older components still reference it
-    user?: {
-        id: number;
+    first_name?: string; 
+    last_name?: string;
+    username?: string;
+    user_details?: {
         username: string;
         first_name: string;
         last_name: string;
-        email: string;
     };
 }
 
@@ -54,14 +56,14 @@ export interface Consultation {
 // --- TREATMENT ---
 export interface Treatment {
     id?: number;
-    patient: number;         // Patient ID
-    doctor: number;          // Doctor ID
-    treatment_name: string;  // Matches your Django field (Diagnosis)
-    description: string;     // Matches your Django field (Medication/Plan)
-    treatment_date?: string;
+    patient: number;
+    doctor: number;
+    treatment_name: string;
+    description?: string;
+    patient_name?: string;
+    doctor_name?: string;  
+    treatment_date?: string; 
 }
-
-
 // --- PRESCRIPTION ---
 export interface Prescription {
     id?: number;
@@ -70,9 +72,9 @@ export interface Prescription {
     frequency: string;
     duration: string;
     patient: number;
-    patient_name?: string; // Add this
+    patient_name?: string; 
     doctor: number;
-    doctor_name?: string;  // Add this
+    doctor_name?: string;  
     date_prescribed?: string;
 }
 
@@ -93,9 +95,9 @@ export interface PaginatedResponse<T> {
 // --- FORM DATA TYPES (For creating/updating) ---
 export interface MedicalRecord {
     id?: number;
-    patient: number;                    // Patient ID
-    patient_name?: string;              // Added: Display name from backend (like Consultation)
-    patient_details?: Patient;          // Optional: Full nested patient object
+    patient: number;                    
+    patient_name?: string;             
+    patient_details?: Patient;          
     blood_type: string;
     allergies: string;
     chronic_conditions: string;
@@ -107,4 +109,5 @@ export interface MedicalRecord {
     updated_at?: string;
     treatments?: Treatment[];
     prescriptions?: Prescription[];
+
 }

@@ -1,134 +1,126 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { createDoctor, updateDoctor } from '../api';
+import { Doctor } from '../types';
 
 interface DoctorFormProps {
-    doctor: any | null; 
+    doctor?: Doctor | null;
     onSubmit: () => void;
     onCancel: () => void;
 }
 
 const DoctorForm: React.FC<DoctorFormProps> = ({ doctor, onSubmit, onCancel }) => {
     const [formData, setFormData] = useState({
-        username: '',
         first_name: '',
         last_name: '',
+        username: '',
+        password: '',
         specialization: '',
         license_number: '',
-        password: '',
         is_available: true
     });
-
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (doctor) {
             setFormData({
-                username: doctor.user_details?.username || '',
-                first_name: doctor.user_details?.first_name || '',
-                last_name: doctor.user_details?.last_name || '',
+                first_name: doctor.user_details?.first_name || doctor.first_name || '',
+                last_name: doctor.user_details?.last_name || doctor.last_name || '',
+                username: doctor.user_details?.username || doctor.username || '',
+                password: '', 
                 specialization: doctor.specialization || '',
                 license_number: doctor.license_number || '',
-                password: '', // Keep blank during edit
-                is_available: doctor.is_available ?? true
+                is_available: doctor.is_available
             });
         }
     }, [doctor]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         try {
-            // Prepare payload: Remove password if it's empty during an update
-            const payload: any = { ...formData };
-            if (doctor && !formData.password) {
-                delete payload.password;
-            }
-
             if (doctor?.id) {
-                await axios.put(`http://127.0.0.1:8000/api/v1/doctors/${doctor.id}/`, payload);
+                await updateDoctor(doctor.id, formData);
             } else {
-                await axios.post('http://127.0.0.1:8000/api/v1/doctors/', payload);
+                await createDoctor(formData);
             }
             onSubmit();
         } catch (err: any) {
-            console.error(err.response?.data);
-            alert("Error: " + JSON.stringify(err.response?.data));
+            console.error("Failed to save doctor:", err);
+            alert(`Error: ${JSON.stringify(err.response?.data || "Failed to save")}`);
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-200">
-                <div className="bg-blue-600 p-6 flex justify-between items-center">
-                    <h2 className="text-xl font-black text-white uppercase tracking-tight">
-                        {doctor ? '📝 Edit Doctor Profile' : '➕ Register New Doctor'}
-                    </h2>
-                    <span className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${formData.is_available ? 'bg-emerald-400 text-white' : 'bg-red-400 text-white'}`}>
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden">
+                <div className="bg-blue-600 p-6 text-white flex justify-between items-center">
+                    <h3 className="text-xl font-black uppercase tracking-widest flex items-center gap-2">
+                        <span className="text-blue-300 text-2xl">+</span> 
+                        {doctor ? 'Edit Doctor Profile' : 'Register New Doctor'}
+                    </h3>
+                    <span className="px-3 py-1 bg-blue-500 rounded-full text-[10px] font-bold uppercase tracking-widest">
                         {formData.is_available ? 'Online' : 'Offline'}
                     </span>
                 </div>
-
+                
                 <form onSubmit={handleSubmit} className="p-8 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-1">
-                            <label className="text-[10px] font-black text-slate-400 uppercase ml-1">First Name</label>
-                            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                                value={formData.first_name} onChange={(e) => setFormData({...formData, first_name: e.target.value})} required />
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">First Name</label>
+                            <input name="first_name" value={formData.first_name} onChange={handleChange} required className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
                         </div>
                         <div className="space-y-1">
-                            <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Last Name</label>
-                            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                                value={formData.last_name} onChange={(e) => setFormData({...formData, last_name: e.target.value})} required />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Username</label>
-                            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                                value={formData.username} onChange={(e) => setFormData({...formData, username: e.target.value})} required />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-[10px] font-black text-slate-400 uppercase ml-1">{doctor ? 'New Password (Optional)' : 'Password'}</label>
-                            <input type="password" placeholder={doctor ? "Leave blank to keep current" : "Minimum 8 chars"} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                                value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} required={!doctor} />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Specialization</label>
-                            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                                value={formData.specialization} onChange={(e) => setFormData({...formData, specialization: e.target.value})} required />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-[10px] font-black text-slate-400 uppercase ml-1">License Number</label>
-                            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                                value={formData.license_number} onChange={(e) => setFormData({...formData, license_number: e.target.value})} required />
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Last Name</label>
+                            <input name="last_name" value={formData.last_name} onChange={handleChange} required className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
                         </div>
                     </div>
 
-                    {/* STATUS SELECTOR (REPLACES CHECKBOX) */}
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Username</label>
+                            <input name="username" value={formData.username} onChange={handleChange} required className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Password {doctor && "(Leave blank to keep current)"}</label>
+                            <input type="password" name="password" value={formData.password} onChange={handleChange} required={!doctor} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Specialization</label>
+                            <input name="specialization" value={formData.specialization} onChange={handleChange} required className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">License Number</label>
+                            <input name="license_number" value={formData.license_number} onChange={handleChange} required className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                        </div>
+                    </div>
+
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Duty Status</label>
-                        <div className="grid grid-cols-2 gap-3 p-1 bg-slate-100 rounded-2xl border border-slate-200">
-                            <button 
-                                type="button" 
-                                onClick={() => setFormData({...formData, is_available: true})}
-                                className={`py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${formData.is_available ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                            >
-                                ● Active
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Duty Status</label>
+                        <div className="flex gap-4">
+                            <button type="button" onClick={() => setFormData({...formData, is_available: true})} className={`flex-1 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${formData.is_available ? 'bg-emerald-50 text-emerald-600 border-2 border-emerald-500' : 'bg-slate-50 text-slate-400 border-2 border-transparent'}`}>
+                                • Active
                             </button>
-                            <button 
-                                type="button" 
-                                onClick={() => setFormData({...formData, is_available: false})}
-                                className={`py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${!formData.is_available ? 'bg-white text-red-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                            >
-                                ○ Away
+                            <button type="button" onClick={() => setFormData({...formData, is_available: false})} className={`flex-1 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${!formData.is_available ? 'bg-slate-100 text-slate-600 border-2 border-slate-400' : 'bg-slate-50 text-slate-400 border-2 border-transparent'}`}>
+                                ⊘ Away
                             </button>
                         </div>
                     </div>
 
-                    <div className="flex space-x-4 pt-4">
-                        <button type="button" onClick={onCancel} className="flex-1 py-4 border border-slate-200 text-slate-500 font-black rounded-2xl uppercase text-[10px] tracking-widest hover:bg-slate-50 transition-all">Cancel</button>
-                        <button type="submit" disabled={loading} className="flex-1 py-4 bg-blue-600 text-white font-black rounded-2xl uppercase text-[10px] tracking-widest shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all active:scale-95">
-                            {loading ? 'Processing...' : doctor ? 'Update Profile' : 'Register Doctor'}
+                    <div className="flex gap-4 pt-6">
+                        <button type="button" onClick={onCancel} className="flex-1 py-4 bg-white border border-slate-200 text-slate-600 font-black rounded-xl uppercase tracking-widest hover:bg-slate-50 transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit" disabled={loading} className="flex-1 py-4 bg-blue-600 text-white font-black rounded-xl uppercase tracking-widest hover:bg-blue-700 shadow-lg shadow-blue-200 active:scale-95 transition-all">
+                            {loading ? 'Processing...' : doctor ? 'Update Record' : 'Save Record'}
                         </button>
                     </div>
                 </form>

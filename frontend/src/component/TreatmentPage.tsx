@@ -1,45 +1,73 @@
-import React, { useState } from 'react';
-import TreatmentForm from './TreatmentForm'; 
-import TreatmentList from './TreatmentList'; 
-import { Treatment } from '../types';
+import React, { useState, useEffect } from 'react';
+import TreatmentForm from './TreatmentForm';
+import TreatmentList from './TreatmentList';
+import { Treatment, Patient, Doctor } from '../types';
+import { getPatients, getDoctors } from '../api';
 
 const TreatmentPage: React.FC = () => {
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [showForm, setShowForm] = useState(false);
-  const [selectedTreatment, setSelectedTreatment] = useState<Treatment | null>(null);
+    const [showForm, setShowForm] = useState(false);
+    const [selectedTreatment, setSelectedTreatment] = useState<Treatment | null>(null);
+    const [refreshKey, setRefreshKey] = useState(0);
+    
+    // --- ADDED STATE FOR DROPDOWNS ---
+    const [patients, setPatients] = useState<Patient[]>([]);
+    const [doctors, setDoctors] = useState<Doctor[]>([]);
 
-  const handleRefresh = () => {
-    setRefreshKey(prev => prev + 1); 
-    setShowForm(false); 
-    setSelectedTreatment(null);
-  };
+    // --- ADDED FETCH LOGIC ---
+    useEffect(() => {
+        const fetchDropdownData = async () => {
+            try {
+                setPatients(await getPatients());
+                setDoctors(await getDoctors());
+            } catch (error) {
+                console.error("Failed to fetch dropdown data:", error);
+            }
+        };
+        fetchDropdownData();
+    }, []);
 
-  const handleEdit = (treatment: Treatment) => {
-    setSelectedTreatment(treatment);
-    setShowForm(true);
-  };
+    const handleRefresh = () => {
+        setShowForm(false);
+        setSelectedTreatment(null);
+        setRefreshKey(k => k + 1);
+    };
 
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center bg-white p-6 rounded-xl border border-slate-200">
-        <h2 className="text-2xl font-black text-pink-600 uppercase">Treatment Registry</h2>
-        <button   
-          onClick={() => { setSelectedTreatment(null); setShowForm(!showForm); }}
-          className={`${showForm ? 'bg-slate-200 text-slate-700' : 'bg-pink-600 text-white'} px-6 py-2 rounded-lg font-bold`}
-        >
-          {showForm ? 'VIEW LIST' : 'ADD NEW RECORD'}
-        </button>
-      </div>
+    const handleEdit = (treatment: Treatment) => {
+        setSelectedTreatment(treatment);
+        setShowForm(true);
+    };
 
-      {showForm ? (
-          <TreatmentForm initialData={selectedTreatment} onSuccess={handleRefresh} />
-      ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200">
-          <TreatmentList key={refreshKey} patientId={0} onUpdate={handleEdit} />
+    return (
+        <div className="space-y-6">
+            <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Treatment Management</h2>
+                <button 
+                    onClick={() => { setSelectedTreatment(null); setShowForm(!showForm); }}
+                    className="px-6 py-2 bg-emerald-600 text-white font-black rounded-lg uppercase tracking-widest text-[10px] hover:bg-emerald-700 transition-colors"
+                >
+                    {showForm ? 'Cancel' : 'Register New'}
+                </button>
+            </div>
+
+            {showForm ? (
+                <TreatmentForm 
+                    initialData={selectedTreatment} 
+                    patients={patients} // <--- FIXED: Passing patients
+                    doctors={doctors}   // <--- FIXED: Passing doctors
+                    onSuccess={handleRefresh} 
+                />
+            ) : (
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+                    <TreatmentList 
+                        key={refreshKey} 
+                        patientId={0} 
+                        patients={patients} // <--- Just in case TreatmentList also needs it for rendering names
+                        onUpdate={handleEdit} 
+                    />
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default TreatmentPage;
