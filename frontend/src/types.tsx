@@ -37,6 +37,11 @@ export interface Doctor {
         first_name: string;
         last_name: string;
     };
+    user?: {
+        first_name: string;
+        last_name: string;
+    }
+
 }
 
 // --- CONSULTATION / VISIT ---

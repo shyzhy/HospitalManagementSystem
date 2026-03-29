@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { createConsultation, updateConsultation, getPatients } from '../api';
-import { Patient, Consultation } from '../types';
+import { createConsultation, updateConsultation, getPatients, getDoctors } from '../api';
+import { Patient, Doctor, Consultation } from '../types';
 
 interface RecordConsultationProps {
     initialData?: Consultation | null;
@@ -8,11 +8,17 @@ interface RecordConsultationProps {
 }
 
 const RecordConsultation: React.FC<RecordConsultationProps> = ({ initialData, onSuccess }) => {
+    // 1. Get User Role and IDs from local storage
+    const userRole = localStorage.getItem('role') || 'patient';
     const currentDoctorId = localStorage.getItem('doctorId');
+    const currentPatientId = localStorage.getItem('patientId'); 
 
     const [patients, setPatients] = useState<Patient[]>([]);
+    const [doctors, setDoctors] = useState<Doctor[]>([]);
+    
     const [formData, setFormData] = useState({
         patient: '',
+        doctor: '', 
         consultation_date: new Date().toISOString().split('T')[0], 
         diagnosis: '',
         symptoms: ''
@@ -20,11 +26,14 @@ const RecordConsultation: React.FC<RecordConsultationProps> = ({ initialData, on
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        // Fetch BOTH lists so admins/patients can select doctors
         getPatients().then(setPatients).catch(console.error);
+        getDoctors().then(setDoctors).catch(console.error);
 
         if (initialData) {
             setFormData({
-                patient: String(initialData.patient),
+                patient: initialData.patient ? String(initialData.patient) : '',
+                doctor: initialData.doctor ? String(initialData.doctor) : '',
                 consultation_date: initialData.consultation_date || new Date().toISOString().split('T')[0],
                 diagnosis: initialData.diagnosis || '',
                 symptoms: initialData.symptoms || ''
@@ -36,17 +45,32 @@ const RecordConsultation: React.FC<RecordConsultationProps> = ({ initialData, on
         e.preventDefault();
         setLoading(true);
 
+        // 2. SMART ID ASSIGNMENT BASED ON ROLE
+        let finalPatientId = Number(formData.patient);
+        let finalDoctorId = Number(formData.doctor);
+
+        if (userRole === 'doctor') {
+            finalDoctorId = Number(currentDoctorId); // Doctor is locked to themselves
+        } else if (userRole === 'patient') {
+            finalPatientId = Number(currentPatientId); // Patient is locked to themselves
+        }
+
         const payload = {
-            patient: Number(formData.patient),
-            doctor: Number(currentDoctorId),
+            patient: finalPatientId,
+            doctor: finalDoctorId,
             consultation_date: formData.consultation_date,
             diagnosis: formData.diagnosis,
             symptoms: formData.symptoms
         };
 
-  
-        if (!payload.doctor || payload.doctor === 0) {
-            alert("Error: Missing Doctor ID. Please LOGOUT and LOGIN again to refresh your session.");
+        // Validation Checks
+        if (!payload.doctor) {
+            alert("Error: Missing Doctor. Please select a doctor or refresh your session.");
+            setLoading(false);
+            return;
+        }
+        if (!payload.patient) {
+            alert("Error: Missing Patient. Please select a patient or refresh your session.");
             setLoading(false);
             return;
         }
@@ -74,21 +98,52 @@ const RecordConsultation: React.FC<RecordConsultationProps> = ({ initialData, on
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* PATIENT SELECT */}
-                    <div className="space-y-1">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Patient</label>
-                        <select 
-                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none"
-                            value={formData.patient}
-                            onChange={(e) => setFormData({...formData, patient: e.target.value})}
-                            required
-                        >
-                            <option value="">Choose Patient...</option>
-                            {patients.map(p => (
-                                <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>
-                            ))}
-                        </select>
-                    </div>
+                    
+                    {/* SHOW PATIENT SELECT (For Admins and Doctors) */}
+                    {(userRole === 'admin' || userRole === 'doctor') && (
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Patient</label>
+                            <select 
+                                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none"
+                                value={formData.patient}
+                                onChange={(e) => setFormData({...formData, patient: e.target.value})}
+                                required
+                            >
+                                <option value="">Choose Patient...</option>
+                                {patients.map(p => (
+                                    <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
+                    {/* SHOW DOCTOR SELECT (For Admins and Patients) */}
+                    {(userRole === 'admin' || userRole === 'patient') && (
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Doctor</label>
+                            <select 
+                                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none"
+                                value={formData.doctor}
+                                onChange={(e) => setFormData({...formData, doctor: e.target.value})}
+                                required
+                            >
+                                <option value="">Choose Doctor...</option>
+                                {doctors.map(d => {
+                                    // Extracting details from the nested user_details object
+                                    const firstName = (d as any).user_details?.first_name || '';
+                                    const lastName = (d as any).user_details?.last_name || 'Unknown';
+                                    const specialization = (d as any).specialization || '';
+                                    
+                                    // The return keyword ensures the options actually render
+                                    return (
+                                        <option key={d.id} value={d.id}>
+                                            Dr. {firstName} {lastName} {specialization ? `- ${specialization}` : ''}
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                        </div>
+                    )}
 
                     {/* DATE FIELD */}
                     <div className="space-y-1">
@@ -109,7 +164,8 @@ const RecordConsultation: React.FC<RecordConsultationProps> = ({ initialData, on
                         className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none font-medium"
                         value={formData.diagnosis}
                         onChange={(e) => setFormData({...formData, diagnosis: e.target.value})}
-                        placeholder="Enter diagnosis results..."
+                        placeholder={userRole === 'patient' ? "Doctor will fill this out..." : "Enter diagnosis results..."}
+                        disabled={userRole === 'patient'} 
                     />
                 </div>
 
