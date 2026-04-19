@@ -16,12 +16,50 @@ class PatientListCreateView(ListCreateAPIView):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff or user.is_superuser:
+            return self.queryset
+        
+        doctor = getattr(user, 'doctor_profile', None)
+        if doctor:
+            return self.queryset.filter(
+                models.Q(treatments__doctor=doctor) | 
+                models.Q(consultations__doctor=doctor) |
+                models.Q(prescriptions__doctor=doctor)
+            ).distinct()
+        
+        patient = getattr(user, 'patient_profile', None)
+        if patient:
+            return self.queryset.filter(user=user)
+            
+        return self.queryset.none()
+
     def perform_destroy(self, instance):
         instance.soft_delete()
 
 class PatientRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff or user.is_superuser:
+            return self.queryset
+        
+        doctor = getattr(user, 'doctor_profile', None)
+        if doctor:
+            return self.queryset.filter(
+                models.Q(treatments__doctor=doctor) | 
+                models.Q(consultations__doctor=doctor) |
+                models.Q(prescriptions__doctor=doctor)
+            ).distinct()
+        
+        patient = getattr(user, 'patient_profile', None)
+        if patient:
+            return self.queryset.filter(user=user)
+            
+        return self.queryset.none()
 
     def perform_destroy(self, instance):
         instance.soft_delete()

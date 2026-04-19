@@ -9,6 +9,7 @@ interface ConsultationDetailsProps {
 }
 
 const ConsultationDetails: React.FC<ConsultationDetailsProps> = ({ consultation, onEdit, onDelete, onClose }) => {
+    const userRole = localStorage.getItem('role') || 'patient';
     const displayDoctorName = consultation.doctor_name
         ? (consultation.doctor_name.toLowerCase().startsWith('dr.')
             ? consultation.doctor_name
@@ -132,34 +133,37 @@ const ConsultationDetails: React.FC<ConsultationDetailsProps> = ({ consultation,
                 {/* --- PROFESSIONAL ACTION FOOTER --- */}
                 <div className="space-y-4 pt-8 border-t border-slate-100">
                     <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-50 p-6 rounded-3xl border border-slate-200/40">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-slate-400 border border-slate-200">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                </svg>
+                        {userRole !== 'patient' ? (
+                            <div className="flex gap-3 w-full sm:w-auto">
+                                <button
+                                    onClick={onDelete}
+                                    className="flex-1 sm:flex-none px-6 py-3 bg-white border border-slate-300 text-red-500 font-bold rounded-xl text-[10px] uppercase tracking-widest hover:bg-red-50 hover:border-red-200 active:scale-95 transition-all shadow-sm"
+                                >
+                                    Void Record
+                                </button>
+                                <button
+                                    onClick={onEdit}
+                                    className="flex-1 sm:flex-none px-10 py-3 bg-[#556ee6] text-white font-bold rounded-xl text-[10px] uppercase tracking-widest shadow-[0_8px_20px_rgba(85,110,230,0.25)] hover:bg-[#485ec4] hover:-translate-y-0.5 active:scale-95 transition-all flex items-center justify-center gap-2"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                    Modify Encounter
+                                </button>
                             </div>
-                            <div>
-                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em]">Clinical Security</p>
-                                <p className="text-[9px] text-slate-400 font-medium">This record is immutable once archived. Only verified personnel can edit.</p>
+                        ) : (
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#556ee6] border border-blue-100 shadow-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04M12 2.944a11.955 11.955 0 01-8.618 3.04m0 0a11.955 11.955 0 00-3.382 8.356c0 6.627 5.373 12 12 12s12-5.373 12-12c0-3.159-1.223-6.03-3.218-8.158" />
+                                    </svg>
+                                </div>
+                                <div className="space-y-0.5">
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Authorized Clinical Record</p>
+                                    <p className="text-[9px] text-slate-400 font-medium italic">This consultation log is verified. Please contact your physician for changes.</p>
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex gap-3 w-full sm:w-auto">
-                            <button
-                                onClick={onDelete}
-                                className="flex-1 sm:flex-none px-6 py-3 bg-white border border-slate-300 text-red-500 font-bold rounded-xl text-[10px] uppercase tracking-widest hover:bg-red-50 hover:border-red-200 active:scale-95 transition-all shadow-sm"
-                            >
-                                Void Record
-                            </button>
-                            <button
-                                onClick={onEdit}
-                                className="flex-1 sm:flex-none px-10 py-3 bg-[#556ee6] text-white font-bold rounded-xl text-[10px] uppercase tracking-widest shadow-[0_8px_20px_rgba(85,110,230,0.25)] hover:bg-[#485ec4] hover:-translate-y-0.5 active:scale-95 transition-all flex items-center justify-center gap-2"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                                Modify Encounter
-                            </button>
-                        </div>
+                        )}
                     </div>
 
                     <button

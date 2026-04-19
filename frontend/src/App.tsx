@@ -19,6 +19,7 @@ import MedicalRecordsList from './component/MedicalRecordsList';
 import MedicalRecordsForm from './component/MedicalRecordsForm';
 import MedicalRecordDetails from './component/MedicalRecordDetails';
 import PatientDetails from './component/PatientDetails';
+import PatientProfile from './component/PatientProfile';
 import Login from './component/Login';
 
 // API & Types
@@ -66,9 +67,11 @@ function App() {
     if (!token) return;
     const fetchData = async () => {
       try {
-        if (userRole === 'admin' || userRole === 'doctor') {
+        if (userRole === 'admin' || userRole === 'doctor' || userRole === 'patient') {
             setPatients(await getPatients());
-            setDoctors(await getDoctors());
+            if (userRole !== 'patient') {
+                setDoctors(await getDoctors());
+            }
         }
       } catch (e) { 
           console.error("Data Fetch Error:", e); 
@@ -130,9 +133,9 @@ function App() {
                   <span className="text-[9px] text-white/70 capitalize">{userRole}</span>
               </div>
               <div 
-                  className={`w-8 h-8 rounded-full bg-[#2A3F6D] border border-white/20 flex items-center justify-center font-bold text-xs ${userRole === 'doctor' ? 'cursor-pointer hover:bg-white/20 transition-colors' : ''}`}
+                  className={`w-8 h-8 rounded-full bg-[#2A3F6D] border border-white/20 flex items-center justify-center font-bold text-xs ${(userRole === 'doctor' || userRole === 'patient') ? 'cursor-pointer hover:bg-white/20 transition-colors' : ''}`}
                   onClick={() => {
-                      if (userRole === 'doctor') {
+                      if (userRole === 'doctor' || userRole === 'patient') {
                           setActiveTab('account');
                           setShowConsultationForm(false);
                           setShowConsultationDetails(false);
@@ -140,7 +143,7 @@ function App() {
                           setShowMedicalRecordForm(false);
                       }
                   }}
-                  title={userRole === 'doctor' ? "Account Settings" : "Profile"}
+                  title={userRole !== 'admin' ? "Account Settings" : "Profile"}
               >
                   {userName.replace(/^Dr\.\s*/i, '').charAt(0).toUpperCase()}
               </div>
@@ -173,7 +176,7 @@ function App() {
                   .filter(tab => {
                       if (userRole === 'admin') return tab !== 'account';
                       if (userRole === 'doctor') return tab !== 'doctors'; 
-                      if (userRole === 'patient') return tab === 'consultations' || tab === 'prescriptions';
+                      if (userRole === 'patient') return tab === 'consultations' || tab === 'prescriptions' || tab === 'account';
                       return false;
                   })
                   .map((tab) => {
@@ -217,21 +220,22 @@ function App() {
           <main className="flex-1 overflow-y-auto p-8 relative">
               
               {/* PAGE HEADER SECTION */}
-              <div className="flex justify-between items-center mb-6 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                  <div className="flex items-center gap-4">
-                      {/* Icon for Header */}
-                      <div className="w-12 h-12 rounded-full bg-[#f4f5f9] text-[#556ee6] flex items-center justify-center font-black text-2xl shadow-inner">
-                         📋
+              {activeTab !== 'account' && (
+                  <div className="flex justify-between items-center mb-6 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                      <div className="flex items-center gap-4">
+                          {/* Icon for Header */}
+                          <div className="w-12 h-12 rounded-full bg-[#f4f5f9] text-[#556ee6] flex items-center justify-center font-black text-2xl shadow-inner">
+                             📋
+                          </div>
+                          <div>
+                              <h1 className="text-xl font-black text-[#495057] tracking-tight capitalize">
+                                  {activeTab.replace('_', ' ')} Directory
+                              </h1>
+                              <p className="text-[12px] font-semibold text-[#74788d] mt-0.5 uppercase tracking-wider">
+                                  MedFlow &gt; {activeTab.replace('_', ' ')}
+                              </p>
+                          </div>
                       </div>
-                      <div>
-                          <h1 className="text-xl font-black text-[#495057] tracking-tight capitalize">
-                              {activeTab.replace('_', ' ')} Directory
-                          </h1>
-                          <p className="text-[12px] font-semibold text-[#74788d] mt-0.5 uppercase tracking-wider">
-                              MedFlow &gt; {activeTab.replace('_', ' ')}
-                          </p>
-                      </div>
-                  </div>
               
                   {canRegisterNew() && (
                       <button onClick={() => {
@@ -249,26 +253,37 @@ function App() {
                       </button>
                   )}
               </div>
+              )}
  
               {/* MAIN DATA CARD */}
               <div className="bg-transparent min-h-[60vh]">
  
           {/* --- ACCOUNT VIEW --- */}
-         {activeTab === 'account' && userRole === 'doctor' && (() => {
-             const myDoctorRecord = doctors.find(d => d.id === parseInt(localStorage.getItem('doctorId') || '0'));
-             return (
-                 <div className="flex justify-center mt-2">
-                      <DoctorForm 
-                           doctor={myDoctorRecord} 
-                           onSubmit={(d) => { 
-                                localStorage.setItem('userName', `Dr. ${d.first_name} ${d.last_name}`);
-                                setRefreshKey(k => k + 1); 
-                            }} 
-                           isInline={true} 
-                      />
-                 </div>
-             );
-         })()}
+          {activeTab === 'account' && (userRole === 'doctor' || userRole === 'patient') && (() => {
+              if (userRole === 'doctor') {
+                  const myDoctorRecord = doctors.find(d => d.id === parseInt(localStorage.getItem('doctorId') || '0'));
+                  return (
+                      <div className="flex justify-center mt-2">
+                           <DoctorForm 
+                                doctor={myDoctorRecord} 
+                                onSubmit={(d) => { 
+                                     localStorage.setItem('userName', `Dr. ${d.first_name} ${d.last_name}`);
+                                     setRefreshKey(k => k + 1); 
+                                 }} 
+                                isInline={true} 
+                           />
+                      </div>
+                  );
+              } else {
+                  const myPatientRecord = patients.find(p => p.id === parseInt(localStorage.getItem('patientId') || '0'));
+                  return (
+                       <PatientProfile 
+                            patient={myPatientRecord} 
+                            onUpdate={() => setRefreshKey(k => k + 1)} 
+                       />
+                  );
+              }
+          })()}
  
           {/* --- CONSULTATIONS VIEW --- */}
          {activeTab === 'consultations' && (
