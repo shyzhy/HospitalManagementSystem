@@ -10,6 +10,13 @@ class Patient(models.Model):
     gender = models.CharField(max_length=10)
     phone = models.CharField(max_length=20, blank=True, default='') 
     address = models.TextField(blank=True, default='')
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    def soft_delete(self):
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
+        self.save()
     
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -21,6 +28,13 @@ class Doctor(models.Model):
     specialization = models.CharField(max_length=100)
     license_number = models.CharField(max_length=50, unique=True)
     is_available = models.BooleanField(default=True)
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    def soft_delete(self):
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
+        self.save()
 
     def __str__(self):
         return f"Dr. {self.first_name} {self.last_name} - {self.specialization}"
