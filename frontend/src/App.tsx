@@ -21,6 +21,7 @@ import MedicalRecordDetails from './component/MedicalRecordDetails';
 import PatientDetails from './component/PatientDetails';
 import PatientProfile from './component/PatientProfile';
 import DoctorProfile from './component/DoctorProfile';
+import DoctorDetails from './component/DoctorDetails';
 import Login from './component/Login';
 
 // API & Types
@@ -51,6 +52,7 @@ function App() {
   const [showMedicalRecordForm, setShowMedicalRecordForm] = useState(false);
   const [showMedicalRecordDetails, setShowMedicalRecordDetails] = useState(false);
   const [showPatientDetails, setShowPatientDetails] = useState(false);
+  const [showDoctorDetails, setShowDoctorDetails] = useState(false);
 
 
   // Selected Items for Editing/Viewing
@@ -67,15 +69,24 @@ function App() {
   useEffect(() => {
     if (!token) return;
     const fetchData = async () => {
-      try {
-        if (userRole === 'admin' || userRole === 'doctor' || userRole === 'patient') {
-            setPatients(await getPatients());
-            if (userRole !== 'patient') {
-                setDoctors(await getDoctors());
-            }
-        }
-      } catch (e) { 
-          console.error("Data Fetch Error:", e); 
+      if (userRole === 'admin' || userRole === 'doctor' || userRole === 'patient') {
+          // Fetch Patients
+          try {
+              const pData = await getPatients();
+              setPatients(pData);
+          } catch (e) {
+              console.error("Patient Fetch Error:", e);
+          }
+
+          // Fetch Doctors (Not for patients)
+          if (userRole !== 'patient') {
+              try {
+                  const dData = await getDoctors();
+                  setDoctors(dData);
+              } catch (e) {
+                  console.error("Doctor Fetch Error:", e);
+              }
+          }
       }
     };
     fetchData();
@@ -220,42 +231,6 @@ function App() {
           {/* --- MAIN PAGE CONTENT --- */}
           <main className="flex-1 overflow-y-auto p-8 relative">
               
-              {/* PAGE HEADER SECTION */}
-              {activeTab !== 'account' && (
-                  <div className="flex justify-between items-center mb-6 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                      <div className="flex items-center gap-4">
-                          {/* Icon for Header */}
-                          <div className="w-12 h-12 rounded-full bg-[#f4f5f9] text-[#556ee6] flex items-center justify-center font-black text-2xl shadow-inner">
-                             📋
-                          </div>
-                          <div>
-                              <h1 className="text-xl font-black text-[#495057] tracking-tight capitalize">
-                                  {activeTab.replace('_', ' ')} Directory
-                              </h1>
-                              <p className="text-[12px] font-semibold text-[#74788d] mt-0.5 uppercase tracking-wider">
-                                  MedFlow &gt; {activeTab.replace('_', ' ')}
-                              </p>
-                          </div>
-                      </div>
-              
-                  {canRegisterNew() && (
-                      <button onClick={() => {
-                          if(activeTab === 'patients') { setSelectedPatient(null); setShowPatientForm(true); }
-                          else if(activeTab === 'doctors') { setSelectedDoctor(null); setShowDoctorForm(true); }
-                          else if(activeTab === 'prescriptions') { setSelectedPrescription(null); setShowPrescriptionForm(true); }
-                          else if(activeTab === 'treatment') { setSelectedTreatment(null); setShowTreatmentForm(!showTreatmentForm); }
-                          else if(activeTab === 'consultations') { setSelectedConsultation(null); setShowConsultationForm(!showConsultationForm); }
-                          else if(activeTab === 'medical_records') { setSelectedMedicalRecord(null); setShowMedicalRecordForm(!showMedicalRecordForm); }
-                      }} 
-                      className="px-6 py-2.5 rounded shadow-sm bg-[#556ee6] hover:bg-[#485ec4] text-white font-bold text-[13px] transition-all flex items-center gap-2"
-                      >
-                          <span className="text-lg leading-none">+</span>
-                          Add New
-                      </button>
-                  )}
-              </div>
-              )}
- 
               {/* MAIN DATA CARD */}
               <div className="bg-transparent min-h-[60vh]">
  
@@ -286,6 +261,30 @@ function App() {
           {/* --- CONSULTATIONS VIEW --- */}
          {activeTab === 'consultations' && (
             <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+             {!showConsultationForm && !showConsultationDetails && (
+               <div className="p-6 flex justify-between items-center border-b border-slate-100">
+                   <div className="flex items-center gap-3">
+                       <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-[#556ee6]">
+                           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                           </svg>
+                       </div>
+                       <div>
+                           <h3 className="text-lg font-black text-slate-800 tracking-tight uppercase leading-none">Consultations</h3>
+                           <p className="text-[10px] text-slate-400 font-bold tracking-[0.2em] mt-1.5 uppercase">MedFlow &gt; Consultations</p>
+                       </div>
+                   </div>
+                   {canRegisterNew() && (
+                       <button 
+                           onClick={() => { setSelectedConsultation(null); setShowConsultationForm(true); }}
+                           className="px-6 py-2.5 bg-[#556ee6] text-white rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-[#485ec4] transition-all flex items-center gap-2 shadow-lg shadow-[#556ee6]/10"
+                       >
+                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                           Add New
+                       </button>
+                   )}
+               </div>
+             )}
              {showConsultationDetails && selectedConsultation ? (
                <ConsultationDetails 
                  consultation={selectedConsultation}
@@ -322,6 +321,30 @@ function App() {
          {/* --- OTHER VIEWS --- */}
          {activeTab === 'treatment' && userRole !== 'patient' && (
             <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+             {!showTreatmentForm && !showTreatmentDetails && (
+               <div className="p-6 flex justify-between items-center border-b border-slate-100">
+                   <div className="flex items-center gap-3">
+                       <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-[#556ee6]">
+                           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                           </svg>
+                       </div>
+                       <div>
+                           <h3 className="text-lg font-black text-slate-800 tracking-tight uppercase leading-none">Treatment</h3>
+                           <p className="text-[10px] text-slate-400 font-bold tracking-[0.2em] mt-1.5 uppercase">MedFlow &gt; Treatment</p>
+                       </div>
+                   </div>
+                   {canRegisterNew() && (
+                       <button 
+                           onClick={() => { setSelectedTreatment(null); setShowTreatmentForm(true); }}
+                           className="px-6 py-2.5 bg-[#556ee6] text-white rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-[#485ec4] transition-all flex items-center gap-2 shadow-lg shadow-[#556ee6]/10"
+                       >
+                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                           Add New
+                       </button>
+                   )}
+               </div>
+             )}
              {showTreatmentDetails && selectedTreatment ? (
                  <TreatmentDetails 
                      treatment={selectedTreatment}
@@ -349,6 +372,30 @@ function App() {
  
          {activeTab === 'medical_records' && userRole !== 'patient' && (
             <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+             {!showMedicalRecordForm && !showMedicalRecordDetails && (
+               <div className="p-6 flex justify-between items-center border-b border-slate-100">
+                   <div className="flex items-center gap-3">
+                       <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-[#556ee6]">
+                           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                           </svg>
+                       </div>
+                       <div>
+                           <h3 className="text-lg font-black text-slate-800 tracking-tight uppercase leading-none">Medical Records</h3>
+                           <p className="text-[10px] text-slate-400 font-bold tracking-[0.2em] mt-1.5 uppercase">MedFlow &gt; Medical Records</p>
+                       </div>
+                   </div>
+                   {canRegisterNew() && (
+                       <button 
+                           onClick={() => { setSelectedMedicalRecord(null); setShowMedicalRecordForm(true); }}
+                           className="px-6 py-2.5 bg-[#556ee6] text-white rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-[#485ec4] transition-all flex items-center gap-2 shadow-lg shadow-[#556ee6]/10"
+                       >
+                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                           Add New
+                       </button>
+                   )}
+               </div>
+             )}
              {showMedicalRecordDetails && selectedMedicalRecord ? (
                  <MedicalRecordDetails 
                      record={selectedMedicalRecord} 
@@ -373,7 +420,31 @@ function App() {
          )}
  
          {activeTab === 'patients' && userRole !== 'patient' && (
-             <div className={showPatientDetails || showPatientForm ? "bg-white rounded-xl shadow-sm border border-slate-200" : ""}>
+             <div className={showPatientDetails || showPatientForm ? "bg-white rounded-xl shadow-sm border border-slate-200" : "bg-white rounded-xl shadow-sm border border-slate-200"}>
+                 {!showPatientForm && !showPatientDetails && (
+                   <div className="p-6 flex justify-between items-center border-b border-slate-100">
+                       <div className="flex items-center gap-3">
+                           <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-[#556ee6]">
+                               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                               </svg>
+                           </div>
+                           <div>
+                               <h3 className="text-lg font-black text-slate-800 tracking-tight uppercase leading-none">Patients Directory</h3>
+                               <p className="text-[10px] text-slate-400 font-bold tracking-[0.2em] mt-1.5 uppercase">MedFlow &gt; Patients</p>
+                           </div>
+                       </div>
+                       {canRegisterNew() && (
+                           <button 
+                               onClick={() => { setSelectedPatient(null); setShowPatientForm(true); }}
+                               className="px-6 py-2.5 bg-[#556ee6] text-white rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-[#485ec4] transition-all flex items-center gap-2 shadow-lg shadow-[#556ee6]/10"
+                           >
+                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                               Add New
+                           </button>
+                       )}
+                   </div>
+                 )}
                  {showPatientDetails && selectedPatient ? (
                      <PatientDetails 
                          patient={selectedPatient} 
@@ -388,12 +459,92 @@ function App() {
              </div>
          )}
  
-         {activeTab === 'doctors' && userRole === 'admin' && (
-             <DoctorList doctors={doctors} onUpdate={(d) => { setSelectedDoctor(d); setShowDoctorForm(true); }} onDelete={(id) => deleteDoctor(id).then(() => setRefreshKey(k => k + 1))} />
-         )}
+          {activeTab === 'doctors' && userRole === 'admin' && (
+              <div className={showDoctorDetails || showDoctorForm ? "bg-white rounded-xl shadow-sm border border-slate-200" : "bg-white rounded-xl shadow-sm border border-slate-200"}>
+                  {!showDoctorForm && !showDoctorDetails && (
+                      <div className="p-6 flex justify-between items-center border-b border-slate-100">
+                          <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-[#556ee6]">
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                  </svg>
+                              </div>
+                              <div>
+                                  <h3 className="text-lg font-black text-slate-800 tracking-tight uppercase leading-none">Doctors Directory</h3>
+                                  <p className="text-[10px] text-slate-400 font-bold tracking-[0.2em] mt-1.5 uppercase">MedFlow &gt; Doctors</p>
+                              </div>
+                          </div>
+                      
+                          <button 
+                              onClick={() => { setSelectedDoctor(null); setShowDoctorForm(true); }}
+                              className="px-6 py-2.5 bg-[#556ee6] text-white rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-[#485ec4] transition-all flex items-center gap-2 shadow-lg shadow-[#556ee6]/10"
+                          >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                              Add New
+                          </button>
+                      </div>
+                  )}
+
+                  {showDoctorForm && (
+                      <div className="p-8">
+                           <div className="mb-0">
+                              <DoctorForm 
+                                  doctor={selectedDoctor || undefined} 
+                                  onSubmit={() => { setShowDoctorForm(false); setRefreshKey(k => k + 1); }} 
+                                  onCancel={() => setShowDoctorForm(false)} 
+                                  isInline={true}
+                              />
+                           </div>
+                      </div>
+                  )}
+
+                  {showDoctorDetails && selectedDoctor && !showDoctorForm && (
+                      <div className="p-4">
+                           <DoctorDetails 
+                              doctor={selectedDoctor} 
+                              onEdit={() => { setShowDoctorDetails(false); setShowDoctorForm(true); }} 
+                              onClose={() => setShowDoctorDetails(false)} 
+                          />
+                      </div>
+                  )}
+
+                  {!showDoctorForm && !showDoctorDetails && (
+                      <DoctorList 
+                          doctors={doctors} 
+                          onTrack={(d) => { setSelectedDoctor(d); setShowDoctorDetails(true); }}
+                          onUpdate={(d) => { setSelectedDoctor(d); setShowDoctorForm(true); }} 
+                          onDelete={(id) => deleteDoctor(id).then(() => setRefreshKey(k => k + 1))} 
+                      />
+                  )}
+              </div>
+          )}
  
          {activeTab === 'prescriptions' && (
             <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+             {!showPrescriptionForm && !showPrescriptionDetails && (
+               <div className="p-6 flex justify-between items-center border-b border-slate-100">
+                   <div className="flex items-center gap-3">
+                       <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-[#556ee6]">
+                           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                           </svg>
+                       </div>
+                       <div>
+                           <h3 className="text-lg font-black text-slate-800 tracking-tight uppercase leading-none">Prescriptions</h3>
+                           <p className="text-[10px] text-slate-400 font-bold tracking-[0.2em] mt-1.5 uppercase">MedFlow &gt; Prescriptions</p>
+                       </div>
+                   </div>
+                   {canRegisterNew() && (
+                       <button 
+                           onClick={() => { setSelectedPrescription(null); setShowPrescriptionForm(true); }}
+                           className="px-6 py-2.5 bg-[#556ee6] text-white rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-[#485ec4] transition-all flex items-center gap-2 shadow-lg shadow-[#556ee6]/10"
+                       >
+                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                           Add New
+                       </button>
+                   )}
+               </div>
+             )}
              {showPrescriptionDetails && selectedPrescription ? (
                  <PrescriptionDetails 
                      prescription={selectedPrescription}
@@ -419,14 +570,14 @@ function App() {
          )}
  
          {/* --- SHARED MODALS --- */}
-         {showDoctorForm && !activeTab && <DoctorForm doctor={selectedDoctor} onSubmit={() => { setShowDoctorForm(false); setRefreshKey(k => k + 1); }} onCancel={() => setShowDoctorForm(false)} />}
+         {showDoctorForm && !activeTab && <DoctorForm doctor={selectedDoctor} onSubmit={() => { setShowDoctorForm(true); setRefreshKey(k => k + 1); }} onCancel={() => setShowDoctorForm(false)} />}
  
          {/* --- CLOSE MAIN CONTAINER DIV --- */}
          </div>
        </main>
        </div>
      </div>
-   );
- }
- 
- export default App;
+  );
+}
+
+export default App;

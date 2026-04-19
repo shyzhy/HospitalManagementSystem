@@ -7,13 +7,13 @@ interface TreatmentFormProps {
     patients: Patient[];
     doctors: Doctor[];
     onSuccess: () => void;
-    onCancel?: () => void; 
+    onCancel?: () => void;
 }
 
-const TreatmentForm: React.FC<TreatmentFormProps> = ({ 
-    initialData, 
-    patients, 
-    doctors, 
+const TreatmentForm: React.FC<TreatmentFormProps> = ({
+    initialData,
+    patients,
+    doctors,
     onSuccess,
     onCancel
 }) => {
@@ -92,7 +92,7 @@ const TreatmentForm: React.FC<TreatmentFormProps> = ({
                     </div>
                 </div>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="p-8 space-y-8">
                 {/* --- ASSIGNMENT SECTION --- */}
                 <div className="bg-slate-50/80 p-6 rounded-3xl border border-slate-100 space-y-6">
@@ -104,14 +104,14 @@ const TreatmentForm: React.FC<TreatmentFormProps> = ({
                         <div className="space-y-1.5 focus-within:text-emerald-600 transition-colors">
                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Target Patient</label>
                             <div className="relative group">
-                                <select 
+                                <select
                                     className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm shadow-sm focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-600 outline-none transition-all text-slate-800 font-bold appearance-none"
-                                    value={formData.patient} 
-                                    onChange={(e) => setFormData({...formData, patient: e.target.value})} 
-                                    required 
+                                    value={formData.patient}
+                                    onChange={(e) => setFormData({ ...formData, patient: e.target.value })}
+                                    required
                                 >
                                     <option value="">Select Clinical Subject...</option>
-                                    {patients.map(p => <option key={p.id} value={p.id}>{p.first_name} {p.last_name} (ID: #{p.id})</option>)}
+                                    {patients.map(p => <option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>)}
                                 </select>
                                 <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-600 transition-colors">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -120,16 +120,16 @@ const TreatmentForm: React.FC<TreatmentFormProps> = ({
                                 </div>
                             </div>
                         </div>
-                        
+
                         {userRole === 'admin' && (
                             <div className="space-y-1.5 focus-within:text-emerald-600 transition-colors">
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Assigned Physician</label>
                                 <div className="relative group">
-                                    <select 
+                                    <select
                                         className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm shadow-sm focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-600 outline-none transition-all text-slate-800 font-bold appearance-none"
-                                        value={formData.doctor} 
-                                        onChange={(e) => setFormData({...formData, doctor: e.target.value})} 
-                                        required 
+                                        value={formData.doctor}
+                                        onChange={(e) => setFormData({ ...formData, doctor: e.target.value })}
+                                        required
                                     >
                                         <option value="">Select Medical Professional...</option>
                                         {doctors.map(d => <option key={d.id} value={d.id}>Dr. {d.first_name} {d.last_name}</option>)}
@@ -150,12 +150,12 @@ const TreatmentForm: React.FC<TreatmentFormProps> = ({
                     <div className="space-y-1.5 focus-within:text-emerald-600 transition-colors">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Treatment / Procedure Designation</label>
                         <div className="relative group">
-                            <input 
-                                className="w-full pl-10 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-sm shadow-sm focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-600 outline-none transition-all text-slate-800 placeholder-slate-400 font-black tracking-tight" 
-                                value={formData.treatment_name} 
-                                onChange={(e) => setFormData({...formData, treatment_name: e.target.value})} 
-                                placeholder="e.g. Intravenous Antibiotic Course - Protocol A" 
-                                required 
+                            <input
+                                className="w-full pl-10 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-sm shadow-sm focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-600 outline-none transition-all text-slate-800 placeholder-slate-400 font-black tracking-tight"
+                                value={formData.treatment_name}
+                                onChange={(e) => setFormData({ ...formData, treatment_name: e.target.value })}
+                                placeholder="e.g. Intravenous Antibiotic Course - Protocol A"
+                                required
                             />
                             <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-600 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -167,19 +167,19 @@ const TreatmentForm: React.FC<TreatmentFormProps> = ({
 
                     <div className="space-y-1.5 focus-within:text-emerald-600 transition-colors">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Clinical Protocol & Execution Notes</label>
-                        <textarea 
+                        <textarea
                             rows={6}
-                            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-3xl text-sm shadow-sm focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-600 outline-none transition-all text-slate-800 placeholder-slate-400 resize-none font-medium leading-relaxed" 
-                            value={formData.description} 
-                            onChange={(e) => setFormData({...formData, description: e.target.value})} 
-                            placeholder="Detail the clinical steps, required equipment, and specific procedural guidelines..." 
+                            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-3xl text-sm shadow-sm focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-600 outline-none transition-all text-slate-800 placeholder-slate-400 resize-none font-medium leading-relaxed"
+                            value={formData.description}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            placeholder="Detail the clinical steps, required equipment, and specific procedural guidelines..."
                         />
                     </div>
                 </div>
 
                 {/* --- ACTION FOOTER --- */}
                 <div className="flex justify-between items-center pt-8 border-t border-slate-100 mt-6 font-sans">
-                    <button 
+                    <button
                         type="button"
                         onClick={() => onCancel?.()}
                         className="px-6 py-3.5 bg-slate-50 text-slate-400 font-black rounded-xl text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-all flex items-center gap-2"
@@ -189,15 +189,15 @@ const TreatmentForm: React.FC<TreatmentFormProps> = ({
                         </svg>
                         Back to Clinical Directory
                     </button>
-                    <button 
-                        type="submit" 
-                        disabled={loading} 
+                    <button
+                        type="submit"
+                        disabled={loading}
                         className="px-12 py-4 bg-emerald-600 text-white font-black rounded-xl text-[12px] uppercase tracking-widest shadow-[0_8px_20px_rgba(5,150,105,0.25)] hover:bg-emerald-700 hover:-translate-y-0.5 active:scale-95 transition-all flex items-center gap-2"
                     >
                         {loading ? (
                             <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                         ) : (
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

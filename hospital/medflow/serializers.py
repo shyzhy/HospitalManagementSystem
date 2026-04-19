@@ -45,11 +45,13 @@ class CustomUserSerializer(DjoserUserSerializer):
 # --- PATIENT SERIALIZER ---
 class PatientSerializer(serializers.ModelSerializer):
     user_details = serializers.SerializerMethodField(read_only=True)
-    username = serializers.CharField(source='user.username', read_only=True)
+    username = serializers.CharField(required=False, allow_blank=True)
+    password = serializers.CharField(required=False, allow_blank=True, write_only=True)
 
     class Meta:
         model = Patient
-        fields = '__all__'
+        fields = ['id', 'first_name', 'last_name', 'dob', 'gender', 'phone', 
+                  'address', 'is_deleted', 'user_details', 'username', 'password']
 
     def get_user_details(self, obj):
         return {'username': obj.user.username} if hasattr(obj, 'user') and obj.user else None
@@ -57,11 +59,12 @@ class PatientSerializer(serializers.ModelSerializer):
 
 # --- DOCTOR SERIALIZER ---
 class DoctorSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username', read_only=True)
+    username = serializers.CharField(required=False, allow_blank=True)
+    password = serializers.CharField(required=False, allow_blank=True, write_only=True)
     
     class Meta:
         model = Doctor
-        fields = ['id', 'first_name', 'last_name', 'username',
+        fields = ['id', 'first_name', 'last_name', 'username', 'password',
                   'specialization', 'license_number', 'is_available']
 
 

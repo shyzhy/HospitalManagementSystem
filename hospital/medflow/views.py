@@ -19,7 +19,7 @@ class PatientListCreateView(ListCreateAPIView):
     def get_queryset(self):
         user = self.request.user
         if user.is_staff or user.is_superuser:
-            return self.queryset
+            return Patient.objects.filter(is_deleted=False)
         
         doctor = getattr(user, 'doctor_profile', None)
         if doctor:
@@ -34,6 +34,19 @@ class PatientListCreateView(ListCreateAPIView):
             return self.queryset.filter(user=user)
             
         return self.queryset.none()
+
+    def perform_create(self, serializer):
+        username = serializer.validated_data.pop('username', None)
+        password = serializer.validated_data.pop('password', None)
+        
+        user = None
+        if username:
+            user = User.objects.create(username=username)
+            if password:
+                user.set_password(password)
+            user.save()
+            
+        serializer.save(user=user)
 
     def perform_destroy(self, instance):
         instance.soft_delete()
@@ -45,7 +58,7 @@ class PatientRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         user = self.request.user
         if user.is_staff or user.is_superuser:
-            return self.queryset
+            return Patient.objects.filter(is_deleted=False)
         
         doctor = getattr(user, 'doctor_profile', None)
         if doctor:
@@ -60,6 +73,18 @@ class PatientRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
             return self.queryset.filter(user=user)
             
         return self.queryset.none()
+
+    def perform_update(self, serializer):
+        username = serializer.validated_data.pop('username', None)
+        password = serializer.validated_data.pop('password', None)
+        
+        instance = serializer.save()
+        if instance.user:
+            if username:
+                instance.user.username = username
+            if password:
+                instance.user.set_password(password)
+            instance.user.save()
 
     def perform_destroy(self, instance):
         instance.soft_delete()
@@ -72,12 +97,40 @@ class DoctorListCreateView(ListCreateAPIView):
     queryset = Doctor.objects.all()
     serializer_class = DoctorSerializer
 
+    def get_queryset(self):
+        return Doctor.objects.filter(is_deleted=False)
+
+    def perform_create(self, serializer):
+        username = serializer.validated_data.pop('username', None)
+        password = serializer.validated_data.pop('password', None)
+        
+        user = None
+        if username:
+            user = User.objects.create(username=username)
+            if password:
+                user.set_password(password)
+            user.save()
+            
+        serializer.save(user=user)
+
     def perform_destroy(self, instance):
         instance.soft_delete()
 
 class DoctorRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = Doctor.objects.all()
     serializer_class = DoctorSerializer
+
+    def perform_update(self, serializer):
+        username = serializer.validated_data.pop('username', None)
+        password = serializer.validated_data.pop('password', None)
+        
+        instance = serializer.save()
+        if instance.user:
+            if username:
+                instance.user.username = username
+            if password:
+                instance.user.set_password(password)
+            instance.user.save()
 
     def perform_destroy(self, instance):
         instance.soft_delete()
@@ -93,7 +146,7 @@ class ConsultationListCreateView(ListCreateAPIView):
     def get_queryset(self):
         user = self.request.user
         if user.is_staff or user.is_superuser:
-            return self.queryset
+            return Consultation.objects.all()
         
         doctor = getattr(user, 'doctor_profile', None)
         if doctor:
@@ -112,7 +165,7 @@ class ConsultationRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         user = self.request.user
         if user.is_staff or user.is_superuser:
-            return self.queryset
+            return Consultation.objects.all()
         
         doctor = getattr(user, 'doctor_profile', None)
         if doctor:
@@ -135,7 +188,7 @@ class PrescriptionListCreateView(ListCreateAPIView):
     def get_queryset(self):
         user = self.request.user
         if user.is_staff or user.is_superuser:
-            return self.queryset
+            return Prescription.objects.all()
         
         doctor = getattr(user, 'doctor_profile', None)
         if doctor:
@@ -154,7 +207,7 @@ class PrescriptionRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         user = self.request.user
         if user.is_staff or user.is_superuser:
-            return self.queryset
+            return Prescription.objects.all()
         
         doctor = getattr(user, 'doctor_profile', None)
         if doctor:
@@ -177,7 +230,7 @@ class TreatmentListCreateView(ListCreateAPIView):
     def get_queryset(self):
         user = self.request.user
         if user.is_staff or user.is_superuser:
-            return self.queryset
+            return Treatment.objects.all()
         
         doctor = getattr(user, 'doctor_profile', None)
         if doctor:
@@ -196,7 +249,7 @@ class TreatmentRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         user = self.request.user
         if user.is_staff or user.is_superuser:
-            return self.queryset
+            return Treatment.objects.all()
         
         doctor = getattr(user, 'doctor_profile', None)
         if doctor:
@@ -219,7 +272,7 @@ class MedicalRecordListCreateView(ListCreateAPIView):
     def get_queryset(self):
         user = self.request.user
         if user.is_staff or user.is_superuser:
-            return self.queryset
+            return MedicalRecord.objects.all()
         
         doctor = getattr(user, 'doctor_profile', None)
         if doctor:
@@ -243,7 +296,7 @@ class MedicalRecordRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         user = self.request.user
         if user.is_staff or user.is_superuser:
-            return self.queryset
+            return MedicalRecord.objects.all()
         
         doctor = getattr(user, 'doctor_profile', None)
         if doctor:

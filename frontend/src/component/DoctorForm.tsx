@@ -72,9 +72,9 @@ const DoctorForm: React.FC<DoctorFormProps> = ({ doctor, onSubmit, onCancel, isI
                     </div>
                 )}
                 
-                <form onSubmit={handleSubmit} className={`${isInline ? 'p-2' : 'p-8'} space-y-8`}>
+                <form onSubmit={handleSubmit} className={`${isInline ? 'p-0' : 'p-8'} space-y-8`}>
                     {/* --- CLINICAL IDENTITY SECTION --- */}
-                    <div className={`p-8 ${isInline ? 'bg-white border border-slate-100 shadow-sm' : 'bg-slate-50 border border-slate-200'} rounded-[2.5rem] space-y-8`}>
+                    <div className={`p-8 ${isInline ? 'bg-slate-50 border border-slate-100' : 'bg-slate-50 border border-slate-200'} rounded-[2.5rem] space-y-8`}>
                         <div className="flex items-center gap-2 mb-2">
                              <div className="w-1.5 h-6 bg-[#4e5ec4] rounded-full"></div>
                              <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Clinical Identity</h4>
@@ -92,7 +92,7 @@ const DoctorForm: React.FC<DoctorFormProps> = ({ doctor, onSubmit, onCancel, isI
                     </div>
 
                     {/* --- PROFESSIONAL CREDENTIALS SECTION --- */}
-                    <div className={`p-8 ${isInline ? 'bg-white border border-slate-100 shadow-sm' : 'bg-slate-50 border border-slate-200'} rounded-[2.5rem] space-y-8`}>
+                    <div className={`p-8 ${isInline ? 'bg-slate-50 border border-slate-100' : 'bg-slate-50 border border-slate-200'} rounded-[2.5rem] space-y-8`}>
                         <div className="flex items-center gap-2 mb-2">
                              <div className="w-1.5 h-6 bg-emerald-500 rounded-full"></div>
                              <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Clinical Credentials</h4>
@@ -111,10 +111,10 @@ const DoctorForm: React.FC<DoctorFormProps> = ({ doctor, onSubmit, onCancel, isI
                         <div className="space-y-3 pt-2">
                             <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Internal Duty Status</label>
                             <div className="flex gap-4 max-w-sm">
-                                <button type="button" onClick={() => setFormData({...formData, is_available: true})} className={`flex-1 py-4 rounded-2xl text-[10px] uppercase tracking-widest font-black transition-all ${formData.is_available ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-50 text-slate-400 border border-slate-100'}`}>
+                                <button type="button" onClick={() => setFormData({...formData, is_available: true})} className={`flex-1 py-4 rounded-2xl text-[10px] uppercase tracking-widest font-black transition-all ${formData.is_available ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-white text-slate-400 border border-slate-200'}`}>
                                     On Duty
                                 </button>
-                                <button type="button" onClick={() => setFormData({...formData, is_available: false})} className={`flex-1 py-4 rounded-2xl text-[10px] uppercase tracking-widest font-black transition-all ${!formData.is_available ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' : 'bg-slate-50 text-slate-400 border border-slate-100'}`}>
+                                <button type="button" onClick={() => setFormData({...formData, is_available: false})} className={`flex-1 py-4 rounded-2xl text-[10px] uppercase tracking-widest font-black transition-all ${!formData.is_available ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' : 'bg-white text-slate-400 border border-slate-200'}`}>
                                     Away
                                 </button>
                             </div>
@@ -122,7 +122,7 @@ const DoctorForm: React.FC<DoctorFormProps> = ({ doctor, onSubmit, onCancel, isI
                     </div>
 
                     {/* --- SYSTEM ACCESS SECTION --- */}
-                    <div className={`p-8 ${isInline ? 'bg-slate-900 shadow-2xl shadow-slate-900/10' : 'bg-slate-900'} rounded-[2.5rem] space-y-8 text-white`}>
+                    <div className={`p-8 bg-slate-900 rounded-[2.5rem] space-y-8 text-white shadow-xl shadow-slate-900/10`}>
                         <div className="flex items-center gap-2 mb-2">
                              <div className="w-1.5 h-6 bg-blue-400 rounded-full"></div>
                              <h4 className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Verified System Access</h4>
@@ -139,25 +139,22 @@ const DoctorForm: React.FC<DoctorFormProps> = ({ doctor, onSubmit, onCancel, isI
                         </div>
                     </div>
 
-                    <div className="flex justify-between items-center pt-8 font-sans">
-                        {!isInline ? (
-                            <button 
-                                type="button" 
-                                onClick={onCancel} 
-                                className="px-8 py-4 bg-slate-50 text-slate-400 font-bold rounded-2xl text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-all flex items-center justify-center gap-2"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                                </svg>
-                                Return to Staff Directory
-                            </button>
-                        ) : (
-                            <div></div>
-                        )}
+                    <div className="flex justify-between items-center pt-8 pb-8 font-sans">
+                        <button 
+                            type="button" 
+                            onClick={onCancel} 
+                            className="px-8 py-4 bg-slate-100 text-slate-400 font-bold rounded-2xl text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center justify-center gap-2"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Cancel Modification
+                        </button>
+                        
                         <button 
                             type="submit" 
                             disabled={loading} 
-                            className={`px-10 py-5 ${isInline ? 'bg-slate-800' : 'bg-[#4e5ec4]'} text-white font-black rounded-[2rem] text-[11px] uppercase tracking-[0.2em] shadow-xl transition-all hover:-translate-y-1 active:scale-95 flex items-center gap-3`}
+                            className={`px-10 py-5 bg-[#4e5ec4] text-white font-black rounded-[2rem] text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-[#4e5ec4]/20 transition-all hover:-translate-y-1 active:scale-95 flex items-center gap-3`}
                         >
                             {loading ? (
                                 <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -176,11 +173,13 @@ const DoctorForm: React.FC<DoctorFormProps> = ({ doctor, onSubmit, onCancel, isI
             </div>
     );
 
-    if (isInline) return formContent;
+    if (isInline) return <div className="p-8">{formContent}</div>;
     
     return (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            {formContent}
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+            <div className="max-w-2xl w-full animate-in zoom-in-95 duration-500">
+                {formContent}
+            </div>
         </div>
     );
 };

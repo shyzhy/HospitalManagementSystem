@@ -15,8 +15,18 @@ API.interceptors.request.use((config) => {
     }
     return config;
 }, (error) => {
+    console.error("API Request Interceptor Error:", error);
     return Promise.reject(error);
 });
+
+// Response interceptor for global error handling
+API.interceptors.response.use(
+    response => response,
+    error => {
+        console.error(`API Error [${error.config?.url}]:`, error.response?.data || error.message);
+        return Promise.reject(error);
+    }
+);
 
 // --- PATIENTS ---
 export const getPatients = async (): Promise<Patient[]> => {

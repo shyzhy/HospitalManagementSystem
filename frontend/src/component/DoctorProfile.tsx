@@ -145,7 +145,7 @@ const DoctorProfile: React.FC<DoctorProfileProps> = ({ doctor, onUpdate }) => {
                             </div>
                             <div>
                                 <h3 className="text-xl font-black tracking-tight uppercase">System Security</h3>
-                                <p className="text-[10px] text-white/40 font-bold tracking-[0.2em] uppercase mt-1">Access Protocol • @{doctor.user_details?.username}</p>
+                                <p className="text-[10px] text-white/40 font-bold tracking-[0.2em] uppercase mt-1">Access Protocol • @{doctor.username}</p>
                             </div>
                         </div>
 
