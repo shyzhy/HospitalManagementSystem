@@ -59,87 +59,117 @@ const DoctorForm: React.FC<DoctorFormProps> = ({ doctor, onSubmit, onCancel, isI
     };
 
     const formContent = (
-            <div className={`bg-white w-full ${isInline ? 'max-w-4xl shadow-sm border border-slate-200 my-2' : 'max-w-2xl shadow-xl overflow-hidden'} rounded-xl`}>
-                <div className="px-8 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                    <div>
-                        <h3 className="text-lg font-bold text-slate-800">
-                            {doctor ? 'Account Settings' : 'Register New Doctor'}
-                        </h3>
-                        <p className="text-xs text-slate-500 mt-1">Manage your internal credentials and status</p>
+            <div className={`w-full ${isInline ? 'bg-transparent' : 'bg-white rounded-2xl shadow-xl overflow-hidden'}`}>
+                {!isInline && (
+                    <div className="bg-[#4e5ec4] p-8 text-white flex justify-between items-center">
+                        <div>
+                            <h3 className="text-xl font-black uppercase tracking-widest flex items-center gap-3">
+                                <span className="p-2 bg-white/20 rounded-xl backdrop-blur-md italic text-sm">MD</span>
+                                Physician Enrollment
+                            </h3>
+                            <p className="text-xs text-white/70 mt-1 font-medium italic">Establishing internal clinical credentials.</p>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm">
-                        <span className={`w-2 h-2 rounded-full ${formData.is_available ? 'bg-emerald-500' : 'bg-slate-400'} ${formData.is_available ? 'animate-pulse' : ''}`}></span>
-                        <span className={`text-[11px] font-bold tracking-wide uppercase ${formData.is_available ? 'text-emerald-700' : 'text-slate-500'}`}>
-                            {formData.is_available ? 'Active' : 'Offline'}
-                        </span>
-                    </div>
-                </div>
+                )}
                 
-                <form onSubmit={handleSubmit} className="p-8 space-y-6">
-                    <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-1.5">
-                            <label className="text-sm font-semibold text-slate-600 block">First Name</label>
-                            <input name="first_name" value={formData.first_name} onChange={handleChange} required className="w-full px-4 py-2.5 bg-transparent border border-slate-300 rounded-lg text-sm shadow-sm focus:bg-white focus:ring-2 focus:ring-[#556ee6]/20 focus:border-[#556ee6] outline-none transition-all text-slate-800 placeholder-slate-400" />
+                <form onSubmit={handleSubmit} className={`${isInline ? 'p-2' : 'p-8'} space-y-8`}>
+                    {/* --- CLINICAL IDENTITY SECTION --- */}
+                    <div className={`p-8 ${isInline ? 'bg-white border border-slate-100 shadow-sm' : 'bg-slate-50 border border-slate-200'} rounded-[2.5rem] space-y-8`}>
+                        <div className="flex items-center gap-2 mb-2">
+                             <div className="w-1.5 h-6 bg-[#4e5ec4] rounded-full"></div>
+                             <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Clinical Identity</h4>
                         </div>
-                        <div className="space-y-1.5">
-                            <label className="text-sm font-semibold text-slate-600 block">Last Name</label>
-                            <input name="last_name" value={formData.last_name} onChange={handleChange} required className="w-full px-4 py-2.5 bg-transparent border border-slate-300 rounded-lg text-sm shadow-sm focus:bg-white focus:ring-2 focus:ring-[#556ee6]/20 focus:border-[#556ee6] outline-none transition-all text-slate-800 placeholder-slate-400" />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-1.5">
-                            <label className="text-sm font-semibold text-slate-600 block">Username</label>
-                            <input name="username" value={formData.username} onChange={handleChange} required className="w-full px-4 py-2.5 bg-transparent border border-slate-300 rounded-lg text-sm shadow-sm focus:bg-white focus:ring-2 focus:ring-[#556ee6]/20 focus:border-[#556ee6] outline-none transition-all text-slate-800 placeholder-slate-400" />
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-sm font-semibold text-slate-600 flex items-baseline justify-between block">
-                                Password <span className="text-[10px] text-slate-400 font-normal">{doctor && "(Leave blank to keep current)"}</span>
-                            </label>
-                            <input type="password" name="password" value={formData.password} onChange={handleChange} required={!doctor} className="w-full px-4 py-2.5 bg-transparent border border-slate-300 rounded-lg text-sm shadow-sm focus:bg-white focus:ring-2 focus:ring-[#556ee6]/20 focus:border-[#556ee6] outline-none transition-all text-slate-800 placeholder-slate-400" placeholder={doctor ? "••••••••" : ""} />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                            <div className="space-y-2">
+                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Legal First Name</label>
+                                <input name="first_name" value={formData.first_name} onChange={handleChange} required className="w-full p-4 bg-transparent border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-[#4e5ec4]/5 focus:border-[#4e5ec4] outline-none transition-all font-bold text-slate-700" />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Legal Last Name</label>
+                                <input name="last_name" value={formData.last_name} onChange={handleChange} required className="w-full p-4 bg-transparent border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-[#4e5ec4]/5 focus:border-[#4e5ec4] outline-none transition-all font-bold text-slate-700" />
+                            </div>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-1.5">
-                            <label className="text-sm font-semibold text-slate-600 block">Specialization</label>
-                            <input name="specialization" value={formData.specialization} onChange={handleChange} required className="w-full px-4 py-2.5 bg-transparent border border-slate-300 rounded-lg text-sm shadow-sm focus:bg-white focus:ring-2 focus:ring-[#556ee6]/20 focus:border-[#556ee6] outline-none transition-all text-slate-800 placeholder-slate-400" />
+                    {/* --- PROFESSIONAL CREDENTIALS SECTION --- */}
+                    <div className={`p-8 ${isInline ? 'bg-white border border-slate-100 shadow-sm' : 'bg-slate-50 border border-slate-200'} rounded-[2.5rem] space-y-8`}>
+                        <div className="flex items-center gap-2 mb-2">
+                             <div className="w-1.5 h-6 bg-emerald-500 rounded-full"></div>
+                             <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Clinical Credentials</h4>
                         </div>
-                        <div className="space-y-1.5">
-                            <label className="text-sm font-semibold text-slate-600 block">License Number</label>
-                            <input name="license_number" value={formData.license_number} onChange={handleChange} required className="w-full px-4 py-2.5 bg-transparent border border-slate-300 rounded-lg text-sm shadow-sm focus:bg-white focus:ring-2 focus:ring-[#556ee6]/20 focus:border-[#556ee6] outline-none transition-all text-slate-800 placeholder-slate-400" />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                            <div className="space-y-2">
+                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Assigned Specialization</label>
+                                <input name="specialization" value={formData.specialization} onChange={handleChange} required className="w-full p-4 bg-transparent border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 outline-none transition-all font-bold text-slate-700" />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Medical License Number</label>
+                                <input name="license_number" value={formData.license_number} onChange={handleChange} required className="w-full p-4 bg-transparent border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 outline-none transition-all font-bold text-slate-700 font-mono" />
+                            </div>
+                        </div>
+
+                        <div className="space-y-3 pt-2">
+                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Internal Duty Status</label>
+                            <div className="flex gap-4 max-w-sm">
+                                <button type="button" onClick={() => setFormData({...formData, is_available: true})} className={`flex-1 py-4 rounded-2xl text-[10px] uppercase tracking-widest font-black transition-all ${formData.is_available ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-50 text-slate-400 border border-slate-100'}`}>
+                                    On Duty
+                                </button>
+                                <button type="button" onClick={() => setFormData({...formData, is_available: false})} className={`flex-1 py-4 rounded-2xl text-[10px] uppercase tracking-widest font-black transition-all ${!formData.is_available ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20' : 'bg-slate-50 text-slate-400 border border-slate-100'}`}>
+                                    Away
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="space-y-2 pt-2">
-                        <label className="text-sm font-semibold text-slate-600 block">Duty Status</label>
-                        <div className="flex gap-3 max-w-sm">
-                            <button type="button" onClick={() => setFormData({...formData, is_available: true})} className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${formData.is_available ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 shadow-sm' : 'bg-slate-50 text-slate-500 border border-slate-200 hover:bg-slate-100'}`}>
-                                Active
+                    {/* --- SYSTEM ACCESS SECTION --- */}
+                    <div className={`p-8 ${isInline ? 'bg-slate-900 shadow-2xl shadow-slate-900/10' : 'bg-slate-900'} rounded-[2.5rem] space-y-8 text-white`}>
+                        <div className="flex items-center gap-2 mb-2">
+                             <div className="w-1.5 h-6 bg-blue-400 rounded-full"></div>
+                             <h4 className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Verified System Access</h4>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                            <div className="space-y-2">
+                                <label className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Secure Username</label>
+                                <input name="username" value={formData.username} onChange={handleChange} required className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl focus:bg-white/10 focus:ring-4 focus:ring-blue-400/5 focus:border-blue-400 outline-none transition-all font-bold text-white shadow-inner" />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Password {doctor && "(Leave blank to keep current)"}</label>
+                                <input type="password" name="password" value={formData.password} onChange={handleChange} required={!doctor} className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl focus:bg-white/10 focus:ring-4 focus:ring-blue-400/5 focus:border-blue-400 outline-none transition-all font-bold text-white shadow-inner" placeholder={doctor ? "••••••••" : ""} />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-between items-center pt-8 font-sans">
+                        {!isInline ? (
+                            <button 
+                                type="button" 
+                                onClick={onCancel} 
+                                className="px-8 py-4 bg-slate-50 text-slate-400 font-bold rounded-2xl text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-all flex items-center justify-center gap-2"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                </svg>
+                                Return to Staff Directory
                             </button>
-                            <button type="button" onClick={() => setFormData({...formData, is_available: false})} className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${!formData.is_available ? 'bg-amber-50 text-amber-600 border border-amber-200 shadow-sm' : 'bg-slate-50 text-slate-500 border border-slate-200 hover:bg-slate-100'}`}>
-                                Away
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="flex justify-between items-center pt-6 border-t border-slate-100 mt-6 !mt-8">
-                        <button 
-                            type="button" 
-                            onClick={onCancel} 
-                            className="px-6 py-3 bg-slate-50 text-slate-400 font-bold rounded-lg text-[11px] uppercase tracking-widest hover:bg-slate-100 transition-all flex items-center justify-center gap-2"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                            </svg>
-                            Back to Directory
-                        </button>
+                        ) : (
+                            <div></div>
+                        )}
                         <button 
                             type="submit" 
                             disabled={loading} 
-                            className="px-8 py-3.5 bg-[#556ee6] text-white font-bold rounded-lg text-[13px] uppercase tracking-widest shadow-[0_4px_15px_rgba(85,110,230,0.3)] hover:bg-[#485ec4] hover:-translate-y-0.5 active:scale-95 transition-all"
+                            className={`px-10 py-5 ${isInline ? 'bg-slate-800' : 'bg-[#4e5ec4]'} text-white font-black rounded-[2rem] text-[11px] uppercase tracking-[0.2em] shadow-xl transition-all hover:-translate-y-1 active:scale-95 flex items-center gap-3`}
                         >
-                            {loading ? 'Processing...' : doctor ? 'Save Changes' : 'Create Record'}
+                            {loading ? (
+                                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                </svg>
+                            )}
+                            {doctor ? 'Commit Physician Updates' : 'Confirm Clinical Record'}
                         </button>
                     </div>
                 </form>
