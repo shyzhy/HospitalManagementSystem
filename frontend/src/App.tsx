@@ -8,17 +8,21 @@ import PatientForm from './component/PatientForm';
 import DoctorForm from './component/DoctorForm';
 import PrescriptionForm from './component/PrescriptionForm';
 import PrescriptionList from './component/PrescriptionList';
+import PrescriptionDetails from './component/PrescriptionDetails';
 import TreatmentForm from './component/TreatmentForm';
 import TreatmentList from './component/TreatmentList';
-import RecordConsultation from './component/RecordConsultation'; 
+import TreatmentDetails from './component/TreatmentDetails';
+import RecordConsultation from './component/RecordConsultation';
 import ConsultationList from './component/ConsultationList';
-import ConsultationDetails from './component/ConsultationDetails'; // <-- NEW IMPORT
+import ConsultationDetails from './component/ConsultationDetails';
 import MedicalRecordsList from './component/MedicalRecordsList';
 import MedicalRecordsForm from './component/MedicalRecordsForm';
+import MedicalRecordDetails from './component/MedicalRecordDetails';
+import PatientDetails from './component/PatientDetails';
 import Login from './component/Login';
 
 // API & Types
-import { getPatients, deletePatient, getDoctors, deleteDoctor, deleteConsultation } from './api';
+import { getPatients, deletePatient, getDoctors, deleteDoctor, deleteConsultation, deleteMedicalRecord, deleteTreatment, deletePrescription } from './api';
 import { Patient, Doctor, Prescription, Consultation, Treatment, MedicalRecord } from './types'; 
 
 function App() {
@@ -28,7 +32,7 @@ function App() {
   const userName = localStorage.getItem('userName') || 'User';
 
   // --- STATE ---
-  const [activeTab, setActiveTab] = useState<'patients' | 'doctors' | 'consultations' | 'prescriptions' | 'treatment' | 'medical_records'>('consultations');
+  const [activeTab, setActiveTab] = useState<'patients' | 'doctors' | 'consultations' | 'prescriptions' | 'treatment' | 'medical_records' | 'account'>('consultations');
   
   const [patients, setPatients] = useState<Patient[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -37,10 +41,15 @@ function App() {
   const [showPatientForm, setShowPatientForm] = useState(false);
   const [showDoctorForm, setShowDoctorForm] = useState(false);
   const [showConsultationForm, setShowConsultationForm] = useState(false); 
-  const [showConsultationDetails, setShowConsultationDetails] = useState(false); // <-- NEW STATE
+  const [showConsultationDetails, setShowConsultationDetails] = useState(false);
+  const [showTreatmentDetails, setShowTreatmentDetails] = useState(false);
+  const [showPrescriptionDetails, setShowPrescriptionDetails] = useState(false);
   const [showPrescriptionForm, setShowPrescriptionForm] = useState(false);
   const [showTreatmentForm, setShowTreatmentForm] = useState(false);
   const [showMedicalRecordForm, setShowMedicalRecordForm] = useState(false);
+  const [showMedicalRecordDetails, setShowMedicalRecordDetails] = useState(false);
+  const [showPatientDetails, setShowPatientDetails] = useState(false);
+
 
   // Selected Items for Editing/Viewing
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
@@ -88,8 +97,12 @@ function App() {
   if (!token) return <Login onLoginSuccess={handleLoginSuccess} />;
 
     const canRegisterNew = () => {
+        if (activeTab === 'account') return false;
         if (userRole === 'admin') return true;
-        if (userRole === 'doctor') return true; 
+        if (userRole === 'doctor') {
+            if (activeTab === 'patients') return false;
+            return true;
+        } 
         if (userRole === 'patient') return activeTab === 'consultations';
         return false;
     };
@@ -111,15 +124,29 @@ function App() {
           
           <div className="flex items-center gap-6">
               <div className="flex flex-col text-right">
-                  <span className="text-xs font-bold leading-tight">{userName}</span>
+                  <span className="text-xs font-bold leading-tight">
+                      {userRole === 'doctor' && !userName.startsWith('Dr.') ? `Dr. ${userName}` : userName}
+                  </span>
                   <span className="text-[9px] text-white/70 capitalize">{userRole}</span>
               </div>
-              <div className="w-8 h-8 rounded-full bg-[#2A3F6D] border border-white/20 flex items-center justify-center font-bold text-xs">
-                  {userName.charAt(0).toUpperCase()}
+              <div 
+                  className={`w-8 h-8 rounded-full bg-[#2A3F6D] border border-white/20 flex items-center justify-center font-bold text-xs ${userRole === 'doctor' ? 'cursor-pointer hover:bg-white/20 transition-colors' : ''}`}
+                  onClick={() => {
+                      if (userRole === 'doctor') {
+                          setActiveTab('account');
+                          setShowConsultationForm(false);
+                          setShowConsultationDetails(false);
+                          setShowTreatmentForm(false);
+                          setShowMedicalRecordForm(false);
+                      }
+                  }}
+                  title={userRole === 'doctor' ? "Account Settings" : "Profile"}
+              >
+                  {userName.replace(/^Dr\.\s*/i, '').charAt(0).toUpperCase()}
               </div>
               
               <div className="w-px h-5 bg-white/20"></div>
-
+ 
               <button 
                   onClick={handleLogout} 
                   className="flex items-center gap-1.5 text-xs font-bold text-white/80 hover:text-white transition-colors"
@@ -142,10 +169,10 @@ function App() {
                   <span className="text-[10px] font-black uppercase tracking-widest text-[#6c7a93]">Main Navigation</span>
               </div>
               <nav className="flex flex-col space-y-1">
-                  {(['patients', 'doctors', 'consultations', 'prescriptions', 'treatment', 'medical_records'] as const)
+                  {(['patients', 'doctors', 'consultations', 'prescriptions', 'treatment', 'medical_records', 'account'] as const)
                   .filter(tab => {
-                      if (userRole === 'admin') return true;
-                      if (userRole === 'doctor' && tab !== 'doctors') return true; 
+                      if (userRole === 'admin') return tab !== 'account';
+                      if (userRole === 'doctor') return tab !== 'doctors'; 
                       if (userRole === 'patient') return tab === 'consultations' || tab === 'prescriptions';
                       return false;
                   })
@@ -160,7 +187,8 @@ function App() {
                       if(tab === 'prescriptions') iconPath = "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4";
                       if(tab === 'treatment') iconPath = "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z";
                       if(tab === 'medical_records') iconPath = "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z";
-
+                      if(tab === 'account') iconPath = "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z";
+ 
                       return (
                           <button key={tab} 
                               onClick={() => { 
@@ -168,7 +196,11 @@ function App() {
                                   setShowConsultationForm(false); 
                                   setShowConsultationDetails(false);
                                   setShowTreatmentForm(false); 
+                                  setShowTreatmentDetails(false);
+                                  setShowPrescriptionForm(false);
+                                  setShowPrescriptionDetails(false);
                                   setShowMedicalRecordForm(false); 
+                                  setShowMedicalRecordDetails(false);
                               }} 
                               className={`flex items-center gap-4 px-6 py-3.5 text-sm font-semibold tracking-wide transition-all ${isActive ? 'bg-[#556ee6] text-white border-l-4 border-white' : 'hover:bg-[#323947] hover:text-[#d3d9e3] border-l-4 border-transparent'}`}>
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -180,7 +212,7 @@ function App() {
                   })}
               </nav>
           </aside>
-
+ 
           {/* --- MAIN PAGE CONTENT --- */}
           <main className="flex-1 overflow-y-auto p-8 relative">
               
@@ -217,97 +249,171 @@ function App() {
                       </button>
                   )}
               </div>
-
+ 
               {/* MAIN DATA CARD */}
               <div className="bg-transparent min-h-[60vh]">
-
-         {/* --- CONSULTATIONS VIEW --- */}
-        {activeTab === 'consultations' && (
-           <div className="bg-white rounded-xl shadow-sm border border-slate-200">
-            {showConsultationForm ? (
-                <RecordConsultation 
-                    initialData={selectedConsultation} 
-                    onSuccess={() => { setShowConsultationForm(false); setSelectedConsultation(null); setRefreshKey(k => k + 1); }} 
-                /> 
-            ) : (
-                <ConsultationList 
-                    key={refreshKey} 
-                    patients={patients} 
-                    onUpdate={(c) => { 
-                      setSelectedConsultation(c); 
-                      setShowConsultationDetails(true); // Open Details Modal first
-                    }} 
-                />
-            )}
-
-            {/* CONSULTATION DETAILS MODAL */}
-            {showConsultationDetails && selectedConsultation && (
-              <ConsultationDetails 
-                consultation={selectedConsultation}
-                onClose={() => setShowConsultationDetails(false)}
-                onEdit={() => { setShowConsultationDetails(false); setShowConsultationForm(true); }}
-                onDelete={() => {
-                   if(selectedConsultation.id) {
-                     deleteConsultation(selectedConsultation.id).then(() => {
-                        setShowConsultationDetails(false);
-                        setRefreshKey(k => k + 1);
-                     });
-                   }
-                }}
-              />
-            )}
-           </div>
-        )}
-
-        {/* --- OTHER VIEWS --- */}
-        {activeTab === 'treatment' && userRole !== 'patient' && (
-           <div className="bg-white rounded-xl shadow-sm border border-slate-200">
-            {showTreatmentForm ? (
-                <TreatmentForm 
-                    initialData={selectedTreatment} 
-                    patients={patients} doctors={doctors} 
-                    onSuccess={() => { setShowTreatmentForm(false); setSelectedTreatment(null); setRefreshKey(k => k + 1); }} 
-                />
-            ) : (
-                <TreatmentList key={refreshKey} patientId={selectedPatient?.id || 0} patients={patients} onUpdate={(t) => { setSelectedTreatment(t); setShowTreatmentForm(true); }} />
-            )}
-           </div>
-        )}
-
-        {activeTab === 'medical_records' && userRole !== 'patient' && (
-           <div className="bg-white rounded-xl shadow-sm border border-slate-200">
-            {showMedicalRecordForm ? (
-                  <MedicalRecordsForm initialData={selectedMedicalRecord} patients={patients} onSuccess={() => { setShowMedicalRecordForm(false); setSelectedMedicalRecord(null); setRefreshKey(k => k + 1); }} onCancel={() => setShowMedicalRecordForm(false)} />
-            ) : (
-                <MedicalRecordsList key={refreshKey} patients={patients} onUpdate={(r) => { setSelectedMedicalRecord(r); setShowMedicalRecordForm(true); }} />
-            )}
-           </div>
-        )}
-
-        {activeTab === 'patients' && userRole !== 'patient' && (
-            <PatientList patients={patients} onUpdate={(p) => {setSelectedPatient(p); setShowPatientForm(true);}} onDelete={(id) => deletePatient(id).then(() => setRefreshKey(k => k + 1))} onTrack={(p) => { setSelectedPatient(p); setActiveTab('treatment'); setShowTreatmentForm(false); }} />
-        )}
-
-        {activeTab === 'doctors' && userRole === 'admin' && (
-            <DoctorList doctors={doctors} onUpdate={(d) => { setSelectedDoctor(d); setShowDoctorForm(true); }} onDelete={(id) => deleteDoctor(id).then(() => setRefreshKey(k => k + 1))} />
-        )}
-
-        {activeTab === 'prescriptions' && (
-            <PrescriptionList onUpdate={(p) => { setSelectedPrescription(p); setShowPrescriptionForm(true); }} />
-        )}
-
-        {/* --- SHARED MODALS --- */}
-        {showDoctorForm && <DoctorForm doctor={selectedDoctor} onSubmit={() => { setShowDoctorForm(false); setRefreshKey(k => k + 1); }} onCancel={() => setShowDoctorForm(false)} />}
-        {showPatientForm && <PatientForm patient={selectedPatient} onSubmit={() => { setShowPatientForm(false); setRefreshKey(k => k + 1); }} onCancel={() => setShowPatientForm(false)} />}
-        {showPrescriptionForm && (
-              <PrescriptionForm initialData={selectedPrescription} patients={patients} doctors={doctors} onSuccess={() => { setShowPrescriptionForm(false); setRefreshKey(k => k + 1); }} onCancel={() => setShowPrescriptionForm(false)} />
-        )}
-        {/* --- CLOSE MAIN CONTAINER DIV --- */}
-        </div>
-      </main>
-      </div>
-    </div>
-  );
-}
-
-export default App;
+ 
+          {/* --- ACCOUNT VIEW --- */}
+         {activeTab === 'account' && userRole === 'doctor' && (() => {
+             const myDoctorRecord = doctors.find(d => d.id === parseInt(localStorage.getItem('doctorId') || '0'));
+             return (
+                 <div className="flex justify-center mt-2">
+                      <DoctorForm 
+                           doctor={myDoctorRecord} 
+                           onSubmit={(d) => { 
+                                localStorage.setItem('userName', `Dr. ${d.first_name} ${d.last_name}`);
+                                setRefreshKey(k => k + 1); 
+                            }} 
+                           isInline={true} 
+                      />
+                 </div>
+             );
+         })()}
+ 
+          {/* --- CONSULTATIONS VIEW --- */}
+         {activeTab === 'consultations' && (
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+             {showConsultationDetails && selectedConsultation ? (
+               <ConsultationDetails 
+                 consultation={selectedConsultation}
+                 onClose={() => setShowConsultationDetails(false)}
+                 onEdit={() => { setShowConsultationDetails(false); setShowConsultationForm(true); }}
+                 onDelete={() => {
+                    if(selectedConsultation.id) {
+                      deleteConsultation(selectedConsultation.id).then(() => {
+                         setShowConsultationDetails(false);
+                         setRefreshKey(k => k + 1);
+                      });
+                    }
+                 }}
+               />
+             ) : showConsultationForm ? (
+                 <RecordConsultation 
+                     initialData={selectedConsultation} 
+                     onSuccess={() => { setShowConsultationForm(false); setSelectedConsultation(null); setRefreshKey(k => k + 1); }} 
+                     onCancel={() => setShowConsultationForm(false)}
+                 /> 
+             ) : (
+                 <ConsultationList 
+                     key={refreshKey} 
+                     patients={patients} 
+                     onUpdate={(c) => { 
+                       setSelectedConsultation(c); 
+                       setShowConsultationDetails(true); 
+                     }} 
+                 />
+             )}
+            </div>
+         )}
+ 
+         {/* --- OTHER VIEWS --- */}
+         {activeTab === 'treatment' && userRole !== 'patient' && (
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+             {showTreatmentDetails && selectedTreatment ? (
+                 <TreatmentDetails 
+                     treatment={selectedTreatment}
+                     onClose={() => setShowTreatmentDetails(false)}
+                     onEdit={() => { setShowTreatmentDetails(false); setShowTreatmentForm(true); }}
+                     onDelete={(id) => deleteTreatment(id).then(() => { setShowTreatmentDetails(false); setRefreshKey(k => k + 1); })}
+                 />
+             ) : showTreatmentForm ? (
+                 <TreatmentForm 
+                     initialData={selectedTreatment} 
+                     patients={patients} doctors={doctors} 
+                     onSuccess={() => { setShowTreatmentForm(false); setSelectedTreatment(null); setRefreshKey(k => k + 1); }} 
+                     onCancel={() => setShowTreatmentForm(false)}
+                 />
+             ) : (
+                 <TreatmentList 
+                     key={refreshKey} 
+                     patientId={selectedPatient?.id || 0} 
+                     patients={patients} 
+                     onUpdate={(t) => { setSelectedTreatment(t); setShowTreatmentDetails(true); }} 
+                 />
+             )}
+            </div>
+         )}
+ 
+         {activeTab === 'medical_records' && userRole !== 'patient' && (
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+             {showMedicalRecordDetails && selectedMedicalRecord ? (
+                 <MedicalRecordDetails 
+                     record={selectedMedicalRecord} 
+                     onClose={() => setShowMedicalRecordDetails(false)} 
+                     onEdit={() => { setShowMedicalRecordDetails(false); setShowMedicalRecordForm(true); }} 
+                     onDelete={() => {
+                         if(selectedMedicalRecord?.id) {
+                             deleteMedicalRecord(selectedMedicalRecord.id).then(() => {
+                                 setShowMedicalRecordDetails(false);
+                                 setSelectedMedicalRecord(null);
+                                 setRefreshKey(k => k + 1);
+                             });
+                         }
+                     }} 
+                 />
+             ) : showMedicalRecordForm ? (
+                   <MedicalRecordsForm initialData={selectedMedicalRecord} patients={patients} onSuccess={() => { setShowMedicalRecordForm(false); setSelectedMedicalRecord(null); setRefreshKey(k => k + 1); }} onCancel={() => setShowMedicalRecordForm(false)} />
+             ) : (
+                 <MedicalRecordsList key={refreshKey} patients={patients} onUpdate={(r) => { setSelectedMedicalRecord(r); setShowMedicalRecordForm(true); }} onView={(r) => { setSelectedMedicalRecord(r); setShowMedicalRecordDetails(true); }} />
+             )}
+            </div>
+         )}
+ 
+         {activeTab === 'patients' && userRole !== 'patient' && (
+             <div className={showPatientDetails || showPatientForm ? "bg-white rounded-xl shadow-sm border border-slate-200" : ""}>
+                 {showPatientDetails && selectedPatient ? (
+                     <PatientDetails 
+                         patient={selectedPatient} 
+                         onClose={() => setShowPatientDetails(false)} 
+                         onEdit={() => { setShowPatientDetails(false); setShowPatientForm(true); }}
+                     />
+                 ) : showPatientForm ? (
+                     <PatientForm patient={selectedPatient} onSubmit={() => { setShowPatientForm(false); setRefreshKey(k => k + 1); }} onCancel={() => setShowPatientForm(false)} />
+                 ) : (
+                     <PatientList patients={patients} onUpdate={(p) => {setSelectedPatient(p); setShowPatientForm(true);}} onDelete={(id) => deletePatient(id).then(() => setRefreshKey(k => k + 1))} onTrack={(p) => { setSelectedPatient(p); setShowPatientDetails(true); }} />
+                 )}
+             </div>
+         )}
+ 
+         {activeTab === 'doctors' && userRole === 'admin' && (
+             <DoctorList doctors={doctors} onUpdate={(d) => { setSelectedDoctor(d); setShowDoctorForm(true); }} onDelete={(id) => deleteDoctor(id).then(() => setRefreshKey(k => k + 1))} />
+         )}
+ 
+         {activeTab === 'prescriptions' && (
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+             {showPrescriptionDetails && selectedPrescription ? (
+                 <PrescriptionDetails 
+                     prescription={selectedPrescription}
+                     onClose={() => setShowPrescriptionDetails(false)}
+                     onEdit={() => { setShowPrescriptionDetails(false); setShowPrescriptionForm(true); }}
+                     onDelete={(id) => deletePrescription(id).then(() => { setShowPrescriptionDetails(false); setRefreshKey(k => k + 1); })}
+                 />
+             ) : showPrescriptionForm ? (
+                 <PrescriptionForm 
+                     initialData={selectedPrescription} 
+                     patients={patients} 
+                     doctors={doctors} 
+                     onSuccess={() => { setShowPrescriptionForm(false); setSelectedPrescription(null); setRefreshKey(k => k + 1); }} 
+                     onCancel={() => setShowPrescriptionForm(false)} 
+                 />
+             ) : (
+                 <PrescriptionList 
+                     onUpdate={(p) => { setSelectedPrescription(p); setShowPrescriptionForm(true); }} 
+                     onView={(p) => { setSelectedPrescription(p); setShowPrescriptionDetails(true); }}
+                 />
+             )}
+            </div>
+         )}
+ 
+         {/* --- SHARED MODALS --- */}
+         {showDoctorForm && !activeTab && <DoctorForm doctor={selectedDoctor} onSubmit={() => { setShowDoctorForm(false); setRefreshKey(k => k + 1); }} onCancel={() => setShowDoctorForm(false)} />}
+ 
+         {/* --- CLOSE MAIN CONTAINER DIV --- */}
+         </div>
+       </main>
+       </div>
+     </div>
+   );
+ }
+ 
+ export default App;

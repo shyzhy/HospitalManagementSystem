@@ -11,7 +11,6 @@ const ConsultationList: React.FC<ConsultationListProps> = ({ patients, onUpdate 
     const [consultations, setConsultations] = useState<Consultation[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    
 
     useEffect(() => {
         fetchConsultations();
@@ -29,37 +28,40 @@ const ConsultationList: React.FC<ConsultationListProps> = ({ patients, onUpdate 
     };
 
     const handleDelete = async (id: number) => {
-        if (window.confirm("Are you sure you want to remove this consultation?")) {
+        if (window.confirm("Permanent Action: Are you sure you want to remove this clinical encounter?")) {
             try {
                 await deleteConsultation(id);
                 fetchConsultations();
             } catch (error) {
                 console.error("Error deleting consultation:", error);
-                alert("Failed to delete consultation.");
             }
         }
     };
 
-    // Filter consultations based on patient name or doctor name
-    const filteredConsultations = consultations.filter(consultation => 
+    const filteredConsultations = consultations.filter(consultation =>
         consultation.patient_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         consultation.doctor_name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    if (loading) return <div className="p-8 text-center text-slate-500 font-bold uppercase tracking-widest text-xs">Loading records...</div>;
+    if (loading) return (
+        <div className="p-20 text-center space-y-4">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#556ee6] border-t-transparent"></div>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Accessing Clinical Ledger...</p>
+        </div>
+    );
 
     return (
         <div className="space-y-6 px-4 pt-4">
-            {/* SEARCH BAR */}
-            <div className="bg-white p-3 rounded-xl border border-slate-200/80 flex items-center gap-3 transition-all focus-within:shadow-[0_0_0_4px_rgba(15,23,42,0.05)] focus-within:border-slate-300">
+            {/* SEARCH AREA */}
+            <div className="bg-white p-3 rounded-xl border border-slate-200/80 flex items-center gap-3 transition-all focus-within:shadow-[0_0_0_4px_rgba(85,110,230,0.05)] focus-within:border-[#556ee6]/30">
                 <div className="text-slate-400 pl-2">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
-                <input 
-                    type="text" 
-                    placeholder="Search consultations..." 
+                <input
+                    type="text"
+                    placeholder="Search clinical encounters..."
                     className="w-full bg-transparent outline-none font-medium text-slate-800 placeholder:text-slate-400 text-sm"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -67,59 +69,63 @@ const ConsultationList: React.FC<ConsultationListProps> = ({ patients, onUpdate 
             </div>
 
             <div className="w-full">
-                <table className="w-full text-left border-collapse">
+                <table className="w-full text-left">
                     <thead>
                         <tr className="bg-slate-50/50 border-b border-slate-100">
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Date</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Patient</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Attending Doctor</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Diagnosis</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Encounter Date</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Patient Identity</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Attending Physician</th>
                             <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                         </tr>
                     </thead>
-                          <tbody className="divide-y divide-slate-100">
-                              {filteredConsultations.length === 0 ? (
-                                  <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-400 font-bold text-xs uppercase tracking-widest">No consultations found</td></tr>
-                              ) : (
-                                  filteredConsultations.map((consultation) => (
-                                      <tr key={consultation.id} className="hover:bg-white transition-all duration-300 group cursor-pointer hover:shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
-                                          <td className="px-6 py-5 font-black text-slate-400 text-[11px] tracking-widest uppercase">
-                                              {consultation.consultation_date ? new Date(consultation.consultation_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
-                                          </td>
-                                          <td className="px-6 py-5">
-                                             <div className="font-black text-slate-800 tracking-tight text-sm group-hover:text-emerald-700 transition-colors">
-                                                 {consultation.patient_name}
-                                             </div>
-                                          </td>
-                                          <td className="px-6 py-5 font-medium text-slate-500 text-xs">
-                                              Dr. {consultation.doctor_name}
-                                          </td>
-                                          <td className="px-6 py-5">
-                                            <span className={`px-3 py-1 rounded-full text-[11px] font-medium tracking-wide ${consultation.diagnosis ? 'bg-slate-100 text-slate-700' : 'bg-orange-50 text-orange-600'}`}>
-                                                {consultation.diagnosis ? consultation.diagnosis.substring(0, 15) + (consultation.diagnosis.length > 15 ? '...' : '') : "Pending"}
-                                            </span>
-                                          </td>
-                                          <td className="px-6 py-4 text-right space-x-4">
-                                              {/* Primary VIEW/EDIT Action */}
-                                              <button 
-                                                  onClick={() => onUpdate(consultation)} 
-                                                  className="text-blue-500 hover:text-blue-700 font-bold text-xs hover:underline transition-all"
-                                              >
-                                                  View
-                                              </button>
-
-                                              {/* CANCEL/REMOVE Action */}
-                                              <button 
-                                                  onClick={() => consultation.id && handleDelete(consultation.id)} 
-                                                  className="text-red-500 hover:text-red-700 font-bold text-xs hover:underline transition-all"
-                                              >
-                                                  Remove
-                                              </button>
-                                          </td>
-                                      </tr>
-                                  ))
-                              )}
-                          </tbody>
+                    <tbody className="divide-y divide-slate-100">
+                        {filteredConsultations.length === 0 ? (
+                            <tr><td colSpan={4} className="px-6 py-20 text-center text-slate-300 font-bold text-xs uppercase tracking-[0.2em]">No clinical encounters archived in this directory</td></tr>
+                        ) : (
+                            filteredConsultations.map((consultation) => (
+                                <tr
+                                    key={consultation.id}
+                                    className="hover:bg-slate-50/50 transition-all duration-300 group cursor-pointer"
+                                    onClick={() => onUpdate(consultation)}
+                                >
+                                    <td className="px-6 py-5">
+                                        <div className="text-[10px] font-black text-[#556ee6] bg-[#556ee6]/5 px-2 py-1 rounded inline-block uppercase tracking-widest border border-[#556ee6]/10">
+                                            {consultation.consultation_date ? new Date(consultation.consultation_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-5">
+                                        <div className="font-black text-slate-800 tracking-tight text-sm group-hover:text-[#556ee6] transition-colors">
+                                            {consultation.patient_name}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-5">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                                            <span className="text-[11px] font-bold text-slate-500 italic">{consultation.doctor_name}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-5 text-right opacity-60 group-hover:opacity-100 transition-opacity">
+                                        <div className="flex items-center justify-end gap-3">
+                                            <button
+                                                className="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-[#556ee6] hover:text-white transition-all shadow-sm"
+                                            >
+                                                Inspect
+                                            </button>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); consultation.id && handleDelete(consultation.id); }}
+                                                className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"
+                                                title="Void Encounter"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
                 </table>
             </div>
         </div>

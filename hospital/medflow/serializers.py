@@ -10,10 +10,11 @@ class CustomUserSerializer(DjoserUserSerializer):
     doctor_id = serializers.SerializerMethodField()
     is_patient = serializers.SerializerMethodField()
     patient_id = serializers.SerializerMethodField()
+    profile_name = serializers.SerializerMethodField()
 
     class Meta(DjoserUserSerializer.Meta):
         fields = (
-            'id', 'username', 'email', 'first_name', 'last_name',
+            'id', 'username', 'email', 'first_name', 'last_name', 'profile_name',
             'is_staff', 'is_superuser', 'is_doctor', 'doctor_id', 'is_patient', 'patient_id'
         )
 
@@ -30,6 +31,15 @@ class CustomUserSerializer(DjoserUserSerializer):
     def get_patient_id(self, obj):
         patient = Patient.objects.filter(user=obj).first()
         return patient.id if patient else None
+
+    def get_profile_name(self, obj):
+        doctor = Doctor.objects.filter(user=obj).first()
+        if doctor:
+            return f"{doctor.first_name} {doctor.last_name}"
+        patient = Patient.objects.filter(user=obj).first()
+        if patient:
+            return f"{patient.first_name} {patient.last_name}"
+        return ""
 
 
 # --- PATIENT SERIALIZER ---
@@ -64,7 +74,11 @@ class BaseRecordSerializer(serializers.ModelSerializer):
 
     def get_doctor_name(self, obj):
         if hasattr(obj, 'doctor') and obj.doctor:
-            return f"Dr. {obj.doctor.first_name} {obj.doctor.last_name}".strip()
+            name = f"{obj.doctor.first_name} {obj.doctor.last_name}"
+            # Ensure we don't double up on "Dr."
+            if name.lower().startswith("dr."):
+                return name
+            return f"Dr. {name}"
         return "N/A"
 
 

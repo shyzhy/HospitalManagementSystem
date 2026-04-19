@@ -5,13 +5,13 @@ import { MedicalRecord, Patient } from '../types';
 interface MedicalRecordsListProps {
     patients: Patient[];
     onUpdate: (record: MedicalRecord) => void;
+    onView: (record: MedicalRecord) => void;
 }
 
-const MedicalRecordsList: React.FC<MedicalRecordsListProps> = ({ patients, onUpdate }) => {
+const MedicalRecordsList: React.FC<MedicalRecordsListProps> = ({ patients, onUpdate, onView }) => {
     const [records, setRecords] = useState<MedicalRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [viewRecord, setViewRecord] = useState<MedicalRecord | null>(null);
 
     const userRole = localStorage.getItem('role');
 
@@ -30,74 +30,94 @@ const MedicalRecordsList: React.FC<MedicalRecordsListProps> = ({ patients, onUpd
         }
     };
 
-    const handleDelete = async (id: number) => {
-        if (window.confirm("Are you sure you want to delete this medical record?")) {
-            try {
-                await deleteMedicalRecord(id);
-                fetchRecords();
-            } catch (error) {
-                console.error("Error deleting record:", error);
-                alert("Failed to delete record.");
-            }
-        }
-    };
-
-    // Filter records based on search term
     const filteredRecords = records.filter(record => 
         record.patient_name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    if (loading) return <div className="p-8 text-center text-slate-500 font-bold uppercase tracking-widest text-xs">Loading records...</div>;
+    if (loading) return (
+        <div className="p-20 text-center space-y-4">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#556ee6] border-t-transparent"></div>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Accessing Medical Repository...</p>
+        </div>
+    );
 
     return (
-        <div className="space-y-6">
-            {/* SEARCH BAR */}
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
-                <span className="text-xl pl-2">🔍</span>
+        <div className="space-y-6 px-4 pt-4">
+            {/* SEARCH AREA */}
+            <div className="bg-white p-3 rounded-xl border border-slate-200/80 flex items-center gap-3 transition-all focus-within:shadow-[0_0_0_4px_rgba(85,110,230,0.05)] focus-within:border-[#556ee6]/30">
+                <div className="text-slate-400 pl-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
                 <input 
                     type="text" 
-                    placeholder="Search by Patient Name..." 
-                    className="w-full bg-transparent outline-none font-bold text-slate-700"
+                    placeholder="Search patient medical profiles..." 
+                    className="w-full bg-transparent outline-none font-medium text-slate-800 placeholder:text-slate-400 text-sm"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                <table className="w-full text-left border-collapse">
+            <div className="w-full">
+                <table className="w-full text-left">
                     <thead>
                         <tr className="bg-slate-50/50 border-b border-slate-100">
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Patient</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Blood Type</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden md:table-cell">Allergies</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Patient Identity</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Type</th>
+                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden md:table-cell">Emergency Contact</th>
                             <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                         {filteredRecords.length === 0 ? (
-                            <tr><td colSpan={4} className="px-6 py-12 text-center text-slate-400 font-bold text-xs uppercase tracking-widest">No medical records found</td></tr>
+                            <tr><td colSpan={4} className="px-6 py-20 text-center text-slate-300 font-bold text-xs uppercase tracking-[0.2em]">No medical profiles found</td></tr>
                         ) : (
                             filteredRecords.map((record) => (
-                                <tr key={record.id} className="hover:bg-slate-50/50 transition-colors group">
-                                    <td className="px-6 py-4 font-bold text-slate-800">{record.patient_name}</td>
-                                    <td className="px-6 py-4 font-bold text-red-500">{record.blood_type || 'N/A'}</td>
-                                    <td className="px-6 py-4 font-medium text-slate-500 hidden md:table-cell truncate max-w-[200px]">
-                                        {record.allergies || 'None listed'}
+                                <tr 
+                                    key={record.id} 
+                                    className="hover:bg-slate-50/50 transition-all duration-300 group cursor-pointer"
+                                    onClick={() => onView(record)}
+                                >
+                                    <td className="px-6 py-5">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-[#f4f5f9] text-[#556ee6] flex items-center justify-center font-black text-xs">
+                                                {record.patient_name?.charAt(0)}
+                                            </div>
+                                            <div className="font-black text-slate-800 tracking-tight text-sm group-hover:text-[#556ee6] transition-colors">
+                                                {record.patient_name}
+                                            </div>
+                                        </div>
                                     </td>
-                                    <td className="px-6 py-4 text-right space-x-3">
-                                        <button onClick={() => setViewRecord(record)} className="text-emerald-600 hover:text-emerald-800 font-black text-[10px] uppercase tracking-widest transition-colors">
-                                            View
-                                        </button>
-                                        {(userRole === 'admin' || userRole === 'doctor') && (
-                                            <>
-                                                <button onClick={() => onUpdate(record)} className="text-blue-500 hover:text-blue-700 font-black text-[10px] uppercase tracking-widest transition-colors">
-                                                    Edit
+                                    <td className="px-6 py-5 text-center">
+                                       <span className="px-2.5 py-1 bg-red-50 text-red-600 rounded-md font-black text-[10px] border border-red-100 uppercase tracking-tighter">
+                                          {record.blood_type || '??'}
+                                       </span>
+                                    </td>
+                                    <td className="px-6 py-5 hidden md:table-cell">
+                                        <div className="flex flex-col">
+                                            <span className="text-[11px] font-bold text-slate-600">{record.emergency_contact_name || 'N/A'}</span>
+                                            <span className="text-[10px] text-slate-400 font-mono tracking-tighter">{record.emergency_contact_phone}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-5 text-right opacity-60 group-hover:opacity-100 transition-opacity">
+                                        <div className="flex items-center justify-end gap-3">
+                                            <button 
+                                                className="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-[#556ee6] hover:text-white transition-all shadow-sm"
+                                            >
+                                                Inspect
+                                            </button>
+                                            {(userRole === 'admin' || userRole === 'doctor') && (
+                                                <button 
+                                                    onClick={(e) => { e.stopPropagation(); onUpdate(record); }} 
+                                                    className="p-1.5 text-slate-400 hover:text-[#556ee6] transition-colors"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                    </svg>
                                                 </button>
-                                                <button onClick={() => record.id && handleDelete(record.id)} className="text-red-400 hover:text-red-600 font-black text-[10px] uppercase tracking-widest transition-colors">
-                                                    Remove
-                                                </button>
-                                            </>
-                                        )}
+                                            )}
+                                        </div>
                                     </td>
                                 </tr>
                             ))
@@ -105,75 +125,6 @@ const MedicalRecordsList: React.FC<MedicalRecordsListProps> = ({ patients, onUpd
                     </tbody>
                 </table>
             </div>
-
-            {/* VIEW MODAL */}
-            {viewRecord && (
-                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden">
-                        <div className="bg-emerald-600 p-6 text-white flex justify-between items-center">
-                            <h3 className="text-lg font-black uppercase tracking-widest">Medical Record Details</h3>
-                            <button onClick={() => setViewRecord(null)} className="text-white/70 hover:text-white text-2xl font-black">&times;</button>
-                        </div>
-                        
-                        <div className="p-8 space-y-6">
-                            <div className="grid grid-cols-2 gap-6 border-b border-slate-100 pb-6">
-                                <div>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Patient Name</p>
-                                    <p className="font-bold text-slate-800 text-lg">{viewRecord.patient_name}</p>
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Blood Type</p>
-                                    <p className="font-bold text-red-500 text-lg">{viewRecord.blood_type || 'N/A'}</p>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-6 border-b border-slate-100 pb-6">
-                                <div>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Emergency Contact</p>
-                                    <p className="font-bold text-slate-700">{viewRecord.emergency_contact_name || 'N/A'}</p>
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Emergency Phone</p>
-                                    <p className="font-bold text-slate-700">{viewRecord.emergency_contact_phone || 'N/A'}</p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <div>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Allergies</p>
-                                    <p className="font-medium text-slate-600 bg-slate-50 p-3 rounded-xl">{viewRecord.allergies || 'None listed'}</p>
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Chronic Conditions</p>
-                                    <p className="font-medium text-slate-600 bg-slate-50 p-3 rounded-xl">{viewRecord.chronic_conditions || 'None listed'}</p>
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Medical History</p>
-                                    <p className="font-medium text-slate-600 bg-slate-50 p-3 rounded-xl">{viewRecord.medical_history || 'None listed'}</p>
-                                </div>
-                            </div>
-
-                            {/* View Attachment Button */}
-                            {viewRecord.attachment ? (
-                                <div className="pt-4">
-                                    <a 
-                                        href={typeof viewRecord.attachment === 'string' ? viewRecord.attachment : URL.createObjectURL(viewRecord.attachment)} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-50 text-emerald-700 font-black text-xs uppercase tracking-widest rounded-xl hover:bg-emerald-100 transition-colors"
-                                    >
-                                        📎 View Attached File
-                                    </a>
-                                </div>
-                            ) : (
-                                <div className="pt-4">
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">No files attached</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

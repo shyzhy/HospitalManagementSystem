@@ -30,7 +30,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
             // Save the user's name for the Welcome message
             const fullName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
-            const displayName = fullName || userData.username || 'User';
+            const displayName = userData.profile_name || fullName || userData.username || 'User';
             localStorage.setItem('userName', displayName);
 
             // Save Patient ID (if applicable)
