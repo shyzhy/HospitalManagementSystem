@@ -95,71 +95,135 @@ function App() {
     };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
+    <div className="h-screen flex flex-col overflow-hidden bg-[#F0F2F5] font-sans">
       
-      <header className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
-            <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-black text-emerald-600 tracking-tighter uppercase">MED FLOW</h1>
-                <span className="hidden md:inline-block px-2 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest rounded-md border border-emerald-100 shadow-sm">
-                    {userRole}
-                </span>
-            </div>
+      {/* --- TOP NAVBAR --- */}
+      <header className="h-14 bg-[#3b5998] text-white flex items-center justify-between px-5 shrink-0 shadow-sm z-30">
+          <div className="flex items-center gap-4">
+              {/* Traffic Lights (Mac style) */}
+              <div className="flex items-center gap-1.5 mr-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                  <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+              </div>
+              <h1 className="text-sm font-black tracking-wide uppercase">MedFlow</h1>
+          </div>
+          
+          <div className="flex items-center gap-6">
+              <div className="flex flex-col text-right">
+                  <span className="text-xs font-bold leading-tight">{userName}</span>
+                  <span className="text-[9px] text-white/70 capitalize">{userRole}</span>
+              </div>
+              <div className="w-8 h-8 rounded-full bg-[#2A3F6D] border border-white/20 flex items-center justify-center font-bold text-xs">
+                  {userName.charAt(0).toUpperCase()}
+              </div>
+              
+              <div className="w-px h-5 bg-white/20"></div>
 
-            <div className="flex items-center space-x-1 overflow-x-auto hide-scrollbar">
-                {(['patients', 'doctors', 'consultations', 'prescriptions', 'treatment', 'medical_records'] as const)
-                .filter(tab => {
-                    if (userRole === 'admin') return true;
-                    if (userRole === 'doctor' && tab !== 'doctors') return true; 
-                    if (userRole === 'patient') return tab === 'consultations' || tab === 'prescriptions';
-                    return false;
-                })
-                .map((tab) => (
-                  <button key={tab} 
-                    onClick={() => { 
-                        setActiveTab(tab); 
-                        setShowConsultationForm(false); 
-                        setShowConsultationDetails(false);
-                        setShowTreatmentForm(false); 
-                        setShowMedicalRecordForm(false); 
-                    }} 
-                    className={`px-3 py-2 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab ? 'bg-slate-900 text-white' : 'text-slate-400 hover:bg-slate-50'}`}>
-                    {tab.replace('_', ' ')}
-                  </button>
-                ))}
-            </div>
-
-            <div className="flex items-center gap-4 border-l border-slate-200 pl-4 ml-2">
-                <div className="hidden lg:flex flex-col text-right">
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Welcome,</span>
-                    <span className="text-xs font-bold text-slate-700 truncate max-w-[150px]">{userName}</span>
-                </div>
-                <button onClick={handleLogout} className="text-[10px] font-black text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-2 rounded-lg uppercase tracking-widest transition-all">Logout</button>
-            </div>
-        </div>
+              <button 
+                  onClick={handleLogout} 
+                  className="flex items-center gap-1.5 text-xs font-bold text-white/80 hover:text-white transition-colors"
+                  title="Logout"
+              >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span>LOGOUT</span>
+              </button>
+          </div>
       </header>
 
-      <main className="max-w-7xl mx-auto p-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-black uppercase tracking-tight">{activeTab.replace('_', ' ')}</h1>
+      {/* --- BOTTOM SECTION (SIDEBAR + MAIN CONTENT) --- */}
+      <div className="flex flex-1 overflow-hidden relative">
           
-          {canRegisterNew() && (
-            <button onClick={() => {
-                if(activeTab === 'patients') { setSelectedPatient(null); setShowPatientForm(true); }
-                else if(activeTab === 'doctors') { setSelectedDoctor(null); setShowDoctorForm(true); }
-                else if(activeTab === 'prescriptions') { setSelectedPrescription(null); setShowPrescriptionForm(true); }
-                else if(activeTab === 'treatment') { setSelectedTreatment(null); setShowTreatmentForm(!showTreatmentForm); }
-                else if(activeTab === 'consultations') { setSelectedConsultation(null); setShowConsultationForm(!showConsultationForm); }
-                else if(activeTab === 'medical_records') { setSelectedMedicalRecord(null); setShowMedicalRecordForm(!showMedicalRecordForm); }
-              }} className="px-8 py-3 rounded-xl bg-emerald-600 text-white font-black text-xs uppercase tracking-widest shadow-xl shadow-emerald-100 hover:bg-emerald-700 transition-all">
-              {(showConsultationForm || showTreatmentForm || showMedicalRecordForm || showPatientForm || showDoctorForm || showPrescriptionForm) ? 'BACK TO LIST' : 'REGISTER NEW'}
-            </button>
-          )}
-        </div>
+          {/* --- SIDEBAR --- */}
+          <aside className="w-[260px] bg-[#2b3240] text-[#9ba5b7] flex flex-col shrink-0 shadow-[4px_0_15px_rgba(0,0,0,0.05)] z-20 py-4 overflow-y-auto">
+              <div className="px-6 mb-4 mt-2">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-[#6c7a93]">Main Navigation</span>
+              </div>
+              <nav className="flex flex-col space-y-1">
+                  {(['patients', 'doctors', 'consultations', 'prescriptions', 'treatment', 'medical_records'] as const)
+                  .filter(tab => {
+                      if (userRole === 'admin') return true;
+                      if (userRole === 'doctor' && tab !== 'doctors') return true; 
+                      if (userRole === 'patient') return tab === 'consultations' || tab === 'prescriptions';
+                      return false;
+                  })
+                  .map((tab) => {
+                      const isActive = activeTab === tab;
+                      
+                      // Assign an icon based on the tab
+                      let iconPath = "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"; // Default
+                      if(tab === 'patients') iconPath = "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z";
+                      if(tab === 'doctors') iconPath = "M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z";
+                      if(tab === 'consultations') iconPath = "M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z";
+                      if(tab === 'prescriptions') iconPath = "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4";
+                      if(tab === 'treatment') iconPath = "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z";
+                      if(tab === 'medical_records') iconPath = "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z";
 
-        {/* --- CONSULTATIONS VIEW --- */}
+                      return (
+                          <button key={tab} 
+                              onClick={() => { 
+                                  setActiveTab(tab); 
+                                  setShowConsultationForm(false); 
+                                  setShowConsultationDetails(false);
+                                  setShowTreatmentForm(false); 
+                                  setShowMedicalRecordForm(false); 
+                              }} 
+                              className={`flex items-center gap-4 px-6 py-3.5 text-sm font-semibold tracking-wide transition-all ${isActive ? 'bg-[#556ee6] text-white border-l-4 border-white' : 'hover:bg-[#323947] hover:text-[#d3d9e3] border-l-4 border-transparent'}`}>
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d={iconPath} />
+                              </svg>
+                              <span className="capitalize">{tab.replace('_', ' ')}</span>
+                          </button>
+                      )
+                  })}
+              </nav>
+          </aside>
+
+          {/* --- MAIN PAGE CONTENT --- */}
+          <main className="flex-1 overflow-y-auto p-8 relative">
+              
+              {/* PAGE HEADER SECTION */}
+              <div className="flex justify-between items-center mb-6 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                  <div className="flex items-center gap-4">
+                      {/* Icon for Header */}
+                      <div className="w-12 h-12 rounded-full bg-[#f4f5f9] text-[#556ee6] flex items-center justify-center font-black text-2xl shadow-inner">
+                         📋
+                      </div>
+                      <div>
+                          <h1 className="text-xl font-black text-[#495057] tracking-tight capitalize">
+                              {activeTab.replace('_', ' ')} Directory
+                          </h1>
+                          <p className="text-[12px] font-semibold text-[#74788d] mt-0.5 uppercase tracking-wider">
+                              MedFlow &gt; {activeTab.replace('_', ' ')}
+                          </p>
+                      </div>
+                  </div>
+              
+                  {canRegisterNew() && (
+                      <button onClick={() => {
+                          if(activeTab === 'patients') { setSelectedPatient(null); setShowPatientForm(true); }
+                          else if(activeTab === 'doctors') { setSelectedDoctor(null); setShowDoctorForm(true); }
+                          else if(activeTab === 'prescriptions') { setSelectedPrescription(null); setShowPrescriptionForm(true); }
+                          else if(activeTab === 'treatment') { setSelectedTreatment(null); setShowTreatmentForm(!showTreatmentForm); }
+                          else if(activeTab === 'consultations') { setSelectedConsultation(null); setShowConsultationForm(!showConsultationForm); }
+                          else if(activeTab === 'medical_records') { setSelectedMedicalRecord(null); setShowMedicalRecordForm(!showMedicalRecordForm); }
+                      }} 
+                      className="px-6 py-2.5 rounded shadow-sm bg-[#556ee6] hover:bg-[#485ec4] text-white font-bold text-[13px] transition-all flex items-center gap-2"
+                      >
+                          <span className="text-lg leading-none">+</span>
+                          Add New
+                      </button>
+                  )}
+              </div>
+
+              {/* MAIN DATA CARD */}
+              <div className="bg-transparent min-h-[60vh]">
+
+         {/* --- CONSULTATIONS VIEW --- */}
         {activeTab === 'consultations' && (
-           <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
+           <div className="bg-white rounded-xl shadow-sm border border-slate-200">
             {showConsultationForm ? (
                 <RecordConsultation 
                     initialData={selectedConsultation} 
@@ -197,7 +261,7 @@ function App() {
 
         {/* --- OTHER VIEWS --- */}
         {activeTab === 'treatment' && userRole !== 'patient' && (
-           <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
+           <div className="bg-white rounded-xl shadow-sm border border-slate-200">
             {showTreatmentForm ? (
                 <TreatmentForm 
                     initialData={selectedTreatment} 
@@ -211,7 +275,7 @@ function App() {
         )}
 
         {activeTab === 'medical_records' && userRole !== 'patient' && (
-           <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
+           <div className="bg-white rounded-xl shadow-sm border border-slate-200">
             {showMedicalRecordForm ? (
                   <MedicalRecordsForm initialData={selectedMedicalRecord} patients={patients} onSuccess={() => { setShowMedicalRecordForm(false); setSelectedMedicalRecord(null); setRefreshKey(k => k + 1); }} onCancel={() => setShowMedicalRecordForm(false)} />
             ) : (
@@ -238,7 +302,10 @@ function App() {
         {showPrescriptionForm && (
               <PrescriptionForm initialData={selectedPrescription} patients={patients} doctors={doctors} onSuccess={() => { setShowPrescriptionForm(false); setRefreshKey(k => k + 1); }} onCancel={() => setShowPrescriptionForm(false)} />
         )}
+        {/* --- CLOSE MAIN CONTAINER DIV --- */}
+        </div>
       </main>
+      </div>
     </div>
   );
 }

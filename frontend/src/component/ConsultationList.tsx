@@ -49,20 +49,24 @@ const ConsultationList: React.FC<ConsultationListProps> = ({ patients, onUpdate 
     if (loading) return <div className="p-8 text-center text-slate-500 font-bold uppercase tracking-widest text-xs">Loading records...</div>;
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 px-4 pt-4">
             {/* SEARCH BAR */}
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
-                <span className="text-xl pl-2">🔍</span>
+            <div className="bg-white p-3 rounded-xl border border-slate-200/80 flex items-center gap-3 transition-all focus-within:shadow-[0_0_0_4px_rgba(15,23,42,0.05)] focus-within:border-slate-300">
+                <div className="text-slate-400 pl-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
                 <input 
                     type="text" 
                     placeholder="Search consultations..." 
-                    className="w-full bg-transparent outline-none font-bold text-slate-700 placeholder:text-slate-300"
+                    className="w-full bg-transparent outline-none font-medium text-slate-800 placeholder:text-slate-400 text-sm"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div className="w-full">
                 <table className="w-full text-left border-collapse">
                     <thead>
                         <tr className="bg-slate-50/50 border-b border-slate-100">
@@ -78,24 +82,28 @@ const ConsultationList: React.FC<ConsultationListProps> = ({ patients, onUpdate 
                                   <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-400 font-bold text-xs uppercase tracking-widest">No consultations found</td></tr>
                               ) : (
                                   filteredConsultations.map((consultation) => (
-                                      <tr key={consultation.id} className="hover:bg-slate-50/50 transition-colors group">
-                                          <td className="px-6 py-4 font-medium text-slate-400 text-xs">
-                                              {consultation.consultation_date ? new Date(consultation.consultation_date).toLocaleDateString() : 'N/A'}
+                                      <tr key={consultation.id} className="hover:bg-white transition-all duration-300 group cursor-pointer hover:shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+                                          <td className="px-6 py-5 font-black text-slate-400 text-[11px] tracking-widest uppercase">
+                                              {consultation.consultation_date ? new Date(consultation.consultation_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
                                           </td>
-                                          <td className="px-6 py-4 font-black text-slate-800 uppercase tracking-tight text-sm">
-                                              {consultation.patient_name}
+                                          <td className="px-6 py-5">
+                                             <div className="font-black text-slate-800 tracking-tight text-sm group-hover:text-emerald-700 transition-colors">
+                                                 {consultation.patient_name}
+                                             </div>
                                           </td>
-                                          <td className="px-6 py-4 font-bold text-blue-600 text-sm">
-                                              {consultation.doctor_name}
+                                          <td className="px-6 py-5 font-medium text-slate-500 text-xs">
+                                              Dr. {consultation.doctor_name}
                                           </td>
-                                          <td className="px-6 py-4 font-medium text-slate-300 italic text-sm">
-                                              {consultation.diagnosis || "Pending..."}
+                                          <td className="px-6 py-5">
+                                            <span className={`px-3 py-1 rounded-full text-[11px] font-medium tracking-wide ${consultation.diagnosis ? 'bg-slate-100 text-slate-700' : 'bg-orange-50 text-orange-600'}`}>
+                                                {consultation.diagnosis ? consultation.diagnosis.substring(0, 15) + (consultation.diagnosis.length > 15 ? '...' : '') : "Pending"}
+                                            </span>
                                           </td>
                                           <td className="px-6 py-4 text-right space-x-4">
                                               {/* Primary VIEW/EDIT Action */}
                                               <button 
                                                   onClick={() => onUpdate(consultation)} 
-                                                  className="text-emerald-500 hover:text-emerald-700 font-black text-[10px] uppercase tracking-widest transition-all hover:scale-105"
+                                                  className="text-blue-500 hover:text-blue-700 font-bold text-xs hover:underline transition-all"
                                               >
                                                   View
                                               </button>
@@ -103,7 +111,7 @@ const ConsultationList: React.FC<ConsultationListProps> = ({ patients, onUpdate 
                                               {/* CANCEL/REMOVE Action */}
                                               <button 
                                                   onClick={() => consultation.id && handleDelete(consultation.id)} 
-                                                  className="text-red-400 hover:text-red-600 font-black text-[10px] uppercase tracking-widest transition-all hover:scale-105"
+                                                  className="text-red-500 hover:text-red-700 font-bold text-xs hover:underline transition-all"
                                               >
                                                   Remove
                                               </button>
