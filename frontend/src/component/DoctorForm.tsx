@@ -23,10 +23,10 @@ const DoctorForm: React.FC<DoctorFormProps> = ({ doctor, onSubmit, onCancel }) =
     useEffect(() => {
         if (doctor) {
             setFormData({
-                first_name: doctor.user_details?.first_name || doctor.first_name || '',
-                last_name: doctor.user_details?.last_name || doctor.last_name || '',
-                username: doctor.user_details?.username || doctor.username || '',
-                password: '', 
+                first_name: doctor.first_name || '',
+                last_name: doctor.last_name || '',
+                username: doctor.username || '',
+                password: '',
                 specialization: doctor.specialization || '',
                 license_number: doctor.license_number || '',
                 is_available: doctor.is_available

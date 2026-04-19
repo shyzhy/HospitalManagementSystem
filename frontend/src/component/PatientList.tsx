@@ -55,16 +55,14 @@ const PatientList: React.FC<PatientListProps> = ({ patients, onUpdate, onDelete,
                                         <button onClick={() => onTrack(patient)} className="text-emerald-600 hover:text-emerald-800 font-black text-[10px] uppercase tracking-widest transition-colors">
                                             Track
                                         </button>
-                                        {(userRole === 'admin' || userRole === 'doctor') && (
+                                        {userRole === 'admin' && (
                                             <>
                                                 <button onClick={() => onUpdate(patient)} className="text-blue-500 hover:text-blue-700 font-black text-[10px] uppercase tracking-widest transition-colors">
                                                     Edit
                                                 </button>
-                                                {userRole === 'admin' && (
-                                                    <button onClick={() => patient.id && onDelete(patient.id)} className="text-red-400 hover:text-red-600 font-black text-[10px] uppercase tracking-widest transition-colors">
-                                                        Remove
-                                                    </button>
-                                                )}
+                                                <button onClick={() => patient.id && onDelete(patient.id)} className="text-red-400 hover:text-red-600 font-black text-[10px] uppercase tracking-widest transition-colors">
+                                                    Remove
+                                                </button>
                                             </>
                                         )}
                                     </td>

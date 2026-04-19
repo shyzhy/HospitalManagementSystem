@@ -1,8 +1,8 @@
-// --- USER DETAILS  ---
+// --- USER DETAILS ---
 export interface UserDetails {
-  username: string;
-  first_name: string;
-  last_name: string;
+    username: string;
+    first_name: string;
+    last_name: string;
 }
 
 // --- PATIENT ---
@@ -14,34 +14,24 @@ export interface Patient {
     address?: string;
     dob: string;
     phone?: string;
-
     username?: string;
     password?: string;
+
     user_details?: {
         username: string;
-    }
+    };
 }
 
 // --- DOCTOR ---
 export interface Doctor {
     id: number;
+    first_name: string;
+    last_name: string;
     specialization: string;
     license_number: string;
     is_available: boolean;
-    
-    first_name?: string; 
-    last_name?: string;
     username?: string;
-    user_details?: {
-        username: string;
-        first_name: string;
-        last_name: string;
-    };
-    user?: {
-        first_name: string;
-        last_name: string;
-    }
-
+    password?: string;
 }
 
 // --- CONSULTATION / VISIT ---
@@ -49,6 +39,7 @@ export interface Consultation {
     id: number;
     patient: number;
     patient_name?: string;
+    patient_first_name?: string;
     patient_last_name?: string;
     doctor: number;
     doctor_name?: string;
@@ -66,9 +57,12 @@ export interface Treatment {
     treatment_name: string;
     description?: string;
     patient_name?: string;
-    doctor_name?: string;  
-    treatment_date?: string; 
+    patient_first_name?: string;
+    patient_last_name?: string;
+    doctor_name?: string;
+    treatment_date?: string;
 }
+
 // --- PRESCRIPTION ---
 export interface Prescription {
     id?: number;
@@ -77,13 +71,15 @@ export interface Prescription {
     frequency: string;
     duration: string;
     patient: number;
-    patient_name?: string; 
+    patient_name?: string;
+    patient_first_name?: string;
+    patient_last_name?: string;
     doctor: number;
-    doctor_name?: string;  
+    doctor_name?: string;
     date_prescribed?: string;
 }
 
-// --- API RESPONSE TYPES (Optional but useful) ---
+// --- API RESPONSE TYPES ---
 export interface ApiResponse<T> {
     data: T;
     message?: string;
@@ -97,12 +93,12 @@ export interface PaginatedResponse<T> {
     results: T[];
 }
 
-// --- FORM DATA TYPES (For creating/updating) ---
+// --- FORM DATA TYPES ---
 export interface MedicalRecord {
     id?: number;
-    patient: number;                    
-    patient_name?: string;             
-    patient_details?: Patient;          
+    patient: number;
+    patient_name?: string;
+    patient_details?: Patient;
     blood_type: string;
     allergies: string;
     chronic_conditions: string;
@@ -114,5 +110,4 @@ export interface MedicalRecord {
     updated_at?: string;
     treatments?: Treatment[];
     prescriptions?: Prescription[];
-
 }

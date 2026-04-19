@@ -121,7 +121,7 @@ const PrescriptionForm: React.FC<PrescriptionFormProps> = ({
                                 required
                             >
                                 <option value="">Select Doctor...</option>
-                                {doctors.map(d => <option key={d.id} value={d.id}>Dr. {d.user_details?.last_name || d.last_name}</option>)}
+                                {doctors.map(d => <option key={d.id} value={d.id}>Dr. {d.last_name}</option>)}
                             </select>
                         </div>
                     )}

@@ -30,7 +30,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel }
                 gender: patient.gender || 'M', // FIXED: Use single letter
                 phone: patient.phone || '',
                 address: patient.address || '',
-                username: patient.user_details?.username || '', 
+                username: patient.username || patient.user_details?.username || '', 
                 password: '' 
             });
         }

@@ -15,13 +15,15 @@ class Patient(models.Model):
         return f"{self.first_name} {self.last_name}"
 
 class Doctor(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='doctor_profile')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name='doctor_profile')
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
     specialization = models.CharField(max_length=100)
     license_number = models.CharField(max_length=50, unique=True)
     is_available = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"Dr. {self.user.last_name} - {self.specialization}"
+        return f"Dr. {self.first_name} {self.last_name} - {self.specialization}"
 
 class MedicalRecord(models.Model):
     patient = models.OneToOneField(Patient, on_delete=models.CASCADE, related_name='medical_record')
@@ -45,9 +47,10 @@ class Consultation(models.Model):
     consultation_date = models.DateField(default=timezone.now) 
     diagnosis = models.TextField(blank=True)
     symptoms = models.TextField(blank=True)
+    notes = models.TextField(blank=True)
 
     def __str__(self):
-        return f"Consultation: {self.patient} with Dr. {self.doctor.user.last_name}"
+        return f"Consultation: {self.patient} with Dr. {self.doctor.first_name} {self.doctor.last_name}"
 
 
 class Treatment(models.Model):

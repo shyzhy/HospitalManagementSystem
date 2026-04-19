@@ -24,7 +24,7 @@ const DoctorList: React.FC<DoctorListProps> = ({ doctors, onUpdate, onDelete }) 
                             <td className="px-6 py-4">
                                 <div className="flex flex-col">
                                     <span className={`font-black text-sm ${!doc.is_available ? 'text-slate-400' : 'text-slate-800'}`}>
-                                        Dr. {doc.user_details?.first_name} {doc.user_details?.last_name}
+                                        Dr. {doc.first_name} {doc.last_name}
                                     </span>
                                     <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">
                                         ID: {doc.license_number}

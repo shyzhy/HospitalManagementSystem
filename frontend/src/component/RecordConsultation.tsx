@@ -128,19 +128,11 @@ const RecordConsultation: React.FC<RecordConsultationProps> = ({ initialData, on
                                 required
                             >
                                 <option value="">Choose Doctor...</option>
-                                {doctors.map(d => {
-                                    // Extracting details from the nested user_details object
-                                    const firstName = (d as any).user_details?.first_name || '';
-                                    const lastName = (d as any).user_details?.last_name || 'Unknown';
-                                    const specialization = (d as any).specialization || '';
-                                    
-                                    // The return keyword ensures the options actually render
-                                    return (
-                                        <option key={d.id} value={d.id}>
-                                            Dr. {firstName} {lastName} {specialization ? `- ${specialization}` : ''}
-                                        </option>
-                                    );
-                                })}
+                                {doctors.map(d => (
+                                    <option key={d.id} value={d.id}>
+                                        Dr. {d.first_name} {d.last_name}{d.specialization ? ` - ${d.specialization}` : ''}
+                                    </option>
+                                ))}
                             </select>
                         </div>
                     )}

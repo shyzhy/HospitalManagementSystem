@@ -3,6 +3,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Patient, Doctor, Consultation, Prescription, Treatment, MedicalRecord
 
+
 # --- USER SERIALIZER ---
 class CustomUserSerializer(DjoserUserSerializer):
     is_doctor = serializers.SerializerMethodField()
@@ -12,7 +13,7 @@ class CustomUserSerializer(DjoserUserSerializer):
 
     class Meta(DjoserUserSerializer.Meta):
         fields = (
-            'id', 'username', 'email', 'first_name', 'last_name', 
+            'id', 'username', 'email', 'first_name', 'last_name',
             'is_staff', 'is_superuser', 'is_doctor', 'doctor_id', 'is_patient', 'patient_id'
         )
 
@@ -30,109 +31,42 @@ class CustomUserSerializer(DjoserUserSerializer):
         patient = Patient.objects.filter(user=obj).first()
         return patient.id if patient else None
 
+
 # --- PATIENT SERIALIZER ---
 class PatientSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(write_only=True, required=False, allow_blank=True)
-    password = serializers.CharField(write_only=True, required=False, allow_blank=True)
     user_details = serializers.SerializerMethodField(read_only=True)
+    username = serializers.CharField(source='user.username', read_only=True)
 
     class Meta:
         model = Patient
         fields = '__all__'
 
     def get_user_details(self, obj):
-        return {"username": obj.user.username} if hasattr(obj, 'user') and obj.user else None
+        return {'username': obj.user.username} if hasattr(obj, 'user') and obj.user else None
 
-    def create(self, validated_data):
-        username = validated_data.pop('username', '').strip()
-        password = validated_data.pop('password', '').strip()
-        user = None
-        
-        if username:
-            user = User.objects.create_user(username=username, password=password)
-            user.first_name = validated_data.get('first_name', '')
-            user.last_name = validated_data.get('last_name', '')
-            user.save()
-            
-        return Patient.objects.create(user=user, **validated_data)
-
-    def update(self, instance, validated_data):
-        username = validated_data.pop('username', '').strip()
-        password = validated_data.pop('password', '').strip()
-        
-        if not instance.user and username:
-            instance.user = User.objects.create_user(username=username, password=password)
-            instance.save() 
-            
-        if instance.user:
-            if username: instance.user.username = username
-            if password: instance.user.set_password(password)
-            instance.user.save()
-            
-        return super().update(instance, validated_data)
 
 # --- DOCTOR SERIALIZER ---
 class DoctorSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(write_only=True, required=False)
-    password = serializers.CharField(write_only=True, required=False)
-    first_name = serializers.CharField(write_only=True, required=False)
-    last_name = serializers.CharField(write_only=True, required=False)
-    user_details = serializers.SerializerMethodField(read_only=True)
-
+    username = serializers.CharField(source='user.username', read_only=True)
+    
     class Meta:
         model = Doctor
-        fields = '__all__'
-        read_only_fields = ['user'] 
+        fields = ['id', 'first_name', 'last_name', 'username',
+                  'specialization', 'license_number', 'is_available']
 
-    def get_user_details(self, obj):
-        if obj.user:
-            return {
-                "username": obj.user.username, 
-                "first_name": obj.user.first_name, 
-                "last_name": obj.user.last_name
-            }
-        return None
-
-    def create(self, validated_data):
-        username = validated_data.pop('username', '').strip()
-        password = validated_data.pop('password', '').strip()
-        fname = validated_data.pop('first_name', '').strip()
-        lname = validated_data.pop('last_name', '').strip()
-
-        if User.objects.filter(username=username).exists():
-            raise serializers.ValidationError({"username": "This username is already taken."})
-
-        user = User.objects.create_user(username=username, password=password, first_name=fname, last_name=lname)
-        return Doctor.objects.create(user=user, **validated_data)
-
-    def update(self, instance, validated_data):
-        username = validated_data.pop('username', None)
-        password = validated_data.pop('password', None)
-        fname = validated_data.pop('first_name', None)
-        lname = validated_data.pop('last_name', None)
-
-        if not instance.user and username:
-            instance.user = User.objects.create_user(username=username, password=password)
-            instance.save()
-
-        if instance.user:
-            if username: instance.user.username = username
-            if password: instance.user.set_password(password)
-            if fname is not None: instance.user.first_name = fname
-            if lname is not None: instance.user.last_name = lname
-            instance.user.save()
-
-        return super().update(instance, validated_data)
 
 # --- BASE RECORD SERIALIZER ---
 class BaseRecordSerializer(serializers.ModelSerializer):
     patient_name = serializers.CharField(source='patient.__str__', read_only=True)
+    patient_first_name = serializers.CharField(source='patient.first_name', read_only=True)
+    patient_last_name = serializers.CharField(source='patient.last_name', read_only=True)
     doctor_name = serializers.SerializerMethodField(read_only=True)
 
     def get_doctor_name(self, obj):
-        if hasattr(obj, 'doctor') and obj.doctor and obj.doctor.user:
-            return f"Dr. {obj.doctor.user.first_name} {obj.doctor.user.last_name}".strip()
+        if hasattr(obj, 'doctor') and obj.doctor:
+            return f"Dr. {obj.doctor.first_name} {obj.doctor.last_name}".strip()
         return "N/A"
+
 
 # --- SPECIFIC RECORD SERIALIZERS ---
 class ConsultationSerializer(BaseRecordSerializer):
@@ -142,15 +76,18 @@ class ConsultationSerializer(BaseRecordSerializer):
         model = Consultation
         fields = '__all__'
 
+
 class PrescriptionSerializer(BaseRecordSerializer):
     class Meta:
         model = Prescription
         fields = '__all__'
 
+
 class TreatmentSerializer(BaseRecordSerializer):
     class Meta:
         model = Treatment
         fields = '__all__'
+
 
 # --- MEDICAL RECORD SERIALIZER ---
 class MedicalRecordSerializer(serializers.ModelSerializer):
