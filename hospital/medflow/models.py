@@ -17,6 +17,9 @@ class Patient(models.Model):
         self.is_deleted = True
         self.deleted_at = timezone.now()
         self.save()
+        # Also delete the patient's medical record
+        if hasattr(self, 'medical_record'):
+            self.medical_record.delete()
     
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
