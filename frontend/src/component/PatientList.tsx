@@ -71,7 +71,7 @@ const PatientList: React.FC<PatientListProps> = ({ patients, onUpdate, onDelete,
                                     <td className="px-6 py-5 hidden md:table-cell">
                                         <div className="flex flex-col">
                                             <span className="text-sm font-bold text-slate-600">{patient.phone}</span>
-                                            <span className="text-[10px] text-slate-400 underline decoration-slate-200 truncate max-w-[150px]">{patient.user_details?.username || patient.username || 'No Account'}</span>
+                                            <span className="text-[10px] text-slate-400 underline decoration-slate-200 truncate max-w-[150px]">{patient.user_details?.email || patient.email || 'No Account'}</span>
                                         </div>
                                     </td>
                                     <td className="px-6 py-5 hidden lg:table-cell">

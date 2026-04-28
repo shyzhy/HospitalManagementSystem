@@ -152,8 +152,8 @@ const PatientProfile: React.FC<PatientProfileProps> = ({ patient, onUpdate }) =>
                         </div>
                         <div className="h-px bg-slate-50"></div>
                         <div className="group">
-                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">System Account Username</label>
-                            <p className="text-lg font-bold text-slate-700 italic group-hover:translate-x-1 transition-transform">@{patient.user_details?.username || 'No-Account'}</p>
+                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">System Account Email</label>
+                            <p className="text-lg font-bold text-slate-700 italic group-hover:translate-x-1 transition-transform">{patient.user_details?.email || 'No-Account'}</p>
                         </div>
                     </div>
                 </div>

@@ -48,7 +48,7 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ patient, onEdit, onClos
                                 </div>
                                 <div className="space-y-0.5">
                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Digital Account Identity</p>
-                                    <p className="text-sm font-bold text-slate-800 underline decoration-slate-200 cursor-pointer hover:text-[#556ee6] transition-colors">{patient.user_details?.username || patient.username || 'No Account Record'}</p>
+                                    <p className="text-sm font-bold text-slate-800 underline decoration-slate-200 cursor-pointer hover:text-[#556ee6] transition-colors">{patient.user_details?.email || patient.email || 'No Account Record'}</p>
                                 </div>
                             </div>
 

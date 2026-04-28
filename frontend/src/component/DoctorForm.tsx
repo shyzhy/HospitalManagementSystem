@@ -13,7 +13,7 @@ const DoctorForm: React.FC<DoctorFormProps> = ({ doctor, onSubmit, onCancel, isI
     const [formData, setFormData] = useState({
         first_name: '',
         last_name: '',
-        username: '',
+        email: '',
         password: '',
         specialization: '',
         license_number: '',
@@ -26,7 +26,7 @@ const DoctorForm: React.FC<DoctorFormProps> = ({ doctor, onSubmit, onCancel, isI
             setFormData({
                 first_name: doctor.first_name || '',
                 last_name: doctor.last_name || '',
-                username: doctor.username || '',
+                email: doctor.email || '',
                 password: '',
                 specialization: doctor.specialization || '',
                 license_number: doctor.license_number || '',
@@ -129,8 +129,8 @@ const DoctorForm: React.FC<DoctorFormProps> = ({ doctor, onSubmit, onCancel, isI
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                             <div className="space-y-2">
-                                <label className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Secure Username</label>
-                                <input name="username" value={formData.username} onChange={handleChange} required className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl focus:bg-white/10 focus:ring-4 focus:ring-blue-400/5 focus:border-blue-400 outline-none transition-all font-bold text-white shadow-inner" />
+                                <label className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Secure Email</label>
+                                <input name="email" value={formData.email} onChange={handleChange} required className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl focus:bg-white/10 focus:ring-4 focus:ring-blue-400/5 focus:border-blue-400 outline-none transition-all font-bold text-white shadow-inner" />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">Password {doctor && "(Leave blank to keep current)"}</label>

@@ -6,7 +6,7 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -15,7 +15,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         setLoading(true);
         try {
             // 1. Get the auth token
-            const tokenRes = await axios.post('http://127.0.0.1:8000/auth/token/login/', { username, password });
+            const tokenRes = await axios.post('http://127.0.0.1:8000/auth/token/login/', { username: email, password });
             const token = tokenRes.data.auth_token;
 
             // 2. Fetch the user's profile details
@@ -30,7 +30,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
             // Save the user's name for the Welcome message
             const fullName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
-            const displayName = userData.profile_name || fullName || userData.username || 'User';
+            const displayName = userData.profile_name || fullName || userData.email || 'User';
             localStorage.setItem('userName', displayName);
 
             // Save Patient ID (if applicable)
@@ -76,8 +76,8 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                         <div className="relative group">
                             <input 
                                 className="w-full p-4 pl-5 bg-white/5 border border-white/10 rounded-2xl outline-none focus:ring-0 focus:border-blue-400 font-medium text-white placeholder:text-slate-500 transition-all focus:bg-white/10" 
-                                placeholder="Username" 
-                                onChange={e => setUsername(e.target.value)} 
+                                placeholder="Email" 
+                                onChange={e => setEmail(e.target.value)} 
                                 required 
                             />
                             <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-400 to-emerald-400 opacity-0 group-hover:opacity-20 transition-opacity -z-10 blur-md hidden group-focus-within:block"></div>

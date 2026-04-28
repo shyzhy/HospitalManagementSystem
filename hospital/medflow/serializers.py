@@ -14,7 +14,7 @@ class CustomUserSerializer(DjoserUserSerializer):
 
     class Meta(DjoserUserSerializer.Meta):
         fields = (
-            'id', 'username', 'email', 'first_name', 'last_name', 'profile_name',
+            'id', 'email', 'first_name', 'last_name', 'profile_name',
             'is_staff', 'is_superuser', 'is_doctor', 'doctor_id', 'is_patient', 'patient_id'
         )
 
@@ -45,26 +45,26 @@ class CustomUserSerializer(DjoserUserSerializer):
 # --- PATIENT SERIALIZER ---
 class PatientSerializer(serializers.ModelSerializer):
     user_details = serializers.SerializerMethodField(read_only=True)
-    username = serializers.CharField(required=False, allow_blank=True)
+    email = serializers.CharField(required=False, allow_blank=True)
     password = serializers.CharField(required=False, allow_blank=True, write_only=True)
 
     class Meta:
         model = Patient
         fields = ['id', 'first_name', 'last_name', 'dob', 'gender', 'phone', 
-                  'address', 'is_deleted', 'user_details', 'username', 'password']
+                  'address', 'is_deleted', 'user_details', 'email', 'password']
 
     def get_user_details(self, obj):
-        return {'username': obj.user.username} if hasattr(obj, 'user') and obj.user else None
+        return {'email': obj.user.username} if hasattr(obj, 'user') and obj.user else None
 
 
 # --- DOCTOR SERIALIZER ---
 class DoctorSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(required=False, allow_blank=True)
+    email = serializers.CharField(required=False, allow_blank=True)
     password = serializers.CharField(required=False, allow_blank=True, write_only=True)
     
     class Meta:
         model = Doctor
-        fields = ['id', 'first_name', 'last_name', 'username', 'password',
+        fields = ['id', 'first_name', 'last_name', 'email', 'password',
                   'specialization', 'license_number', 'is_available']
 
 

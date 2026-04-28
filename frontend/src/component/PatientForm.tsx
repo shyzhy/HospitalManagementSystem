@@ -17,7 +17,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel, 
         gender: 'M', // FIXED: Default to 'M'
         phone: '',
         address: '',
-        username: '',
+        email: '',
         password: '' 
     });
     const [loading, setLoading] = useState(false);
@@ -31,7 +31,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel, 
                 gender: patient.gender || 'M', // FIXED: Use single letter
                 phone: patient.phone || '',
                 address: patient.address || '',
-                username: patient.username || patient.user_details?.username || '', 
+                email: patient.email || patient.user_details?.email || '', 
                 password: '' 
             });
         }
@@ -80,8 +80,8 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel, 
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                         <div className="space-y-1.5">
-                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] ml-1">Secure Username</label>
-                            <input name="username" value={formData.username} onChange={handleChange} required className="w-full p-4 bg-transparent border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-[#556ee6]/5 focus:border-[#556ee6] outline-none transition-all font-bold text-slate-700" />
+                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] ml-1">Secure Email</label>
+                            <input name="email" value={formData.email} onChange={handleChange} required className="w-full p-4 bg-transparent border border-slate-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-[#556ee6]/5 focus:border-[#556ee6] outline-none transition-all font-bold text-slate-700" />
                         </div>
                         <div className="space-y-1.5">
                             <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] ml-1">Password {patient && "(Keep blank to skip)"}</label>

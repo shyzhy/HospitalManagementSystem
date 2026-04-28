@@ -1,6 +1,6 @@
 // --- USER DETAILS ---
 export interface UserDetails {
-    username: string;
+    email: string;
     first_name: string;
     last_name: string;
 }
@@ -14,11 +14,11 @@ export interface Patient {
     address?: string;
     dob: string;
     phone?: string;
-    username?: string;
+    email?: string;
     password?: string;
 
     user_details?: {
-        username: string;
+        email: string;
     };
 }
 
@@ -30,7 +30,7 @@ export interface Doctor {
     specialization: string;
     license_number: string;
     is_available: boolean;
-    username?: string;
+    email?: string;
     password?: string;
 }
 

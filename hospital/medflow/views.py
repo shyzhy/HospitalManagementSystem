@@ -36,12 +36,12 @@ class PatientListCreateView(ListCreateAPIView):
         return self.queryset.none()
 
     def perform_create(self, serializer):
-        username = serializer.validated_data.pop('username', None)
+        email = serializer.validated_data.pop('email', None)
         password = serializer.validated_data.pop('password', None)
         
         user = None
-        if username:
-            user = User.objects.create(username=username)
+        if email:
+            user = User.objects.create(username=email)
             if password:
                 user.set_password(password)
             user.save()
@@ -75,13 +75,13 @@ class PatientRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
         return self.queryset.none()
 
     def perform_update(self, serializer):
-        username = serializer.validated_data.pop('username', None)
+        email = serializer.validated_data.pop('email', None)
         password = serializer.validated_data.pop('password', None)
         
         instance = serializer.save()
         if instance.user:
-            if username:
-                instance.user.username = username
+            if email:
+                instance.user.username = email
             if password:
                 instance.user.set_password(password)
             instance.user.save()
@@ -101,12 +101,12 @@ class DoctorListCreateView(ListCreateAPIView):
         return Doctor.objects.filter(is_deleted=False)
 
     def perform_create(self, serializer):
-        username = serializer.validated_data.pop('username', None)
+        email = serializer.validated_data.pop('email', None)
         password = serializer.validated_data.pop('password', None)
         
         user = None
-        if username:
-            user = User.objects.create(username=username)
+        if email:
+            user = User.objects.create(username=email)
             if password:
                 user.set_password(password)
             user.save()
@@ -121,13 +121,13 @@ class DoctorRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     serializer_class = DoctorSerializer
 
     def perform_update(self, serializer):
-        username = serializer.validated_data.pop('username', None)
+        email = serializer.validated_data.pop('email', None)
         password = serializer.validated_data.pop('password', None)
         
         instance = serializer.save()
         if instance.user:
-            if username:
-                instance.user.username = username
+            if email:
+                instance.user.username = email
             if password:
                 instance.user.set_password(password)
             instance.user.save()
