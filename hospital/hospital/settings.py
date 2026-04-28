@@ -91,6 +91,7 @@ DJOSER = {
     },
 }
 
+
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
@@ -103,6 +104,13 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = [EMAIL_ADDRESS]'
+EMAIL_HOST_PASSWORD = '[PASSWORD]'
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = [EMAIL_ADDRESS]'
 
 CORS_ALLOW_ALL_ORIGINS = True 
 

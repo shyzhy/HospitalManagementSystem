@@ -1,4 +1,5 @@
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.views import APIView
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from django.contrib.auth.models import User
@@ -8,6 +9,49 @@ from .serializers import (
     PatientSerializer, DoctorSerializer, ConsultationSerializer,
     PrescriptionSerializer, TreatmentSerializer, MedicalRecordSerializer
 )
+
+
+# ==========================================
+# PATIENT SELF-REGISTRATION (PUBLIC)
+# ==========================================
+class PatientRegisterView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        data = request.data
+        email = data.get('email', '').strip()
+        password = data.get('password', '').strip()
+        re_password = data.get('re_password', '').strip()
+        first_name = data.get('first_name', '').strip()
+        last_name = data.get('last_name', '').strip()
+        dob = data.get('dob', '')
+        gender = data.get('gender', 'M')
+        phone = data.get('phone', '').strip()
+        address = data.get('address', '').strip()
+
+        # Validation
+        if not all([email, password, re_password, first_name, last_name, dob]):
+            return Response({'error': 'All required fields must be filled.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if password != re_password:
+            return Response({'error': 'Passwords do not match.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if User.objects.filter(username=email).exists():
+            return Response({'error': 'An account with this email already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create User + Patient
+        user = User.objects.create_user(username=email, email=email, password=password, first_name=first_name, last_name=last_name)
+        Patient.objects.create(
+            user=user,
+            first_name=first_name,
+            last_name=last_name,
+            dob=dob,
+            gender=gender,
+            phone=phone,
+            address=address,
+        )
+
+        return Response({'message': 'Account created successfully. You can now sign in.'}, status=status.HTTP_201_CREATED)
 
 # ==========================================
 # PAITENT VIEWS
@@ -41,7 +85,7 @@ class PatientListCreateView(ListCreateAPIView):
         
         user = None
         if email:
-            user = User.objects.create(username=email)
+            user = User.objects.create(username=email, email=email)
             if password:
                 user.set_password(password)
             user.save()
@@ -82,6 +126,7 @@ class PatientRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
         if instance.user:
             if email:
                 instance.user.username = email
+                instance.user.email = email
             if password:
                 instance.user.set_password(password)
             instance.user.save()
@@ -106,7 +151,7 @@ class DoctorListCreateView(ListCreateAPIView):
         
         user = None
         if email:
-            user = User.objects.create(username=email)
+            user = User.objects.create(username=email, email=email)
             if password:
                 user.set_password(password)
             user.save()
@@ -128,6 +173,7 @@ class DoctorRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
         if instance.user:
             if email:
                 instance.user.username = email
+                instance.user.email = email
             if password:
                 instance.user.set_password(password)
             instance.user.save()
