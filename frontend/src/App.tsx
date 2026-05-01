@@ -23,6 +23,7 @@ import PatientProfile from './component/PatientProfile';
 import DoctorProfile from './component/DoctorProfile';
 import DoctorDetails from './component/DoctorDetails';
 import Login from './component/Login';
+import Activate from './component/Activate';
 
 // API & Types
 import { getPatients, deletePatient, getDoctors, deleteDoctor, deleteConsultation, deleteMedicalRecord, deleteTreatment, deletePrescription } from './api';
@@ -108,6 +109,12 @@ function App() {
     setUserRole(null);
     window.location.reload();
   };
+
+  // Check if we're on an activation URL
+  const activationMatch = window.location.pathname.match(/^\/activate\/(.+)\/(.+)$/);
+  if (activationMatch) {
+    return <Activate uid={activationMatch[1]} token={activationMatch[2]} />;
+  }
 
   if (!token) return <Login onLoginSuccess={handleLoginSuccess} />;
 

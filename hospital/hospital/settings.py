@@ -20,11 +20,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-   
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken', 
     'djoser',
+    'cloudinary',
+    'cloudinary_storage',
 
     'medflow',
 ]
@@ -85,9 +86,14 @@ REST_FRAMEWORK = {
 
 DJOSER = {
     'USER_CREATE_PASSWORD_RETYPE': True,
+    'SEND_ACTIVATION_EMAIL': True,
+    'ACTIVATION_URL': 'activate/{uid}/{token}',
     'SERIALIZERS': {
         'user': 'medflow.serializers.CustomUserSerializer',
         'current_user': 'medflow.serializers.CustomUserSerializer',
+    },
+    'EMAIL': {
+        'activation': 'medflow.emails.CustomActivationEmail',
     },
 }
 
@@ -104,13 +110,22 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# --- CLOUDINARY STORAGE ---
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'diqzmwyy6',
+    'API_KEY': '412544457667796',
+    'API_SECRET': 'o80VQRy-stk75RHAdNTgF3Gv0ec',
+}
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# --- EMAIL (Gmail SMTP) ---
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = [EMAIL_ADDRESS]'
-EMAIL_HOST_PASSWORD = '[PASSWORD]'
+EMAIL_HOST_USER = 'shemkyle20@gmail.com'
+EMAIL_HOST_PASSWORD = 'ywctubzpxwwbqqsy'
 EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = [EMAIL_ADDRESS]'
+DEFAULT_FROM_EMAIL = 'shemkyle20@gmail.com'
 
 CORS_ALLOW_ALL_ORIGINS = True 
 

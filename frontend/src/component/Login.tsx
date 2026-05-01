@@ -72,12 +72,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         setRegSuccess('');
         try {
             await axios.post('http://127.0.0.1:8000/api/v1/register/', regData);
-            setRegSuccess('Account created successfully! You can now sign in.');
-            setTimeout(() => {
-                setIsRegister(false);
-                setEmail(regData.email);
-                setRegSuccess('');
-            }, 2000);
+            setRegSuccess('Account created! Please check your email to activate your account before signing in.');
         } catch (err: any) {
             const msg = err.response?.data?.error || 'Registration failed. Please try again.';
             setRegError(msg);

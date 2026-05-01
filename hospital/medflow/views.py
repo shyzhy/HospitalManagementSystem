@@ -9,6 +9,7 @@ from .serializers import (
     PatientSerializer, DoctorSerializer, ConsultationSerializer,
     PrescriptionSerializer, TreatmentSerializer, MedicalRecordSerializer
 )
+from .emails import CustomActivationEmail
 
 
 # ==========================================
@@ -39,8 +40,12 @@ class PatientRegisterView(APIView):
         if User.objects.filter(username=email).exists():
             return Response({'error': 'An account with this email already exists.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Create User + Patient
-        user = User.objects.create_user(username=email, email=email, password=password, first_name=first_name, last_name=last_name)
+        # Create INACTIVE User + Patient (requires email activation)
+        user = User.objects.create_user(
+            username=email, email=email, password=password,
+            first_name=first_name, last_name=last_name,
+            is_active=False
+        )
         Patient.objects.create(
             user=user,
             first_name=first_name,
@@ -51,7 +56,11 @@ class PatientRegisterView(APIView):
             address=address,
         )
 
-        return Response({'message': 'Account created successfully. You can now sign in.'}, status=status.HTTP_201_CREATED)
+        # Send activation email
+        context = {'user': user}
+        CustomActivationEmail(request, context).send([email])
+
+        return Response({'message': 'Account created! Please check your email to activate your account.'}, status=status.HTTP_201_CREATED)
 
 # ==========================================
 # PAITENT VIEWS
