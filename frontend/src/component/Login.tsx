@@ -12,6 +12,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [loginError, setLoginError] = useState('');
 
     // Register state
     const [regData, setRegData] = useState({
@@ -26,6 +27,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+        setLoginError('');
         try {
             const tokenRes = await axios.post('http://127.0.0.1:8000/auth/token/login/', { username: email, password });
             const token = tokenRes.data.auth_token;
@@ -55,7 +57,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
             onLoginSuccess(token, role);
         } catch (err) {
-            alert("Login Failed: Check credentials.");
+            setLoginError("Login Failed: Please check your credentials or ensure your account has been activated.");
         } finally { 
             setLoading(false); 
         }
@@ -121,6 +123,11 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                 {/* ===== LOGIN FORM ===== */}
                 {!isRegister && (
                     <form onSubmit={handleLogin} className="space-y-6 animate-in fade-in duration-300">
+                        {loginError && (
+                            <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs font-bold text-center animate-in fade-in zoom-in-95 duration-300">
+                                ✕ {loginError}
+                            </div>
+                        )}
                         <div className="space-y-4">
                             <div>
                                 <label className={labelClass}>Email Address</label>
