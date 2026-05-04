@@ -24,4 +24,4 @@ class CustomActivationEmail(email.ActivationEmail):
         )
         self.to = to
         self.attach_alternative(html_content, 'text/html')
-        super(email.ActivationEmail, self).send(*args, **kwargs)
+        super(email.ActivationEmail, self).send(to, *args, **kwargs)
