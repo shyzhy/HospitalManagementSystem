@@ -1,23 +1,50 @@
-import React from 'react';
-import { Patient } from '../types';
+import React, { useState, useEffect } from 'react';
+import { Patient, Consultation } from '../types';
+import { getConsultations } from '../api';
 
 interface PatientDetailsProps {
     patient: Patient;
     onEdit: () => void;
     onClose: () => void;
     readOnly?: boolean;
+    onViewConsultation?: (consultation: Consultation) => void;
 }
 
-const PatientDetails: React.FC<PatientDetailsProps> = ({ patient, onEdit, onClose, readOnly }) => {
+const PatientDetails: React.FC<PatientDetailsProps> = ({ patient, onEdit, onClose, readOnly, onViewConsultation }) => {
+    const [consultations, setConsultations] = useState<Consultation[]>([]);
+    const [loadingConsultations, setLoadingConsultations] = useState(true);
+
+    useEffect(() => {
+        const fetchPatientConsultations = async () => {
+            try {
+                const data = await getConsultations();
+                const filtered = data.filter(c => c.patient === patient.id);
+                setConsultations(filtered);
+            } catch (error) {
+                console.error("Error fetching patient consultations:", error);
+            } finally {
+                setLoadingConsultations(false);
+            }
+        };
+        fetchPatientConsultations();
+    }, [patient.id]);
     return (
         <div className="bg-white w-full rounded-2xl overflow-hidden animate-in fade-in duration-300">
             
             {/* Header Section */}
             <div className="bg-white px-8 py-6 border-b border-slate-100 flex justify-between items-center relative overflow-hidden">
                 <div className="flex items-center gap-5 relative z-10">
-                    <div className="w-16 h-16 rounded-full bg-slate-50 border border-slate-200 text-[#556ee6] flex items-center justify-center font-black text-2xl shadow-inner">
-                        {patient.first_name?.charAt(0)}{patient.last_name?.charAt(0)}
-                    </div>
+                    {(patient.profile_picture_url || patient.profile_picture) ? (
+                        <img 
+                            src={(patient.profile_picture_url || patient.profile_picture) as string} 
+                            alt={`${patient.first_name} ${patient.last_name}`}
+                            className="w-16 h-16 rounded-full object-cover border border-slate-200 shadow-inner"
+                        />
+                    ) : (
+                        <div className="w-16 h-16 rounded-full bg-slate-50 border border-slate-200 text-[#556ee6] flex items-center justify-center font-black text-2xl shadow-inner">
+                            {patient.first_name?.charAt(0)}{patient.last_name?.charAt(0)}
+                        </div>
+                    )}
                     <div>
                         <h3 className="text-xl font-bold text-slate-800 leading-none">
                             {patient.first_name} {patient.last_name}
@@ -80,26 +107,59 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ patient, onEdit, onClos
                         </div>
                     </div>
 
-                    {/* Quick Stats / Bio */}
+                    {/* Clinical History */}
                     <div className="space-y-6">
-                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">Medical Status Summary</h4>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-slate-50/50 p-6 rounded-3xl border border-slate-100 text-center space-y-2">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Patient ID</p>
-                                <p className="text-xl font-black text-slate-800">#{patient.id?.toString().padStart(4, '0')}</p>
-                            </div>
-                            <div className="bg-slate-50/50 p-6 rounded-3xl border border-slate-100 text-center space-y-2">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Consultations</p>
-                                <p className="text-xl font-black text-[#556ee6]">History</p>
-                            </div>
+                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">Clinical Encounters</h4>
+                        <div className="bg-slate-50/50 rounded-3xl border border-slate-100 overflow-hidden">
+                            {loadingConsultations ? (
+                                <div className="p-8 text-center space-y-3">
+                                    <div className="inline-block animate-spin rounded-full h-5 w-5 border-2 border-[#556ee6] border-t-transparent"></div>
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Loading Records...</p>
+                                </div>
+                            ) : consultations.length === 0 ? (
+                                <div className="p-8 text-center">
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No clinical encounters recorded.</p>
+                                </div>
+                            ) : (
+                                <div className="max-h-[300px] overflow-y-auto">
+                                    {consultations.map(consultation => (
+                                        <div 
+                                            key={consultation.id} 
+                                            className="p-4 border-b border-slate-100 last:border-0 hover:bg-white transition-colors flex justify-between items-center group cursor-pointer"
+                                            onClick={() => onViewConsultation && onViewConsultation(consultation)}
+                                        >
+                                            <div>
+                                                <p className="text-xs font-black text-slate-800">
+                                                    {consultation.consultation_date ? new Date(consultation.consultation_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Unknown Date'}
+                                                </p>
+                                                <p className="text-[10px] text-slate-400 font-bold italic mt-0.5">{consultation.doctor_name || 'No Physician'}</p>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <div className="px-2 py-1 bg-[#556ee6]/5 text-[#556ee6] rounded text-[9px] font-black uppercase tracking-widest border border-[#556ee6]/10">
+                                                    #CONS-{consultation.id.toString().padStart(4, '0')}
+                                                </div>
+                                                <button 
+                                                    className="opacity-0 group-hover:opacity-100 px-3 py-1.5 bg-slate-100 text-slate-600 rounded text-[9px] font-black uppercase tracking-widest hover:bg-[#556ee6] hover:text-white transition-all shadow-sm"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onViewConsultation && onViewConsultation(consultation);
+                                                    }}
+                                                >
+                                                    Inspect
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
-                        <div className="p-6 bg-[#556ee6]/5 border border-[#556ee6]/10 rounded-3xl space-y-3">
+                        <div className="p-4 bg-[#556ee6]/5 border border-[#556ee6]/10 rounded-2xl space-y-2">
                              <div className="flex items-center gap-2">
                                 <div className="w-1.5 h-1.5 rounded-full bg-[#556ee6] animate-pulse"></div>
-                                <p className="text-[10px] font-black text-[#556ee6] uppercase tracking-widest">Active Clinical Track</p>
+                                <p className="text-[9px] font-black text-[#556ee6] uppercase tracking-widest">Active Clinical Track</p>
                              </div>
-                             <p className="text-xs text-slate-600 font-medium leading-relaxed italic">
-                                This patient is currently being managed under active clinical observation. All treatments and prescriptions are synchronized with their primary digital record.
+                             <p className="text-[11px] text-slate-600 font-medium leading-relaxed italic">
+                                This patient is under active clinical observation. History is synchronized.
                              </p>
                         </div>
                     </div>

@@ -488,6 +488,11 @@ function App() {
                          onClose={() => setShowPatientDetails(false)} 
                          onEdit={() => { setShowPatientDetails(false); setShowPatientForm(true); }}
                          readOnly={userRole === 'doctor'}
+                         onViewConsultation={(c) => {
+                             setSelectedConsultation(c);
+                             setShowConsultationDetails(true);
+                             setActiveTab('consultations');
+                         }}
                      />
                  ) : showPatientForm ? (
                      <PatientForm patient={selectedPatient} onSubmit={() => { setShowPatientForm(false); setRefreshKey(k => k + 1); }} onCancel={() => setShowPatientForm(false)} />

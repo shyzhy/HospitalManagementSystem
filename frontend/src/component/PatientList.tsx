@@ -57,9 +57,17 @@ const PatientList: React.FC<PatientListProps> = ({ patients, onUpdate, onDelete,
                                 >
                                     <td className="px-4 sm:px-6 py-5">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-slate-100 text-[#556ee6] flex items-center justify-center font-black text-xs border border-slate-200 shadow-sm transition-transform group-hover:scale-105">
-                                                {patient.first_name.charAt(0)}{patient.last_name.charAt(0)}
-                                            </div>
+                                            {(patient.profile_picture_url || patient.profile_picture) ? (
+                                                <img 
+                                                    src={(patient.profile_picture_url || patient.profile_picture) as string} 
+                                                    alt={`${patient.first_name} ${patient.last_name}`}
+                                                    className="w-10 h-10 rounded-full object-cover border border-slate-200 shadow-sm transition-transform group-hover:scale-105"
+                                                />
+                                            ) : (
+                                                <div className="w-10 h-10 rounded-full bg-slate-100 text-[#556ee6] flex items-center justify-center font-black text-xs border border-slate-200 shadow-sm transition-transform group-hover:scale-105">
+                                                    {patient.first_name?.charAt(0)}{patient.last_name?.charAt(0)}
+                                                </div>
+                                            )}
                                             <div>
                                                 <div className="font-black text-slate-800 tracking-tight text-sm group-hover:text-[#556ee6] transition-colors leading-none mb-1">
                                                     {patient.first_name} {patient.last_name}

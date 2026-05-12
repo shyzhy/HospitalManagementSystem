@@ -48,9 +48,17 @@ const ConsultationDetails: React.FC<ConsultationDetailsProps> = ({ consultation,
                 <div className="flex flex-col lg:flex-row gap-8 items-stretch">
                     {/* Patient Bio Card */}
                     <div className="flex-1 bg-slate-50/80 rounded-3xl p-6 border border-slate-100 flex items-center gap-6">
-                        <div className="w-20 h-20 rounded-2xl bg-white shadow-sm border border-slate-200 text-[#556ee6] flex items-center justify-center font-black text-3xl font-mono">
-                            {consultation.patient_name?.charAt(0) || 'P'}
-                        </div>
+                        {consultation.patient_profile_picture_url ? (
+                            <img 
+                                src={consultation.patient_profile_picture_url} 
+                                alt={consultation.patient_name || 'Patient'}
+                                className="w-20 h-20 rounded-2xl object-cover shadow-sm border border-slate-200"
+                            />
+                        ) : (
+                            <div className="w-20 h-20 rounded-2xl bg-white shadow-sm border border-slate-200 text-[#556ee6] flex items-center justify-center font-black text-3xl font-mono">
+                                {consultation.patient_name?.charAt(0) || 'P'}
+                            </div>
+                        )}
                         <div className="space-y-1">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Patient Identity</label>
                             <p className="text-2xl font-black text-slate-800 tracking-tight leading-none">

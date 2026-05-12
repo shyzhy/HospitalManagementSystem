@@ -45,6 +45,7 @@ export interface Consultation {
     patient_name?: string;
     patient_first_name?: string;
     patient_last_name?: string;
+    patient_profile_picture_url?: string;
     doctor: number;
     doctor_name?: string;
     consultation_date: string;
