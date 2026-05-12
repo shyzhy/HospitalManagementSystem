@@ -8,8 +8,9 @@ class Patient(models.Model):
     last_name = models.CharField(max_length=100)
     dob = models.DateField()
     gender = models.CharField(max_length=10)
-    phone = models.CharField(max_length=20, blank=True, default='') 
+    phone = models.CharField(max_length=20, blank=True, default='')
     address = models.TextField(blank=True, default='')
+    profile_picture = models.ImageField(upload_to='patients/profiles/', null=True, blank=True)
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
 
@@ -30,6 +31,7 @@ class Doctor(models.Model):
     last_name = models.CharField(max_length=100)
     specialization = models.CharField(max_length=100)
     license_number = models.CharField(max_length=50, unique=True)
+    profile_picture = models.ImageField(upload_to='doctors/profiles/', null=True, blank=True)
     is_available = models.BooleanField(default=True)
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)

@@ -18,14 +18,14 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cloudinary_storage',          # Must be before staticfiles
     'django.contrib.staticfiles',
+    'cloudinary',
 
     'corsheaders',
     'rest_framework',
-    'rest_framework.authtoken', 
+    'rest_framework.authtoken',
     'djoser',
-    'cloudinary',
-    'cloudinary_storage',
 
     'medflow',
 ]
@@ -67,7 +67,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'medflow',
         'USER': 'postgres',
-        'PASSWORD': 'shuri',
+        'PASSWORD': 'Blessedme08',
         'HOST': '127.0.0.1',
         'PORT': '5432',
     }
@@ -116,7 +116,16 @@ CLOUDINARY_STORAGE = {
     'API_KEY': '412544457667796',
     'API_SECRET': 'o80VQRy-stk75RHAdNTgF3Gv0ec',
 }
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# Django 4.2+ uses STORAGES dict; also keep DEFAULT_FILE_STORAGE for older compat.
+STORAGES = {
+    'default': {
+        'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+    },
+}
 
 # --- EMAIL (Gmail SMTP) ---
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

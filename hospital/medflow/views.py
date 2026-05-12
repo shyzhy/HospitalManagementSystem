@@ -1,14 +1,22 @@
+# pyrefly: ignore [missing-import]
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+# pyrefly: ignore [missing-import]
 from rest_framework.views import APIView
+# pyrefly: ignore [missing-import]
 from rest_framework import permissions, status
+# pyrefly: ignore [missing-import]
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from django.db import models
+# pyrefly: ignore [missing-import]
 from .models import Patient, Doctor, Consultation, Prescription, Treatment, MedicalRecord
+# pyrefly: ignore [missing-import]
 from .serializers import (
     PatientSerializer, DoctorSerializer, ConsultationSerializer,
     PrescriptionSerializer, TreatmentSerializer, MedicalRecordSerializer
 )
+
+# pyrefly: ignore [missing-import]
 from .emails import CustomActivationEmail
 
 
@@ -76,11 +84,8 @@ class PatientListCreateView(ListCreateAPIView):
         
         doctor = getattr(user, 'doctor_profile', None)
         if doctor:
-            return self.queryset.filter(
-                models.Q(treatments__doctor=doctor) | 
-                models.Q(consultations__doctor=doctor) |
-                models.Q(prescriptions__doctor=doctor)
-            ).distinct()
+            # Doctors can view all active patients in the directory
+            return Patient.objects.filter(is_deleted=False)
         
         patient = getattr(user, 'patient_profile', None)
         if patient:
@@ -115,11 +120,8 @@ class PatientRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
         
         doctor = getattr(user, 'doctor_profile', None)
         if doctor:
-            return self.queryset.filter(
-                models.Q(treatments__doctor=doctor) | 
-                models.Q(consultations__doctor=doctor) |
-                models.Q(prescriptions__doctor=doctor)
-            ).distinct()
+            # Doctors can access any active patient record
+            return Patient.objects.filter(is_deleted=False)
         
         patient = getattr(user, 'patient_profile', None)
         if patient:
