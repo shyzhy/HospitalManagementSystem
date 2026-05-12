@@ -48,6 +48,7 @@ export interface Consultation {
     patient_profile_picture_url?: string;
     doctor: number;
     doctor_name?: string;
+    doctor_profile_picture_url?: string;
     consultation_date: string;
     symptoms: string;
     diagnosis: string;

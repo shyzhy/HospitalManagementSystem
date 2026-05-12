@@ -91,6 +91,7 @@ class BaseRecordSerializer(serializers.ModelSerializer):
     patient_last_name = serializers.CharField(source='patient.last_name', read_only=True)
     patient_profile_picture_url = serializers.SerializerMethodField(read_only=True)
     doctor_name = serializers.SerializerMethodField(read_only=True)
+    doctor_profile_picture_url = serializers.SerializerMethodField(read_only=True)
 
     def get_patient_profile_picture_url(self, obj):
         if hasattr(obj, 'patient') and obj.patient and obj.patient.profile_picture:
@@ -105,6 +106,12 @@ class BaseRecordSerializer(serializers.ModelSerializer):
                 return name
             return f"Dr. {name}"
         return "N/A"
+
+    def get_doctor_profile_picture_url(self, obj):
+        if hasattr(obj, 'doctor') and obj.doctor and obj.doctor.profile_picture:
+            return obj.doctor.profile_picture.url
+        return None
+
 
 
 # --- SPECIFIC RECORD SERIALIZERS ---

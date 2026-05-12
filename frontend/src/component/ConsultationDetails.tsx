@@ -46,26 +46,51 @@ const ConsultationDetails: React.FC<ConsultationDetailsProps> = ({ consultation,
 
                 {/* --- IDENTITY & METADATA GRID --- */}
                 <div className="flex flex-col lg:flex-row gap-8 items-stretch">
-                    {/* Patient Bio Card */}
+                    {/* Primary Identity Card */}
                     <div className="flex-1 bg-slate-50/80 rounded-3xl p-6 border border-slate-100 flex items-center gap-6">
-                        {consultation.patient_profile_picture_url ? (
-                            <img 
-                                src={consultation.patient_profile_picture_url} 
-                                alt={consultation.patient_name || 'Patient'}
-                                className="w-20 h-20 rounded-2xl object-cover shadow-sm border border-slate-200"
-                            />
+                        {userRole === 'patient' ? (
+                            <>
+                                {consultation.doctor_profile_picture_url ? (
+                                    <img 
+                                        src={consultation.doctor_profile_picture_url} 
+                                        alt={displayDoctorName}
+                                        className="w-20 h-20 rounded-2xl object-cover shadow-sm border border-slate-200"
+                                    />
+                                ) : (
+                                    <div className="w-20 h-20 rounded-2xl bg-white shadow-sm border border-slate-200 text-[#556ee6] flex items-center justify-center font-black text-3xl font-mono">
+                                        {displayDoctorName.replace('Dr. ', '').charAt(0) || 'D'}
+                                    </div>
+                                )}
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Attending Physician</label>
+                                    <p className="text-2xl font-black text-slate-800 tracking-tight leading-none">
+                                        {displayDoctorName}
+                                    </p>
+                                    <span className="text-[11px] font-bold text-[#556ee6] bg-[#556ee6]/5 px-2 py-0.5 rounded leading-none">DoctorID: #{consultation.doctor}</span>
+                                </div>
+                            </>
                         ) : (
-                            <div className="w-20 h-20 rounded-2xl bg-white shadow-sm border border-slate-200 text-[#556ee6] flex items-center justify-center font-black text-3xl font-mono">
-                                {consultation.patient_name?.charAt(0) || 'P'}
-                            </div>
+                            <>
+                                {consultation.patient_profile_picture_url ? (
+                                    <img 
+                                        src={consultation.patient_profile_picture_url} 
+                                        alt={consultation.patient_name || 'Patient'}
+                                        className="w-20 h-20 rounded-2xl object-cover shadow-sm border border-slate-200"
+                                    />
+                                ) : (
+                                    <div className="w-20 h-20 rounded-2xl bg-white shadow-sm border border-slate-200 text-[#556ee6] flex items-center justify-center font-black text-3xl font-mono">
+                                        {consultation.patient_name?.charAt(0) || 'P'}
+                                    </div>
+                                )}
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Patient Identity</label>
+                                    <p className="text-2xl font-black text-slate-800 tracking-tight leading-none">
+                                        {consultation.patient_name || 'Anonymous Patient'}
+                                    </p>
+                                    <span className="text-[11px] font-bold text-[#556ee6] bg-[#556ee6]/5 px-2 py-0.5 rounded leading-none">PatientID: #{consultation.patient}</span>
+                                </div>
+                            </>
                         )}
-                        <div className="space-y-1">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Patient Identity</label>
-                            <p className="text-2xl font-black text-slate-800 tracking-tight leading-none">
-                                {consultation.patient_name || 'Anonymous Patient'}
-                            </p>
-                            <span className="text-[11px] font-bold text-[#556ee6] bg-[#556ee6]/5 px-2 py-0.5 rounded leading-none">PatientID: #{consultation.patient}</span>
-                        </div>
                     </div>
 
                     {/* Encounter Metadata Card */}
@@ -83,8 +108,17 @@ const ConsultationDetails: React.FC<ConsultationDetailsProps> = ({ consultation,
                             </div>
                         </div>
                         <div className="pt-1">
-                            <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block mb-1">Attending Physician</label>
-                            <p className="text-sm font-bold text-white/90 truncate italic">{displayDoctorName}</p>
+                            {userRole === 'patient' ? (
+                                <>
+                                    <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block mb-1">Patient Record</label>
+                                    <p className="text-sm font-bold text-white/90 truncate italic">{consultation.patient_name || 'Anonymous Patient'}</p>
+                                </>
+                            ) : (
+                                <>
+                                    <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block mb-1">Attending Physician</label>
+                                    <p className="text-sm font-bold text-white/90 truncate italic">{displayDoctorName}</p>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
