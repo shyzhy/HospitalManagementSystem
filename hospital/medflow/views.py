@@ -1,4 +1,3 @@
-# pyrefly: ignore [missing-import]
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 # pyrefly: ignore [missing-import]
 from rest_framework.views import APIView
@@ -6,6 +5,8 @@ from rest_framework.views import APIView
 from rest_framework import permissions, status
 # pyrefly: ignore [missing-import]
 from rest_framework.response import Response
+# pyrefly: ignore [missing-import]
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.contrib.auth.models import User
 from django.db import models
 # pyrefly: ignore [missing-import]
@@ -76,6 +77,7 @@ class PatientRegisterView(APIView):
 class PatientListCreateView(ListCreateAPIView):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         user = self.request.user
@@ -112,6 +114,7 @@ class PatientListCreateView(ListCreateAPIView):
 class PatientRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         user = self.request.user
@@ -152,6 +155,7 @@ class PatientRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
 class DoctorListCreateView(ListCreateAPIView):
     queryset = Doctor.objects.all()
     serializer_class = DoctorSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         return Doctor.objects.filter(is_deleted=False)
@@ -175,6 +179,7 @@ class DoctorListCreateView(ListCreateAPIView):
 class DoctorRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = Doctor.objects.all()
     serializer_class = DoctorSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def perform_update(self, serializer):
         email = serializer.validated_data.pop('email', None)

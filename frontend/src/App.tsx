@@ -152,7 +152,7 @@ function App() {
                   <span className="text-[9px] text-white/70 capitalize">{userRole}</span>
               </div>
               <div 
-                  className={`w-8 h-8 rounded-full bg-[#2A3F6D] border border-white/20 flex items-center justify-center font-bold text-xs ${(userRole === 'doctor' || userRole === 'patient') ? 'cursor-pointer hover:bg-white/20 transition-colors' : ''}`}
+                  className={`w-8 h-8 rounded-full bg-[#2A3F6D] border border-white/20 flex items-center justify-center font-bold text-xs overflow-hidden ${(userRole === 'doctor' || userRole === 'patient') ? 'cursor-pointer hover:bg-white/20 transition-colors' : ''}`}
                   onClick={() => {
                       if (userRole === 'doctor' || userRole === 'patient') {
                           setActiveTab('account');
@@ -164,7 +164,18 @@ function App() {
                   }}
                   title={userRole !== 'admin' ? "Account Settings" : "Profile"}
               >
-                  {userName.replace(/^Dr\.\s*/i, '').charAt(0).toUpperCase()}
+                  {(() => {
+                      let picUrl: string | undefined;
+                      if (userRole === 'doctor') {
+                          const doc = doctors.find(d => d.id === parseInt(localStorage.getItem('doctorId') || '0'));
+                          picUrl = doc?.profile_picture_url;
+                      } else if (userRole === 'patient') {
+                          const pat = patients.find(p => p.id === parseInt(localStorage.getItem('patientId') || '0'));
+                          picUrl = pat?.profile_picture_url;
+                      }
+                      if (picUrl) return <img src={picUrl} alt="avatar" className="w-full h-full object-cover" />;
+                      return userName.replace(/^Dr\.\s*/i, '').charAt(0).toUpperCase();
+                  })()}
               </div>
               
               <div className="w-px h-5 bg-white/20"></div>

@@ -16,6 +16,8 @@ export interface Patient {
     phone?: string;
     email?: string;
     password?: string;
+    profile_picture?: string | File;
+    profile_picture_url?: string;
 
     user_details?: {
         email: string;
@@ -32,6 +34,8 @@ export interface Doctor {
     is_available: boolean;
     email?: string;
     password?: string;
+    profile_picture?: string | File;
+    profile_picture_url?: string;
 }
 
 // --- CONSULTATION / VISIT ---

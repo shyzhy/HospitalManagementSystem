@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Doctor } from '../types';
+import { uploadProfilePicture } from '../api';
 import DoctorForm from './DoctorForm';
 
 interface DoctorProfileProps {
@@ -9,6 +10,9 @@ interface DoctorProfileProps {
 
 const DoctorProfile: React.FC<DoctorProfileProps> = ({ doctor, onUpdate }) => {
     const [isEditing, setIsEditing] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const [localPicUrl, setLocalPicUrl] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     if (!doctor) {
         return (
@@ -21,6 +25,24 @@ const DoctorProfile: React.FC<DoctorProfileProps> = ({ doctor, onUpdate }) => {
     }
 
     const initials = `${doctor.first_name?.charAt(0) || ''}${doctor.last_name?.charAt(0) || ''}`;
+    const avatarUrl = localPicUrl || doctor.profile_picture_url;
+
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !doctor.id) return;
+
+        setUploading(true);
+        try {
+            const result = await uploadProfilePicture('doctor', doctor.id, file);
+            setLocalPicUrl(result.profile_picture_url || result.profile_picture);
+            onUpdate(result);
+        } catch (err) {
+            console.error('Upload failed:', err);
+            alert('Failed to upload profile picture. Please try again.');
+        } finally {
+            setUploading(false);
+        }
+    };
 
     const handleUpdateSuccess = (updatedDoctor: Doctor) => {
         setIsEditing(false);
@@ -58,12 +80,45 @@ const DoctorProfile: React.FC<DoctorProfileProps> = ({ doctor, onUpdate }) => {
 
                 <div className="p-12 relative z-10">
                     <div className="flex flex-col lg:flex-row items-center gap-12">
-                        {/* Avatar Section */}
+                        {/* Avatar Section with Upload */}
                         <div className="relative group">
-                            <div className="w-44 h-44 rounded-[3rem] bg-gradient-to-br from-[#4e5ec4] to-[#3a47a1] p-1.5 shadow-2xl shadow-[#4e5ec4]/30">
-                                <div className="w-full h-full rounded-[2.8rem] bg-white flex items-center justify-center font-black text-5xl text-[#4e5ec4] tracking-tighter">
-                                    {initials}
-                                </div>
+                            <input 
+                                type="file" 
+                                ref={fileInputRef} 
+                                onChange={handleFileSelect} 
+                                accept="image/*" 
+                                className="hidden" 
+                                id="doctor-avatar-upload"
+                            />
+                            <div 
+                                className="w-44 h-44 rounded-[3rem] bg-gradient-to-br from-[#4e5ec4] to-[#3a47a1] p-1.5 shadow-2xl shadow-[#4e5ec4]/30 cursor-pointer"
+                                onClick={() => fileInputRef.current?.click()}
+                            >
+                                {avatarUrl ? (
+                                    <img 
+                                        src={avatarUrl} 
+                                        alt={`Dr. ${doctor.first_name} ${doctor.last_name}`}
+                                        className="w-full h-full rounded-[2.8rem] object-cover"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full rounded-[2.8rem] bg-white flex items-center justify-center font-black text-5xl text-[#4e5ec4] tracking-tighter">
+                                        {initials}
+                                    </div>
+                                )}
+                            </div>
+                            {/* Camera overlay */}
+                            <div 
+                                className={`absolute inset-0 rounded-[3rem] bg-black/40 flex items-center justify-center transition-opacity cursor-pointer ${uploading ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                                onClick={() => !uploading && fileInputRef.current?.click()}
+                            >
+                                {uploading ? (
+                                    <div className="w-8 h-8 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                )}
                             </div>
                             <div className={`absolute -bottom-2 -right-2 p-4 rounded-[1.5rem] shadow-xl border-4 border-white transition-all transform ${doctor.is_available ? 'bg-emerald-500 scale-110' : 'bg-amber-500 scale-100'}`}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">

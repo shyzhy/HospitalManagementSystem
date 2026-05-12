@@ -47,25 +47,41 @@ class PatientSerializer(serializers.ModelSerializer):
     user_details = serializers.SerializerMethodField(read_only=True)
     email = serializers.CharField(required=False, allow_blank=True)
     password = serializers.CharField(required=False, allow_blank=True, write_only=True)
+    profile_picture_url = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Patient
         fields = ['id', 'first_name', 'last_name', 'dob', 'gender', 'phone', 
-                  'address', 'is_deleted', 'user_details', 'email', 'password']
+                  'address', 'is_deleted', 'user_details', 'email', 'password',
+                  'profile_picture', 'profile_picture_url']
+        extra_kwargs = {'profile_picture': {'required': False}}
 
     def get_user_details(self, obj):
         return {'email': obj.user.username} if hasattr(obj, 'user') and obj.user else None
+
+    def get_profile_picture_url(self, obj):
+        if obj.profile_picture:
+            return obj.profile_picture.url
+        return None
 
 
 # --- DOCTOR SERIALIZER ---
 class DoctorSerializer(serializers.ModelSerializer):
     email = serializers.CharField(required=False, allow_blank=True)
     password = serializers.CharField(required=False, allow_blank=True, write_only=True)
+    profile_picture_url = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = Doctor
         fields = ['id', 'first_name', 'last_name', 'email', 'password',
-                  'specialization', 'license_number', 'is_available']
+                  'specialization', 'license_number', 'is_available',
+                  'profile_picture', 'profile_picture_url']
+        extra_kwargs = {'profile_picture': {'required': False}}
+
+    def get_profile_picture_url(self, obj):
+        if obj.profile_picture:
+            return obj.profile_picture.url
+        return None
 
 
 # --- BASE RECORD SERIALIZER ---

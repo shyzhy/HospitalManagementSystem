@@ -140,4 +140,19 @@ export const deleteMedicalRecord = async (id: number): Promise<void> => {
     await API.delete(`medical-records/${id}/`);
 };
 
+// --- PROFILE PICTURE ---
+export const uploadProfilePicture = async (
+    role: 'patient' | 'doctor',
+    id: number,
+    file: File
+): Promise<any> => {
+    const formData = new FormData();
+    formData.append('profile_picture', file);
+    const endpoint = role === 'patient' ? `patients/${id}/` : `doctors/${id}/`;
+    const response = await API.patch(endpoint, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+};
+
 export default API;
