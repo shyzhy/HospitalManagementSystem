@@ -5,9 +5,10 @@ interface PatientDetailsProps {
     patient: Patient;
     onEdit: () => void;
     onClose: () => void;
+    readOnly?: boolean;
 }
 
-const PatientDetails: React.FC<PatientDetailsProps> = ({ patient, onEdit, onClose }) => {
+const PatientDetails: React.FC<PatientDetailsProps> = ({ patient, onEdit, onClose, readOnly }) => {
     return (
         <div className="bg-white w-full rounded-2xl overflow-hidden animate-in fade-in duration-300">
             
@@ -106,6 +107,7 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ patient, onEdit, onClos
 
                 {/* Patient Footer Actions */}
                 <div className="space-y-3 pt-10 border-t border-slate-100">
+                    {!readOnly && (
                     <div className="flex gap-4 flex-row-reverse">
                         <button 
                             onClick={onEdit}
@@ -114,6 +116,7 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({ patient, onEdit, onClos
                             Modify Basic Profile
                         </button>
                     </div>
+                    )}
                     <button 
                         onClick={onClose} 
                         className="w-full py-3.5 bg-slate-50 text-slate-400 font-bold rounded-lg text-[11px] uppercase tracking-widest hover:bg-slate-100 transition-all text-center flex items-center justify-center gap-2"
