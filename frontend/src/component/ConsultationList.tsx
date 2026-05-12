@@ -68,14 +68,14 @@ const ConsultationList: React.FC<ConsultationListProps> = ({ patients, onUpdate 
                 />
             </div>
 
-            <div className="w-full">
-                <table className="w-full text-left">
+            <div className="w-full overflow-x-auto">
+                <table className="w-full text-left min-w-[500px]">
                     <thead>
                         <tr className="bg-slate-50/50 border-b border-slate-100">
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Encounter Date</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Patient Identity</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Attending Physician</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Encounter Date</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Patient Identity</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden sm:table-cell">Attending Physician</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -88,23 +88,23 @@ const ConsultationList: React.FC<ConsultationListProps> = ({ patients, onUpdate 
                                     className="hover:bg-slate-50/50 transition-all duration-300 group cursor-pointer"
                                     onClick={() => onUpdate(consultation)}
                                 >
-                                    <td className="px-6 py-5">
+                                    <td className="px-4 sm:px-6 py-5">
                                         <div className="text-[10px] font-black text-[#556ee6] bg-[#556ee6]/5 px-2 py-1 rounded inline-block uppercase tracking-widest border border-[#556ee6]/10">
                                             {consultation.consultation_date ? new Date(consultation.consultation_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-5">
+                                    <td className="px-4 sm:px-6 py-5">
                                         <div className="font-black text-slate-800 tracking-tight text-sm group-hover:text-[#556ee6] transition-colors">
                                             {consultation.patient_name}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-5">
+                                    <td className="px-4 sm:px-6 py-5 hidden sm:table-cell">
                                         <div className="flex items-center gap-2">
                                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
                                             <span className="text-[11px] font-bold text-slate-500 italic">{consultation.doctor_name}</span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-5 text-right opacity-60 group-hover:opacity-100 transition-opacity">
+                                    <td className="px-4 sm:px-6 py-5 text-right opacity-60 group-hover:opacity-100 transition-opacity">
                                         <div className="flex items-center justify-end gap-3">
                                             <button
                                                 className="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-[#556ee6] hover:text-white transition-all shadow-sm"

@@ -35,14 +35,14 @@ const PatientList: React.FC<PatientListProps> = ({ patients, onUpdate, onDelete,
                 />
             </div>
 
-            <div className="w-full">
-                <table className="w-full text-left">
+            <div className="w-full overflow-x-auto">
+                <table className="w-full text-left min-w-[500px]">
                     <thead>
                         <tr className="bg-slate-50/50 border-b border-slate-100">
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Patient Identity</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden md:table-cell">Contact Details</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden lg:table-cell">Region / Address</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Patient Identity</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden md:table-cell">Contact Details</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden lg:table-cell">Region / Address</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -55,7 +55,7 @@ const PatientList: React.FC<PatientListProps> = ({ patients, onUpdate, onDelete,
                                     className="hover:bg-slate-50/50 transition-all duration-300 group cursor-pointer"
                                     onClick={() => onTrack(patient)}
                                 >
-                                    <td className="px-6 py-5">
+                                    <td className="px-4 sm:px-6 py-5">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-full bg-slate-100 text-[#556ee6] flex items-center justify-center font-black text-xs border border-slate-200 shadow-sm transition-transform group-hover:scale-105">
                                                 {patient.first_name.charAt(0)}{patient.last_name.charAt(0)}
@@ -68,18 +68,18 @@ const PatientList: React.FC<PatientListProps> = ({ patients, onUpdate, onDelete,
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-5 hidden md:table-cell">
+                                    <td className="px-4 sm:px-6 py-5 hidden md:table-cell">
                                         <div className="flex flex-col">
                                             <span className="text-sm font-bold text-slate-600">{patient.phone}</span>
                                             <span className="text-[10px] text-slate-400 underline decoration-slate-200 truncate max-w-[150px]">{patient.user_details?.email || patient.email || 'No Account'}</span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-5 hidden lg:table-cell">
+                                    <td className="px-4 sm:px-6 py-5 hidden lg:table-cell">
                                         <div className="text-xs font-medium text-slate-500 italic truncate max-w-[200px]">
                                             {patient.address || 'No address registered'}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-5 text-right opacity-60 group-hover:opacity-100 transition-opacity">
+                                    <td className="px-4 sm:px-6 py-5 text-right opacity-60 group-hover:opacity-100 transition-opacity">
                                         <div className="flex items-center justify-end gap-3">
                                             <button 
                                                 className="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-[#556ee6] hover:text-white transition-all shadow-sm"

@@ -178,11 +178,11 @@ const TreatmentForm: React.FC<TreatmentFormProps> = ({
                 </div>
 
                 {/* --- ACTION FOOTER --- */}
-                <div className="flex justify-between items-center pt-8 border-t border-slate-100 mt-6 font-sans">
+                <div className="flex flex-col-reverse sm:flex-row justify-between items-center gap-4 pt-8 border-t border-slate-100 mt-6 font-sans">
                     <button
                         type="button"
                         onClick={() => onCancel?.()}
-                        className="px-6 py-3.5 bg-slate-50 text-slate-400 font-black rounded-xl text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-all flex items-center gap-2"
+                        className="w-full sm:w-auto px-6 py-3.5 bg-slate-50 text-slate-400 font-black rounded-xl text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-all flex items-center justify-center gap-2"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -192,7 +192,7 @@ const TreatmentForm: React.FC<TreatmentFormProps> = ({
                     <button
                         type="submit"
                         disabled={loading}
-                        className="px-12 py-4 bg-emerald-600 text-white font-black rounded-xl text-[12px] uppercase tracking-widest shadow-[0_8px_20px_rgba(5,150,105,0.25)] hover:bg-emerald-700 hover:-translate-y-0.5 active:scale-95 transition-all flex items-center gap-2"
+                        className="w-full sm:w-auto px-12 py-4 bg-emerald-600 text-white font-black rounded-xl text-[12px] uppercase tracking-widest shadow-[0_8px_20px_rgba(5,150,105,0.25)] hover:bg-emerald-700 hover:-translate-y-0.5 active:scale-95 transition-all flex items-center justify-center gap-2"
                     >
                         {loading ? (
                             <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

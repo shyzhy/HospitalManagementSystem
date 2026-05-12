@@ -54,14 +54,14 @@ const TreatmentList: React.FC<TreatmentListProps> = ({ patientId, patients, onUp
 
     return (
         <div className="space-y-6 px-4 pt-4">
-            <div className="w-full">
-                <table className="w-full text-left">
+            <div className="w-full overflow-x-auto">
+                <table className="w-full text-left min-w-[500px]">
                     <thead>
                         <tr className="bg-slate-50/50 border-b border-slate-100">
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Procedure / Treatment</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Patient Identity</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Physician</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Procedure / Treatment</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden sm:table-cell">Patient Identity</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden md:table-cell">Physician</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -78,7 +78,7 @@ const TreatmentList: React.FC<TreatmentListProps> = ({ patientId, patients, onUp
                                             {t.description || 'Clinical procedural details pending...'}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-5">
+                                    <td className="px-4 sm:px-6 py-5 hidden sm:table-cell">
                                         <div className="flex items-center gap-2">
                                             <div className="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 text-[#556ee6] flex items-center justify-center font-black text-[9px]">
                                                 {t.patient_name?.charAt(0)}
@@ -86,7 +86,7 @@ const TreatmentList: React.FC<TreatmentListProps> = ({ patientId, patients, onUp
                                             <span className="text-sm font-bold text-slate-600 tracking-tight">{t.patient_name}</span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-5">
+                                    <td className="px-4 sm:px-6 py-5 hidden md:table-cell">
                                          <span className="text-[11px] font-bold text-slate-500 italic">{t.doctor_name}</span>
                                     </td>
                                     <td className="px-6 py-5 text-right opacity-60 group-hover:opacity-100 transition-opacity">

@@ -36,15 +36,15 @@ const DoctorList: React.FC<DoctorListProps> = ({ doctors, onUpdate, onDelete, on
                 />
             </div>
 
-            <div className="w-full">
-                <table className="w-full text-left">
+            <div className="w-full overflow-x-auto">
+                <table className="w-full text-left min-w-[500px]">
                     <thead>
                         <tr className="bg-slate-50/50 border-b border-slate-100">
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Medical Personnel</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden md:table-cell">Reg. Number</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden lg:table-cell">Verified Specialization</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Medical Personnel</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden md:table-cell">Reg. Number</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden lg:table-cell">Verified Specialization</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -57,7 +57,7 @@ const DoctorList: React.FC<DoctorListProps> = ({ doctors, onUpdate, onDelete, on
                                     className="hover:bg-slate-50 group transition-all duration-300 cursor-pointer"
                                     onClick={() => onTrack(doc)}
                                 >
-                                    <td className="px-6 py-5">
+                                    <td className="px-4 sm:px-6 py-5">
                                         <div className="flex items-center gap-4">
                                             <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-black text-white text-xs border border-white/20 shadow-sm transition-transform group-hover:scale-105 ${index % 2 === 0 ? 'bg-[#4e5ec4]' : 'bg-slate-800'}`}>
                                                 {doc.first_name.charAt(0)}{doc.last_name.charAt(0)}
@@ -70,13 +70,13 @@ const DoctorList: React.FC<DoctorListProps> = ({ doctors, onUpdate, onDelete, on
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-5 hidden md:table-cell">
+                                    <td className="px-4 sm:px-6 py-5 hidden md:table-cell">
                                         <span className="text-xs font-mono font-bold text-slate-400 uppercase tracking-tighter">#{doc.license_number}</span>
                                     </td>
-                                    <td className="px-6 py-5 hidden lg:table-cell">
+                                    <td className="px-4 sm:px-6 py-5 hidden lg:table-cell">
                                         <div className="text-xs font-black text-slate-500 uppercase tracking-widest italic">{doc.specialization}</div>
                                     </td>
-                                    <td className="px-6 py-5">
+                                    <td className="px-4 sm:px-6 py-5">
                                         <div className="flex items-center gap-2">
                                             <div className={`w-1.5 h-1.5 rounded-full ${doc.is_available ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-amber-500'}`}></div>
                                             <span className={`text-[10px] font-black uppercase tracking-widest ${doc.is_available ? 'text-emerald-600' : 'text-amber-600'}`}>
@@ -84,7 +84,7 @@ const DoctorList: React.FC<DoctorListProps> = ({ doctors, onUpdate, onDelete, on
                                             </span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-5 text-right">
+                                    <td className="px-4 sm:px-6 py-5 text-right">
                                         <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button 
                                                 className="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-[#4e5ec4] hover:text-white transition-all shadow-sm"

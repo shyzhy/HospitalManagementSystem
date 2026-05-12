@@ -59,14 +59,14 @@ const MedicalRecordsList: React.FC<MedicalRecordsListProps> = ({ patients, onUpd
                 />
             </div>
 
-            <div className="w-full">
-                <table className="w-full text-left">
+            <div className="w-full overflow-x-auto">
+                <table className="w-full text-left min-w-[500px]">
                     <thead>
                         <tr className="bg-slate-50/50 border-b border-slate-100">
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Patient Identity</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Type</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden md:table-cell">Emergency Contact</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Patient Identity</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Type</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden md:table-cell">Emergency Contact</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -79,7 +79,7 @@ const MedicalRecordsList: React.FC<MedicalRecordsListProps> = ({ patients, onUpd
                                     className="hover:bg-slate-50/50 transition-all duration-300 group cursor-pointer"
                                     onClick={() => onView(record)}
                                 >
-                                    <td className="px-6 py-5">
+                                    <td className="px-4 sm:px-6 py-5">
                                         <div className="flex items-center gap-3">
                                             <div className="w-8 h-8 rounded-full bg-[#f4f5f9] text-[#556ee6] flex items-center justify-center font-black text-xs">
                                                 {record.patient_name?.charAt(0)}
@@ -89,18 +89,18 @@ const MedicalRecordsList: React.FC<MedicalRecordsListProps> = ({ patients, onUpd
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-5 text-center">
+                                    <td className="px-4 sm:px-6 py-5 text-center">
                                        <span className="px-2.5 py-1 bg-red-50 text-red-600 rounded-md font-black text-[10px] border border-red-100 uppercase tracking-tighter">
                                           {record.blood_type || '??'}
                                        </span>
                                     </td>
-                                    <td className="px-6 py-5 hidden md:table-cell">
+                                    <td className="px-4 sm:px-6 py-5 hidden md:table-cell">
                                         <div className="flex flex-col">
                                             <span className="text-[11px] font-bold text-slate-600">{record.emergency_contact_name || 'N/A'}</span>
                                             <span className="text-[10px] text-slate-400 font-mono tracking-tighter">{record.emergency_contact_phone}</span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-5 text-right opacity-60 group-hover:opacity-100 transition-opacity">
+                                    <td className="px-4 sm:px-6 py-5 text-right opacity-60 group-hover:opacity-100 transition-opacity">
                                         <div className="flex items-center justify-end gap-3">
                                             <button 
                                                 className="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-[#556ee6] hover:text-white transition-all shadow-sm"

@@ -37,6 +37,7 @@ function App() {
 
   // --- STATE ---
   const [activeTab, setActiveTab] = useState<'patients' | 'doctors' | 'consultations' | 'prescriptions' | 'treatment' | 'medical_records' | 'account'>('consultations');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   const [patients, setPatients] = useState<Patient[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -133,10 +134,19 @@ function App() {
     <div className="h-screen flex flex-col overflow-hidden bg-[#F0F2F5] font-sans">
       
       {/* --- TOP NAVBAR --- */}
-      <header className="h-14 bg-[#3b5998] text-white flex items-center justify-between px-5 shrink-0 shadow-sm z-30">
-          <div className="flex items-center gap-4">
-              {/* Traffic Lights (Mac style) */}
-              <div className="flex items-center gap-1.5 mr-2">
+      <header className="h-14 bg-[#3b5998] text-white flex items-center justify-between px-3 sm:px-5 shrink-0 shadow-sm z-30">
+          <div className="flex items-center gap-3 sm:gap-4">
+              {/* Hamburger for mobile */}
+              <button 
+                  className="lg:hidden p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+              >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+              </button>
+              {/* Traffic Lights (Mac style) - hidden on mobile */}
+              <div className="hidden sm:flex items-center gap-1.5 mr-2">
                   <div className="w-3 h-3 rounded-full bg-red-500"></div>
                   <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
                   <div className="w-3 h-3 rounded-full bg-green-500"></div>
@@ -144,8 +154,8 @@ function App() {
               <h1 className="text-sm font-black tracking-wide uppercase">MedFlow</h1>
           </div>
           
-          <div className="flex items-center gap-6">
-              <div className="flex flex-col text-right">
+          <div className="flex items-center gap-3 sm:gap-6">
+              <div className="hidden sm:flex flex-col text-right">
                   <span className="text-xs font-bold leading-tight">
                       {userRole === 'doctor' && !userName.startsWith('Dr.') ? `Dr. ${userName}` : userName}
                   </span>
@@ -188,7 +198,7 @@ function App() {
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
-                  <span>LOGOUT</span>
+                  <span className="hidden sm:inline">LOGOUT</span>
               </button>
           </div>
       </header>
@@ -196,8 +206,16 @@ function App() {
       {/* --- BOTTOM SECTION (SIDEBAR + MAIN CONTENT) --- */}
       <div className="flex flex-1 overflow-hidden relative">
           
+          {/* --- MOBILE BACKDROP --- */}
+          {sidebarOpen && (
+              <div 
+                  className="fixed inset-0 bg-black/50 z-30 lg:hidden" 
+                  onClick={() => setSidebarOpen(false)}
+              />
+          )}
+
           {/* --- SIDEBAR --- */}
-          <aside className="w-[260px] bg-[#2b3240] text-[#9ba5b7] flex flex-col shrink-0 shadow-[4px_0_15px_rgba(0,0,0,0.05)] z-20 py-4 overflow-y-auto">
+          <aside className={`fixed lg:relative top-14 lg:top-0 left-0 h-[calc(100vh-3.5rem)] lg:h-auto w-[260px] bg-[#2b3240] text-[#9ba5b7] flex flex-col shrink-0 shadow-[4px_0_15px_rgba(0,0,0,0.05)] z-40 lg:z-20 py-4 overflow-y-auto transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
               <div className="px-6 mb-4 mt-2">
                   <span className="text-[10px] font-black uppercase tracking-widest text-[#6c7a93]">Main Navigation</span>
               </div>
@@ -226,6 +244,7 @@ function App() {
                           <button key={tab} 
                               onClick={() => { 
                                   setActiveTab(tab); 
+                                  setSidebarOpen(false);
                                   setShowConsultationForm(false); 
                                   setShowConsultationDetails(false);
                                   setShowTreatmentForm(false); 
@@ -247,7 +266,7 @@ function App() {
           </aside>
  
           {/* --- MAIN PAGE CONTENT --- */}
-          <main className="flex-1 overflow-y-auto p-8 relative">
+          <main className="flex-1 overflow-y-auto p-3 sm:p-5 lg:p-8 relative">
               
               {/* MAIN DATA CARD */}
               <div className="bg-transparent min-h-[60vh]">

@@ -215,11 +215,11 @@ const RecordConsultation: React.FC<RecordConsultationProps> = ({ initialData, on
                     />
                 </div>
 
-                <div className="flex justify-between items-center pt-4 border-t border-slate-100 mt-6 font-sans">
+                <div className="flex flex-col-reverse sm:flex-row justify-between items-center gap-4 pt-4 border-t border-slate-100 mt-6 font-sans">
                     <button 
                         type="button"
                         onClick={onCancel}
-                        className="px-6 py-3 bg-slate-50 text-slate-400 font-bold rounded-lg text-[11px] uppercase tracking-widest hover:bg-slate-100 transition-all flex items-center gap-2"
+                        className="w-full sm:w-auto px-6 py-3 bg-slate-50 text-slate-400 font-bold rounded-lg text-[11px] uppercase tracking-widest hover:bg-slate-100 transition-all flex items-center justify-center gap-2"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -229,7 +229,7 @@ const RecordConsultation: React.FC<RecordConsultationProps> = ({ initialData, on
                     <button 
                         type="submit" 
                         disabled={loading}
-                        className="px-8 py-3 bg-[#556ee6] text-white font-bold rounded-lg text-[13px] uppercase tracking-widest shadow-[0_4px_15px_rgba(85,110,230,0.3)] hover:bg-[#485ec4] hover:-translate-y-0.5 active:scale-95 transition-all flex items-center gap-2"
+                        className="w-full sm:w-auto px-8 py-3 bg-[#556ee6] text-white font-bold rounded-lg text-[13px] uppercase tracking-widest shadow-[0_4px_15px_rgba(85,110,230,0.3)] hover:bg-[#485ec4] hover:-translate-y-0.5 active:scale-95 transition-all flex items-center justify-center gap-2"
                     >
                         {loading && (
                             <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

@@ -223,11 +223,11 @@ const MedicalRecordsForm: React.FC<MedicalRecordsFormProps> = ({
                 </div>
 
                 {/* FORM ACTIONS */}
-                <div className="pt-6 border-t border-slate-100 flex gap-4 flex-row-reverse font-sans">
+                <div className="pt-6 border-t border-slate-100 flex flex-col sm:flex-row-reverse gap-4 font-sans">
                     <button 
                         type="submit" 
                         disabled={loading} 
-                        className="px-10 py-3.5 bg-[#556ee6] text-white font-bold rounded-lg text-[13px] uppercase tracking-widest shadow-[0_8px_20px_rgba(85,110,230,0.3)] hover:bg-[#485ec4] hover:-translate-y-0.5 active:scale-95 transition-all flex items-center justify-center gap-2"
+                        className="w-full sm:w-auto px-10 py-3.5 bg-[#556ee6] text-white font-bold rounded-lg text-[13px] uppercase tracking-widest shadow-[0_8px_20px_rgba(85,110,230,0.3)] hover:bg-[#485ec4] hover:-translate-y-0.5 active:scale-95 transition-all flex items-center justify-center gap-2"
                     >
                         {loading && (
                             <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -240,7 +240,7 @@ const MedicalRecordsForm: React.FC<MedicalRecordsFormProps> = ({
                     <button 
                         type="button" 
                         onClick={onCancel} 
-                        className="px-8 py-3.5 bg-white border border-slate-300 text-slate-600 font-bold rounded-lg text-[11px] uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm"
+                        className="w-full sm:w-auto px-8 py-3.5 bg-white border border-slate-300 text-slate-600 font-bold rounded-lg text-[11px] uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm"
                     >
                         Discard
                     </button>

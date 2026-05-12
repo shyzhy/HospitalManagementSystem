@@ -140,7 +140,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel, 
                     </div>
                 </div>
 
-                <div className="flex justify-between items-center pt-8 font-sans">
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 font-sans">
                     {!isInline ? (
                         <button 
                             type="button" 
@@ -158,7 +158,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSubmit, onCancel, 
                     <button 
                         type="submit" 
                         disabled={loading} 
-                        className="px-10 py-5 bg-emerald-600 text-white font-black rounded-2xl text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-emerald-200/50 hover:bg-emerald-700 hover:-translate-y-1 active:scale-95 transition-all flex items-center gap-3"
+                        className="w-full sm:w-auto px-10 py-5 bg-emerald-600 text-white font-black rounded-2xl text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-emerald-200/50 hover:bg-emerald-700 hover:-translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-3"
                     >
                         {loading ? (
                             <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
