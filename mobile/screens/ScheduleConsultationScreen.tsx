@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Activi
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { createConsultation, getDoctors } from '../services/api';
 import * as SecureStore from 'expo-secure-store';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function ScheduleConsultationScreen({ navigation }: any) {
   const [loading, setLoading] = useState(false);
@@ -10,6 +11,9 @@ export default function ScheduleConsultationScreen({ navigation }: any) {
   const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
   const [symptoms, setSymptoms] = useState('');
   const [fetchingDoctors, setFetchingDoctors] = useState(true);
+  
+  const [consultationDate, setConsultationDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -25,6 +29,13 @@ export default function ScheduleConsultationScreen({ navigation }: any) {
     fetchDoctors();
   }, []);
 
+  const onDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      setConsultationDate(selectedDate);
+    }
+  };
+
   const handleSchedule = async () => {
     if (!selectedDoctor || !symptoms.trim()) {
       Alert.alert("Required", "Please select a doctor and describe your symptoms.");
@@ -36,11 +47,11 @@ export default function ScheduleConsultationScreen({ navigation }: any) {
       const patientId = await SecureStore.getItemAsync('patientId');
       
       await createConsultation({
-        patient: patientId ? parseInt(patientId) : 1, // Fallback
+        patient: patientId ? parseInt(patientId) : 1,
         doctor: selectedDoctor.id,
-        consultation_date: new Date().toISOString().split('T')[0], // Default to today
+        consultation_date: consultationDate.toISOString().split('T')[0],
         symptoms: symptoms.trim(),
-        diagnosis: '' // Initial state
+        diagnosis: ''
       });
       
       Alert.alert("Success", "Appointment scheduled successfully! Your doctor will review it shortly.");
@@ -99,6 +110,30 @@ export default function ScheduleConsultationScreen({ navigation }: any) {
               </TouchableOpacity>
             ))}
           </View>
+        )}
+
+        {/* Date Selection */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>CONSULTATION DATE</Text>
+          <TouchableOpacity 
+            style={styles.datePickerBtn}
+            onPress={() => setShowDatePicker(true)}
+          >
+            <MaterialCommunityIcons name="calendar-month" size={20} color="#556ee6" />
+            <Text style={styles.datePickerText}>
+              {consultationDate.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {showDatePicker && (
+          <DateTimePicker
+            value={consultationDate}
+            mode="date"
+            display="default"
+            minimumDate={new Date()}
+            onChange={onDateChange}
+          />
         )}
 
         {/* Symptoms Input */}
@@ -254,6 +289,21 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     minHeight: 120,
     textAlignVertical: 'top',
+  },
+  datePickerBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 16,
+    padding: 16,
+  },
+  datePickerText: {
+    fontSize: 14,
+    color: '#1e293b',
+    fontWeight: '600',
+    marginLeft: 12,
   },
   submitBtn: {
     backgroundColor: '#1e293b',

@@ -32,7 +32,7 @@ export default function PrescriptionDetailScreen({ route, navigation }: any) {
             <MaterialCommunityIcons name="doctor" size={24} color="#556ee6" />
             <View style={styles.infoText}>
               <Text style={styles.infoLabel}>PRESCRIBING PHYSICIAN</Text>
-              <Text style={styles.infoValue}>Dr. {prescription.doctor_name || prescription.doctor}</Text>
+              <Text style={styles.infoValue}> {prescription.doctor_name || prescription.doctor}</Text>
             </View>
           </View>
         </View>
@@ -71,7 +71,7 @@ export default function PrescriptionDetailScreen({ route, navigation }: any) {
           <MaterialCommunityIcons name="shield-check-outline" size={16} color="#34c38f" />
           <Text style={styles.adminNoteText}>This is a verified digital prescription.</Text>
         </View>
-        
+
         <View style={{ height: 40 }} />
       </ScrollView>
     </View>

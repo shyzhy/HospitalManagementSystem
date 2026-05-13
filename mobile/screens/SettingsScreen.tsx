@@ -91,7 +91,9 @@ export default function SettingsScreen({ navigation }: any) {
   const getProfilePicUrl = () => {
     if (!user?.profile_picture_url) return null;
     if (user.profile_picture_url.startsWith('http')) return user.profile_picture_url;
-    return `${API_URL}${user.profile_picture_url}`;
+    // Check if it already has /media/
+    const path = user.profile_picture_url.startsWith('/') ? user.profile_picture_url : `/${user.profile_picture_url}`;
+    return `${API_URL}${path}`;
   };
 
   return (
@@ -113,7 +115,11 @@ export default function SettingsScreen({ navigation }: any) {
         <View style={styles.profileCard}>
           <View style={styles.avatarWrapper}>
             {getProfilePicUrl() ? (
-              <Image source={{ uri: getProfilePicUrl() }} style={styles.avatar} />
+              <Image 
+                source={{ uri: getProfilePicUrl() }} 
+                style={styles.avatar} 
+                key={getProfilePicUrl()} // Force refresh
+              />
             ) : (
               <View style={styles.placeholderAvatar}>
                 <Text style={styles.avatarText}>
@@ -134,7 +140,7 @@ export default function SettingsScreen({ navigation }: any) {
             </TouchableOpacity>
           </View>
           
-          <Text style={styles.userName}>{user?.first_name} {user?.last_name || user?.username}</Text>
+          <Text style={styles.userName}>{user?.profile_name || `${user?.first_name} ${user?.last_name}`}</Text>
           <View style={styles.roleBadge}>
             <Text style={styles.roleText}>{role?.toUpperCase()} PORTAL</Text>
           </View>
@@ -143,9 +149,10 @@ export default function SettingsScreen({ navigation }: any) {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>ACCOUNT SETTINGS</Text>
+          
           <TouchableOpacity 
             style={styles.menuItem}
-            onPress={() => Alert.alert("Profile", "Please use the MedFlow web dashboard for full profile updates.")}
+            onPress={() => Alert.alert("Clinical Records", "Full medical history is available in the Consultations module.")}
           >
             <View style={[styles.menuIcon, { backgroundColor: '#eff6ff' }]}>
               <MaterialCommunityIcons name="account-outline" size={20} color="#3b82f6" />
@@ -156,7 +163,7 @@ export default function SettingsScreen({ navigation }: any) {
           
           <TouchableOpacity 
             style={styles.menuItem}
-            onPress={() => Alert.alert("Security", "Password modification is handled via secure web gateway.")}
+            onPress={() => Alert.alert("Security", "Password modification is handled via secure web gateway for your protection.")}
           >
             <View style={[styles.menuIcon, { backgroundColor: '#f5f3ff' }]}>
               <MaterialCommunityIcons name="lock-outline" size={20} color="#8b5cf6" />
@@ -165,7 +172,10 @@ export default function SettingsScreen({ navigation }: any) {
             <MaterialCommunityIcons name="chevron-right" size={20} color="#cbd5e1" />
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity 
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('Notifications')}
+          >
             <View style={[styles.menuIcon, { backgroundColor: '#ecfdf5' }]}>
               <MaterialCommunityIcons name="bell-outline" size={20} color="#10b981" />
             </View>

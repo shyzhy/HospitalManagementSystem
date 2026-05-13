@@ -78,6 +78,14 @@ export const getMedicalRecords = async () => {
   return api.get('/api/v1/medical-records/');
 };
 
+export const getNotifications = async () => {
+  return api.get('/api/v1/notifications/');
+};
+
+export const updateNotification = async (id: number, data: any) => {
+  return api.patch(`/api/v1/notifications/${id}/`, data);
+};
+
 export const updatePatient = async (id: number, data: any) => {
   return api.patch(`/api/v1/patients/${id}/`, data);
 };

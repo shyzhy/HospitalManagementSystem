@@ -8,10 +8,12 @@ urlpatterns = [
     # Patients
     path('patients/', views.PatientListCreateView.as_view(), name='patient-list'),
     path('patients/<int:pk>/', views.PatientRetrieveUpdateDestroyView.as_view(), name='patient-detail'),
+    path('patients/<int:pk>/upload_picture/', views.PatientUploadPictureView.as_view(), name='patient-upload-picture'),
 
     # Doctors
     path('doctors/', views.DoctorListCreateView.as_view(), name='doctor-list'),
     path('doctors/<int:pk>/', views.DoctorRetrieveUpdateDestroyView.as_view(), name='doctor-detail'),
+    path('doctors/<int:pk>/upload_picture/', views.DoctorUploadPictureView.as_view(), name='doctor-upload-picture'),
 
     # Consultations
     path('consultations/', views.ConsultationListCreateView.as_view(), name='consultation-list'),
@@ -28,4 +30,8 @@ urlpatterns = [
     # Medical Records
     path('medical-records/', views.MedicalRecordListCreateView.as_view(), name='medical-records-list'),
     path('medical-records/<int:pk>/', views.MedicalRecordRetrieveUpdateDestroyView.as_view(), name='medical-records-detail'),
+
+    # Notifications
+    path('notifications/', views.NotificationListView.as_view(), name='notification-list'),
+    path('notifications/<int:pk>/', views.NotificationUpdateView.as_view(), name='notification-detail'),
 ]

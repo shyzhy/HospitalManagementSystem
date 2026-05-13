@@ -1,7 +1,7 @@
 from djoser.serializers import UserSerializer as DjoserUserSerializer
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Patient, Doctor, Consultation, Prescription, Treatment, MedicalRecord
+from .models import Patient, Doctor, Consultation, Prescription, Treatment, MedicalRecord, Notification
 
 
 # --- USER SERIALIZER ---
@@ -11,12 +11,23 @@ class CustomUserSerializer(DjoserUserSerializer):
     is_patient = serializers.SerializerMethodField()
     patient_id = serializers.SerializerMethodField()
     profile_name = serializers.SerializerMethodField()
+    profile_picture_url = serializers.SerializerMethodField()
 
     class Meta(DjoserUserSerializer.Meta):
         fields = (
             'id', 'email', 'first_name', 'last_name', 'profile_name',
-            'is_staff', 'is_superuser', 'is_doctor', 'doctor_id', 'is_patient', 'patient_id'
+            'is_staff', 'is_superuser', 'is_doctor', 'doctor_id', 'is_patient', 'patient_id',
+            'profile_picture_url'
         )
+
+    def get_profile_picture_url(self, obj):
+        doctor = Doctor.objects.filter(user=obj).first()
+        if doctor and doctor.profile_picture:
+            return doctor.profile_picture.url
+        patient = Patient.objects.filter(user=obj).first()
+        if patient and patient.profile_picture:
+            return patient.profile_picture.url
+        return None
 
     def get_is_doctor(self, obj):
         return Doctor.objects.filter(user=obj).exists()
@@ -154,3 +165,8 @@ class MedicalRecordSerializer(serializers.ModelSerializer):
         if not self.instance and MedicalRecord.objects.filter(patient=value).exists():
             raise serializers.ValidationError("This patient already has a medical record. Please EDIT the existing one instead.")
         return value
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = '__all__'

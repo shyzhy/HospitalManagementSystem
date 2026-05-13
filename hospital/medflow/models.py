@@ -95,3 +95,19 @@ class Prescription(models.Model):
 
     def __str__(self):
         return f"{self.medication} - {self.patient}"
+
+class Notification(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='notifications')
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    notification_type = models.CharField(max_length=50, choices=[
+        ('consultation', 'Consultation'),
+        ('prescription', 'Prescription'),
+        ('general', 'General')
+    ], default='general')
+    related_id = models.IntegerField(null=True, blank=True)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Notification for {self.patient}: {self.title}"

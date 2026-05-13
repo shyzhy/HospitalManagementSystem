@@ -1,53 +1,52 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-
-const MOCK_NOTIFICATIONS = [
-  {
-    id: '1',
-    title: 'New Diagnosis Added',
-    body: 'Dr. Yin added diagnosis from your consultation',
-    type: 'consultation',
-    data: { consultation: { id: 1, patient_name: 'John Doe', doctor_name: 'Dr. Yin', diagnosis: 'Common Cold', symptoms: 'Fever, Cough', consultation_date: '2026-05-13' } },
-    time: '2 hours ago',
-    read: false,
-  },
-  {
-    id: '2',
-    title: 'Prescription Issued',
-    body: 'Dr. Yin prescribed/issued you a prescription',
-    type: 'prescription',
-    data: { prescription: { id: 1, medication_name: 'Amoxicillin', dosage: '500mg', frequency: 'Twice a day', date_prescribed: '2026-05-13', doctor_name: 'Dr. Yin' } },
-    time: '5 hours ago',
-    read: true,
-  }
-];
+import { getNotifications } from '../services/api';
 
 export default function NotificationsScreen({ navigation }: any) {
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await getNotifications();
+      setNotifications(response.data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const renderItem = ({ item }: { item: any }) => (
     <TouchableOpacity 
-      style={[styles.notificationCard, !item.read && styles.unreadCard]}
+      style={[styles.notificationCard, !item.is_read && styles.unreadCard]}
       onPress={() => {
-        if (item.type === 'consultation') {
-          navigation.navigate('ConsultationDetail', item.data);
-        } else if (item.type === 'prescription') {
-          navigation.navigate('PrescriptionDetail', item.data);
+        // Redirection logic based on type
+        if (item.notification_type === 'consultation') {
+          navigation.navigate('Consultations');
+        } else if (item.notification_type === 'prescription') {
+          navigation.navigate('Prescriptions');
         }
       }}
     >
       <View style={styles.iconContainer}>
         <MaterialCommunityIcons 
-          name={item.type === 'consultation' ? 'stethoscope' : 'pill'} 
+          name={item.notification_type === 'consultation' ? 'stethoscope' : 'pill'} 
           size={24} 
-          color={item.type === 'consultation' ? '#556ee6' : '#f97316'} 
+          color={item.notification_type === 'consultation' ? '#556ee6' : '#f97316'} 
         />
       </View>
       <View style={styles.textContainer}>
         <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.body}>{item.body}</Text>
-        <Text style={styles.time}>{item.time}</Text>
+        <Text style={styles.body}>{item.message}</Text>
+        <Text style={styles.time}>{new Date(item.created_at).toLocaleString()}</Text>
       </View>
-      {!item.read && <View style={styles.unreadDot} />}
+      {!item.is_read && <View style={styles.unreadDot} />}
     </TouchableOpacity>
   );
 
@@ -63,13 +62,25 @@ export default function NotificationsScreen({ navigation }: any) {
         </View>
       </View>
 
-      <FlatList
-        data={MOCK_NOTIFICATIONS}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-      />
+      {loading ? (
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color="#556ee6" />
+        </View>
+      ) : (
+        <FlatList
+          data={notifications}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderItem}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <MaterialCommunityIcons name="bell-off-outline" size={48} color="#cbd5e1" />
+              <Text style={styles.emptyText}>No clinical updates found.</Text>
+            </View>
+          }
+        />
+      )}
     </View>
   );
 }
@@ -166,5 +177,21 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: '#556ee6',
     marginLeft: 8,
+  },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 100,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#94a3b8',
+    marginTop: 12,
+    fontWeight: 'bold',
   },
 });

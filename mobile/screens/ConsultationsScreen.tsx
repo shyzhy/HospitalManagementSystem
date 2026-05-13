@@ -23,14 +23,14 @@ export default function ConsultationsScreen({ navigation }: any) {
     }
   };
 
-  const filteredConsultations = consultations.filter(c => 
+  const filteredConsultations = consultations.filter(c =>
     (c.patient_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
     (c.primary_complaint || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const renderItem = ({ item }: { item: any }) => (
-    <TouchableOpacity 
-      style={styles.card} 
+    <TouchableOpacity
+      style={styles.card}
       activeOpacity={0.7}
       onPress={() => navigation.navigate('ConsultationDetail', { consultation: item })}
     >
@@ -46,9 +46,9 @@ export default function ConsultationsScreen({ navigation }: any) {
           <Text style={styles.dateText}>{new Date(item.consultation_date).toLocaleDateString()}</Text>
         </View>
       </View>
-      
+
       <View style={styles.divider} />
-      
+
       <View style={styles.cardFooter}>
         <View style={styles.footerItem}>
           <MaterialCommunityIcons name="clock-outline" size={14} color="#94a3b8" />
@@ -56,7 +56,7 @@ export default function ConsultationsScreen({ navigation }: any) {
         </View>
         <View style={styles.footerItem}>
           <MaterialCommunityIcons name="doctor" size={14} color="#94a3b8" />
-          <Text style={styles.footerText}>Dr. {item.doctor_name || item.doctor}</Text>
+          <Text style={styles.footerText}> {item.doctor_name || item.doctor}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -87,7 +87,7 @@ export default function ConsultationsScreen({ navigation }: any) {
           style={styles.searchInput}
         />
       </View>
-      
+
       {loading ? (
         <View style={styles.center}>
           <ActivityIndicator size="large" color="#556ee6" />
