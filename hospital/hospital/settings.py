@@ -9,7 +9,7 @@ SECRET_KEY = 'django-insecure-7rwyqhc^u&micuoif5cf+xxebp@*sqz7o8gju$z+xg!!mvw31p
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 INSTALLED_APPS = [
@@ -65,11 +65,11 @@ WSGI_APPLICATION = 'hospital.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'railway',
+        'NAME': 'medflow',
         'USER': 'postgres',
-        'PASSWORD': 'RokFDTPGVWXOFAfWadzKhGazCXVOzyZF',
-        'HOST': 'yamabiko.proxy.rlwy.net',
-        'PORT': '19892',
+        'PASSWORD': 'shuri',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
     }
 }
 
