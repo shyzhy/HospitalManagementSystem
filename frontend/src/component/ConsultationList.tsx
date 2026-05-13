@@ -11,6 +11,7 @@ const ConsultationList: React.FC<ConsultationListProps> = ({ patients, onUpdate 
     const [consultations, setConsultations] = useState<Consultation[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const userRole = localStorage.getItem('role');
 
     useEffect(() => {
         fetchConsultations();
@@ -74,7 +75,9 @@ const ConsultationList: React.FC<ConsultationListProps> = ({ patients, onUpdate 
                         <tr className="bg-slate-50/50 border-b border-slate-100">
                             <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Encounter Date</th>
                             <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Patient Identity</th>
-                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden sm:table-cell">Attending Physician</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden sm:table-cell">
+                                {userRole === 'doctor' ? 'Diagnosis Status' : 'Attending Physician'}
+                            </th>
                             <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                         </tr>
                     </thead>
@@ -99,10 +102,19 @@ const ConsultationList: React.FC<ConsultationListProps> = ({ patients, onUpdate 
                                         </div>
                                     </td>
                                     <td className="px-4 sm:px-6 py-5 hidden sm:table-cell">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
-                                            <span className="text-[11px] font-bold text-slate-500 italic">{consultation.doctor_name}</span>
-                                        </div>
+                                        {userRole === 'doctor' ? (
+                                            <div className="flex items-center gap-2">
+                                                <div className={`w-1.5 h-1.5 rounded-full ${consultation.diagnosis ? 'bg-emerald-400 animate-pulse' : 'bg-orange-400'}`}></div>
+                                                <span className={`text-[10px] font-black uppercase tracking-widest ${consultation.diagnosis ? 'text-emerald-600' : 'text-orange-500'}`}>
+                                                    {consultation.diagnosis ? 'Completed Diagnosis' : 'Pending Diagnosis'}
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-slate-300"></div>
+                                                <span className="text-[11px] font-bold text-slate-500 italic">{consultation.doctor_name}</span>
+                                            </div>
+                                        )}
                                     </td>
                                     <td className="px-4 sm:px-6 py-5 text-right opacity-60 group-hover:opacity-100 transition-opacity">
                                         <div className="flex items-center justify-end gap-3">

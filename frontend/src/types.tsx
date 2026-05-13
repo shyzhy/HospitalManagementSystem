@@ -65,7 +65,9 @@ export interface Treatment {
     patient_name?: string;
     patient_first_name?: string;
     patient_last_name?: string;
+    patient_profile_picture_url?: string;
     doctor_name?: string;
+    doctor_profile_picture_url?: string;
     treatment_date?: string;
 }
 
@@ -80,8 +82,10 @@ export interface Prescription {
     patient_name?: string;
     patient_first_name?: string;
     patient_last_name?: string;
+    patient_profile_picture_url?: string;
     doctor: number;
     doctor_name?: string;
+    doctor_profile_picture_url?: string;
     date_prescribed?: string;
 }
 

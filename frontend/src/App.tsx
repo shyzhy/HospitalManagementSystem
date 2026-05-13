@@ -27,6 +27,7 @@ function AppContent() {
   const userName = localStorage.getItem('userName') || 'User';
 
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [consultedPatients, setConsultedPatients] = useState<Patient[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -39,8 +40,15 @@ function AppContent() {
     const fetchData = async () => {
       if (userRole === 'admin' || userRole === 'doctor' || userRole === 'patient') {
           try {
+              // Always fetch all patients for dropdowns/forms
               const pData = await getPatients();
               setPatients(pData);
+
+              // If doctor, also fetch the restricted list for their "Patients Directory"
+              if (userRole === 'doctor') {
+                  const cpData = await getPatients(true);
+                  setConsultedPatients(cpData);
+              }
           } catch (e) {
               console.error("Patient Fetch Error:", e);
           }
@@ -192,7 +200,15 @@ function AppContent() {
             
             <Route path="/patients" element={
               <PrivateRoute isAuthenticated={!!token}>
-                {userRole !== 'patient' ? <PatientsView patients={patients} userRole={userRole} canRegisterNew={canRegisterNew()} onRefresh={handleRefresh} /> : <Navigate to="/" />}
+                {userRole !== 'patient' ? (
+                  <PatientsView 
+                    patients={userRole === 'doctor' ? consultedPatients : patients} 
+                    doctors={doctors}
+                    userRole={userRole} 
+                    canRegisterNew={canRegisterNew()} 
+                    onRefresh={handleRefresh} 
+                  />
+                ) : <Navigate to="/" />}
               </PrivateRoute>
             } />
             

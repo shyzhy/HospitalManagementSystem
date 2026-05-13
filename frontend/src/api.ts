@@ -29,8 +29,9 @@ API.interceptors.response.use(
 );
 
 // --- PATIENTS ---
-export const getPatients = async (): Promise<Patient[]> => {
-    const response = await API.get<Patient[]>("patients/");
+export const getPatients = async (consultedOnly: boolean = false): Promise<Patient[]> => {
+    const url = consultedOnly ? "patients/?consulted_only=true" : "patients/";
+    const response = await API.get<Patient[]>(url);
     return response.data;
 };
 export const createPatient = async (data: Partial<Patient>): Promise<Patient> => {
@@ -67,6 +68,10 @@ export const getConsultations = async (): Promise<Consultation[]> => {
     const response = await API.get<Consultation[]>("consultations/");
     return response.data;
 };
+export const getConsultationsByPatient = async (patientId: number): Promise<Consultation[]> => {
+    const response = await API.get<Consultation[]>(`consultations/?patient=${patientId}`);
+    return response.data;
+};
 export const createConsultation = async (data: Partial<Consultation>): Promise<Consultation> => {
     const response = await API.post<Consultation>("consultations/", data);
     return response.data;
@@ -82,6 +87,10 @@ export const deleteConsultation = async (id: number): Promise<void> => {
 // --- PRESCRIPTIONS ---
 export const getPrescriptions = async (): Promise<Prescription[]> => {
     const response = await API.get<Prescription[]>("prescriptions/");
+    return response.data;
+};
+export const getPrescriptionsByPatient = async (patientId: number): Promise<Prescription[]> => {
+    const response = await API.get<Prescription[]>(`prescriptions/?patient=${patientId}`);
     return response.data;
 };
 export const createPrescription = async (data: Partial<Prescription>): Promise<Prescription> => {

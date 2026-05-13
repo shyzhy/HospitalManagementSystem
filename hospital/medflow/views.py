@@ -86,7 +86,17 @@ class PatientListCreateView(ListCreateAPIView):
         
         doctor = getattr(user, 'doctor_profile', None)
         if doctor:
-            # Doctors can view all active patients in the directory
+            # Doctors can view all patients for directory searching, 
+            # OR restricted list based on query param
+            consulted_only = self.request.query_params.get('consulted_only') == 'true'
+            if consulted_only:
+                return Patient.objects.filter(
+                    models.Q(is_deleted=False) & (
+                        models.Q(consultations__doctor=doctor) | 
+                        models.Q(treatments__doctor=doctor) | 
+                        models.Q(prescriptions__doctor=doctor)
+                    )
+                ).distinct()
             return Patient.objects.filter(is_deleted=False)
         
         patient = getattr(user, 'patient_profile', None)
@@ -123,7 +133,7 @@ class PatientRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
         
         doctor = getattr(user, 'doctor_profile', None)
         if doctor:
-            # Doctors can access any active patient record
+            # Doctors can access any active patient record for clinical continuity
             return Patient.objects.filter(is_deleted=False)
         
         patient = getattr(user, 'patient_profile', None)
@@ -212,6 +222,17 @@ class ConsultationListCreateView(ListCreateAPIView):
         
         doctor = getattr(user, 'doctor_profile', None)
         if doctor:
+            patient_id = self.request.query_params.get('patient')
+            if patient_id:
+                # Doctors can view all consultations for a patient they've interacted with
+                if Patient.objects.filter(
+                    models.Q(id=patient_id) & (
+                        models.Q(consultations__doctor=doctor) | 
+                        models.Q(treatments__doctor=doctor) | 
+                        models.Q(prescriptions__doctor=doctor)
+                    )
+                ).exists():
+                    return self.queryset.filter(patient_id=patient_id)
             return self.queryset.filter(doctor=doctor)
         
         patient = getattr(user, 'patient_profile', None)
@@ -254,6 +275,17 @@ class PrescriptionListCreateView(ListCreateAPIView):
         
         doctor = getattr(user, 'doctor_profile', None)
         if doctor:
+            patient_id = self.request.query_params.get('patient')
+            if patient_id:
+                # Doctors can view all prescriptions for a patient they've interacted with
+                if Patient.objects.filter(
+                    models.Q(id=patient_id) & (
+                        models.Q(consultations__doctor=doctor) | 
+                        models.Q(treatments__doctor=doctor) | 
+                        models.Q(prescriptions__doctor=doctor)
+                    )
+                ).exists():
+                    return self.queryset.filter(patient_id=patient_id)
             return self.queryset.filter(doctor=doctor)
         
         patient = getattr(user, 'patient_profile', None)
@@ -296,6 +328,17 @@ class TreatmentListCreateView(ListCreateAPIView):
         
         doctor = getattr(user, 'doctor_profile', None)
         if doctor:
+            patient_id = self.request.query_params.get('patient')
+            if patient_id:
+                # Doctors can view all treatments for a patient they've interacted with
+                if Patient.objects.filter(
+                    models.Q(id=patient_id) & (
+                        models.Q(consultations__doctor=doctor) | 
+                        models.Q(treatments__doctor=doctor) | 
+                        models.Q(prescriptions__doctor=doctor)
+                    )
+                ).exists():
+                    return self.queryset.filter(patient_id=patient_id)
             return self.queryset.filter(doctor=doctor)
         
         patient = getattr(user, 'patient_profile', None)

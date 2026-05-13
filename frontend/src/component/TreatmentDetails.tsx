@@ -12,142 +12,139 @@ const TreatmentDetails: React.FC<TreatmentDetailsProps> = ({ treatment, onEdit, 
     const userRole = localStorage.getItem('role') || 'patient';
 
     return (
-        <div className="bg-white w-full rounded-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500 border border-slate-200 shadow-xl">
-            
-            {/* Header Section */}
-            <div className="bg-emerald-600 p-8 text-white relative overflow-hidden">
-                <div className="relative z-10 flex justify-between items-center">
-                    <div>
-                        <div className="flex items-center gap-2 mb-2">
-                             <span className="px-2 py-0.5 bg-white/20 rounded-md text-[9px] font-black uppercase tracking-widest backdrop-blur-md">Clinical Procedure</span>
-                             <span className="px-2 py-0.5 bg-white/10 text-emerald-100 rounded-md text-[9px] font-black uppercase tracking-widest backdrop-blur-md border border-white/10">Active Treatment Plan</span>
-                        </div>
-                        <h3 className="text-2xl font-black uppercase tracking-tighter leading-none">Treatment Details</h3>
-                        <p className="text-xs text-emerald-100/60 font-medium mt-2 italic shadow-sm">Procedural Record #{treatment.id?.toString().padStart(4, '0')}</p>
+        <div className="bg-white w-full rounded-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500 border border-slate-200">
+
+            {/* Header Section - Modern Minimalist */}
+            <div className="bg-white p-8 border-b border-slate-100 relative overflow-hidden flex justify-between items-center">
+                <div className="relative z-10">
+                    <div className="flex items-center gap-3 mb-2">
+                        <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-md text-[9px] font-black uppercase tracking-widest border border-emerald-100">Clinical Procedure</span>
+                        <span className="px-2 py-0.5 bg-slate-50 text-slate-400 rounded-md text-[9px] font-black uppercase tracking-widest border border-slate-200">System Record</span>
                     </div>
-                    <div className="p-4 bg-white/10 rounded-2xl backdrop-blur-xl border border-white/20 shadow-2xl">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                    </div>
+                    <h3 className="text-xl font-bold text-slate-800 tracking-tight">Treatment Plan Details</h3>
+                    <p className="text-[10px] text-slate-400 font-bold mt-1.5 uppercase tracking-[0.2em]">MedFlow &gt; Clinical Documentation</p>
                 </div>
-                
-                {/* Decorative background element */}
-                <div className="absolute -right-16 -top-16 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
-                <div className="absolute left-1/4 -bottom-12 w-32 h-32 bg-emerald-400/10 rounded-full blur-2xl"></div>
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-emerald-600 shadow-sm relative z-10">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                </div>
             </div>
 
             <div className="p-10 space-y-10">
-                
-                {/* Primary Info Area */}
-                <div className="flex flex-col lg:flex-row gap-8 items-stretch">
+
+                {/* Identification & Metadata Area */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
                     {/* Patient Identification Card */}
-                    <div className="flex-1 bg-slate-50/80 rounded-3xl p-6 border border-slate-100 flex items-center gap-6">
-                        <div className="w-20 h-20 rounded-2xl bg-white shadow-sm border border-slate-200 text-emerald-600 flex items-center justify-center font-black text-3xl font-mono">
-                            {treatment.patient_name?.charAt(0) || 'P'}
-                        </div>
+                    <div className="lg:col-span-2 bg-slate-50/50 rounded-3xl p-8 border border-slate-100 flex items-center gap-6">
+                        {treatment.patient_profile_picture_url ? (
+                            <img
+                                src={treatment.patient_profile_picture_url}
+                                alt={treatment.patient_name}
+                                className="w-20 h-20 rounded-full object-cover border-2 border-white shadow-md"
+                            />
+                        ) : (
+                            <div className="w-20 h-20 rounded-full bg-white border border-slate-200 text-emerald-600 flex items-center justify-center font-black text-2xl shadow-sm">
+                                {treatment.patient_name?.charAt(0) || 'P'}
+                            </div>
+                        )}
                         <div className="space-y-1">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Patient Assignment</label>
-                            <p className="text-2xl font-black text-slate-800 tracking-tight leading-none">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Target Patient</p>
+                            <p className="text-2xl font-bold text-slate-800 tracking-tight leading-none">
                                 {treatment.patient_name || 'Anonymous Patient'}
                             </p>
-                            <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded leading-none">ID: #{treatment.patient}</span>
+                            <div className="flex items-center gap-2 mt-2">
+                                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">INTERNAL ID: #{treatment.patient}</span>
+                                <span className="text-[10px] font-bold text-slate-400">Verified Identity</span>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Procedure Metadata Card */}
-                    <div className="lg:w-1/3 bg-slate-800 rounded-3xl p-6 text-white space-y-4 shadow-lg shadow-slate-200/50">
-                        <div className="flex justify-between items-end border-b border-white/10 pb-4">
+                    {/* Meta Info Card */}
+                    <div className="bg-slate-900 rounded-3xl p-8 text-white flex flex-col justify-between shadow-xl shadow-slate-200">
+                        <div className="space-y-1">
+                            <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em]">Clinical ID</p>
+                            <p className="text-xl font-bold font-mono tracking-tighter text-emerald-400">#TRT-{treatment.id?.toString().padStart(4, '0')}</p>
+                        </div>
+                        <div className="mt-6 pt-6 border-t border-white/10 flex justify-between items-end">
                             <div className="space-y-1">
-                                <label className="text-[9px] font-black text-white/40 uppercase tracking-widest">Enrollment Date</label>
-                                <p className="text-lg font-black text-emerald-400">
-                                    {treatment.treatment_date ? new Date(treatment.treatment_date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }) : 'N/A'}
-                                </p>
+                                <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em]">Assignment Date</p>
+                                <p className="text-sm font-bold">{treatment.treatment_date ? new Date(treatment.treatment_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</p>
                             </div>
                             <div className="text-right">
-                                <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest block whitespace-nowrap">Clinical ID</span>
-                                <span className="text-sm font-black font-mono tracking-tighter">#TRT-{treatment.id?.toString().padStart(4, '0')}</span>
+                                <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em]">Status</p>
+                                <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Active</p>
                             </div>
-                        </div>
-                        <div className="pt-1">
-                            <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block mb-1">Prescribing Physician</label>
-                            <p className="text-sm font-bold text-white/90 truncate italic">Dr. {treatment.doctor_name}</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Procedure Specifics */}
-                <div className="space-y-8">
-                    <div className="space-y-4">
-                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-emerald-100/50 text-emerald-600 flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                            </div>
-                            <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Procedure / Plan Name</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div className="space-y-6">
+                        <div className="flex items-center gap-3">
+                            <div className="w-1.5 h-6 bg-emerald-500 rounded-full"></div>
+                            <h4 className="text-[11px] font-black text-slate-800 uppercase tracking-widest">Designated Procedure</h4>
                         </div>
-                        <div className="p-6 bg-white border border-slate-200 rounded-3xl shadow-sm">
-                            <p className="text-xl font-black text-slate-800 tracking-tight">{treatment.treatment_name}</p>
+                        <div className="p-8 bg-white border border-slate-100 rounded-3xl shadow-sm hover:border-emerald-100 transition-colors">
+                            <p className="text-xl font-bold text-slate-800 tracking-tight leading-relaxed">
+                                {treatment.treatment_name}
+                            </p>
+                            <div className="mt-4 flex items-center gap-3 pt-4 border-t border-slate-50">
+                                {treatment.doctor_profile_picture_url ? (
+                                    <img src={treatment.doctor_profile_picture_url} className="w-6 h-6 rounded-full object-cover" alt="doctor" />
+                                ) : (
+                                    <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-400">D</div>
+                                )}
+                                <span className="text-[11px] font-bold text-slate-500">Authorized by {treatment.doctor_name}</span>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="space-y-4">
-                        <h4 className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            Clinical Instructions & Plan Detail
-                        </h4>
-                        <div className="p-8 bg-slate-50/50 border border-slate-100 rounded-3xl text-sm text-slate-600 font-medium leading-relaxed whitespace-pre-wrap italic">
-                            {treatment.description || 'Detailed clinical procedural notes are pending for this treatment record.'}
+                    <div className="space-y-6">
+                        <div className="flex items-center gap-3">
+                            <div className="w-1.5 h-6 bg-slate-300 rounded-full"></div>
+                            <h4 className="text-[11px] font-black text-slate-800 uppercase tracking-widest">Clinical Protocol</h4>
+                        </div>
+                        <div className="p-8 bg-slate-50/50 border border-slate-100 rounded-3xl min-h-[160px]">
+                            <p className="text-[13px] text-slate-600 font-medium leading-relaxed italic whitespace-pre-wrap">
+                                {treatment.description || 'Detailed clinical procedural notes are pending for this treatment record.'}
+                            </p>
                         </div>
                     </div>
                 </div>
 
-                {/* Professional Footer Actions */}
-                <div className="space-y-4 pt-8 border-t border-slate-100">
-                    <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-50 p-6 rounded-3xl border border-slate-200/40">
-                        {userRole !== 'patient' ? (
+                {/* Footer Actions */}
+                <div className="space-y-4 pt-10 border-t border-slate-100">
+                    <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
+                        <button
+                            onClick={onClose}
+                            className="w-full sm:w-auto py-3.5 px-8 text-slate-400 font-bold rounded-xl text-[11px] uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center justify-center gap-3"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Return to Directory
+                        </button>
+
+                        {userRole !== 'patient' && (
                             <div className="flex gap-3 w-full sm:w-auto">
-                                <button 
+                                <button
                                     onClick={() => treatment.id && onDelete(treatment.id)}
-                                    className="flex-1 sm:flex-none px-6 py-3 bg-white border border-slate-300 text-red-500 font-bold rounded-xl text-[10px] uppercase tracking-widest hover:bg-red-50 hover:border-red-200 active:scale-95 transition-all shadow-sm"
+                                    className="px-6 py-3.5 bg-white border border-slate-200 text-red-500 font-bold rounded-xl text-[11px] uppercase tracking-widest hover:bg-red-50 hover:border-red-100 active:scale-95 transition-all"
                                 >
-                                    Void Record
+                                    Void Plan
                                 </button>
-                                <button 
+                                <button
                                     onClick={onEdit}
-                                    className="flex-1 sm:flex-none px-10 py-3 bg-emerald-600 text-white font-bold rounded-xl text-[10px] uppercase tracking-widest shadow-[0_8px_20px_rgba(5,150,105,0.2)] hover:bg-emerald-700 hover:-translate-y-0.5 active:scale-95 transition-all flex items-center justify-center gap-2"
+                                    className="px-10 py-3.5 bg-emerald-600 text-white font-bold rounded-xl text-[11px] uppercase tracking-widest shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 hover:-translate-y-0.5 active:scale-95 transition-all flex items-center justify-center gap-2"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                    Modify Plan
+                                    Update Documentation
                                 </button>
-                            </div>
-                        ) : (
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-emerald-500 border border-emerald-100 shadow-sm">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04M12 2.944a11.955 11.955 0 01-8.618 3.04m0 0a11.955 11.955 0 00-3.382 8.356c0 6.627 5.373 12 12 12s12-5.373 12-12c0-3.159-1.223-6.03-3.218-8.158" />
-                                    </svg>
-                                </div>
-                                <div className="space-y-0.5">
-                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Authorized Clinical Record</p>
-                                    <p className="text-[9px] text-slate-400 font-medium italic">This treatment plan is verified. Please contact your physician for changes.</p>
-                                </div>
                             </div>
                         )}
                     </div>
-
-                    <button 
-                        onClick={onClose} 
-                        className="w-full py-4 text-slate-400 font-black rounded-2xl text-[11px] uppercase tracking-[0.3em] hover:bg-slate-50 transition-all text-center flex items-center justify-center gap-3 border border-transparent hover:border-slate-100"
-                    >
-                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                        Back to Clinical Directory
-                    </button>
                 </div>
             </div>
         </div>

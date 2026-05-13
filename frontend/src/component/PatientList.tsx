@@ -28,7 +28,7 @@ const PatientList: React.FC<PatientListProps> = ({ patients, onUpdate, onDelete,
                 </div>
                 <input 
                     type="text" 
-                    placeholder="Search master patient directory..." 
+                    placeholder={userRole === 'admin' ? "Search master patient directory..." : "Search my consulted patients..."} 
                     className="w-full bg-transparent outline-none font-medium text-slate-800 placeholder:text-slate-400 text-sm"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
