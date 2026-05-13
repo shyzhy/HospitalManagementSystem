@@ -120,4 +120,5 @@ export interface MedicalRecord {
     updated_at?: string;
     treatments?: Treatment[];
     prescriptions?: Prescription[];
+    patient_profile_picture_url?: string;
 }

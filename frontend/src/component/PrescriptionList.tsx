@@ -42,9 +42,11 @@ const PrescriptionList: React.FC<PrescriptionListProps> = ({ onUpdate, onView })
                 <table className="w-full text-left min-w-[500px]">
                     <thead className="bg-slate-50/50 border-b border-slate-100">
                         <tr>
-                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Medication Order</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Issue Date</th>
                             <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden sm:table-cell">Patient Identity</th>
-                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden md:table-cell">Prescribing Physician</th>
+                            <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden md:table-cell">
+                                {userRole === 'doctor' ? 'Clinical Medication' : 'Prescribing Physician'}
+                            </th>
                             <th className="px-4 sm:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                         </tr>
                     </thead>
@@ -56,12 +58,14 @@ const PrescriptionList: React.FC<PrescriptionListProps> = ({ onUpdate, onView })
                                 <tr key={p.id} className="hover:bg-slate-50/50 transition-all group cursor-pointer" onClick={() => onView && onView(p)}>
                                     <td className="px-6 py-5">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#556ee6] flex items-center justify-center text-lg shadow-sm border border-blue-100/50">
-                                                💊
+                                            <div className="text-[10px] font-black text-[#556ee6] bg-[#556ee6]/5 px-2.5 py-1.5 rounded-lg border border-[#556ee6]/10 shadow-sm uppercase tracking-tighter">
+                                                {p.date_prescribed ? new Date(p.date_prescribed).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Pending'}
                                             </div>
                                             <div>
-                                                <p className="text-sm font-black text-slate-800 tracking-tight group-hover:text-[#556ee6] transition-colors">{p.medication}</p>
                                                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Order #{p.id?.toString().padStart(4, '0')}</p>
+                                                {userRole !== 'doctor' && (
+                                                    <p className="text-[11px] font-black text-slate-800 tracking-tight mt-0.5">{p.medication}</p>
+                                                )}
                                             </div>
                                         </div>
                                     </td>
@@ -74,7 +78,14 @@ const PrescriptionList: React.FC<PrescriptionListProps> = ({ onUpdate, onView })
                                         </div>
                                     </td>
                                     <td className="px-4 sm:px-6 py-5 hidden md:table-cell">
-                                        <span className="text-[11px] font-bold text-slate-400 italic">{p.doctor_name || `ID: ${p.doctor}`}</span>
+                                        {userRole === 'doctor' ? (
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
+                                                <span className="text-[11px] font-black text-[#556ee6] uppercase tracking-tight">{p.medication}</span>
+                                            </div>
+                                        ) : (
+                                            <span className="text-[11px] font-bold text-slate-400 italic">{p.doctor_name || `ID: ${p.doctor}`}</span>
+                                        )}
                                     </td>
                                     <td className="px-6 py-5 text-right opacity-40 group-hover:opacity-100 transition-opacity">
                                         <div className="flex items-center justify-end gap-3" onClick={(e) => e.stopPropagation()}>

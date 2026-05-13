@@ -138,10 +138,16 @@ class TreatmentSerializer(BaseRecordSerializer):
 # --- MEDICAL RECORD SERIALIZER ---
 class MedicalRecordSerializer(serializers.ModelSerializer):
     patient_name = serializers.CharField(source='patient.__str__', read_only=True)
+    patient_profile_picture_url = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = MedicalRecord
         fields = '__all__'
+
+    def get_patient_profile_picture_url(self, obj):
+        if obj.patient and obj.patient.profile_picture:
+            return obj.patient.profile_picture.url
+        return None
 
     # THE 500 ERROR FIX: This prevents crashes if a patient already has a record!
     def validate_patient(self, value):
