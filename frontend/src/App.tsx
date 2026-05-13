@@ -1,86 +1,49 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import './App.css';
 
-// Component Imports
-import PatientList from './component/PatientList';
-import DoctorList from './component/DoctorList';
-import PatientForm from './component/PatientForm';
-import DoctorForm from './component/DoctorForm';
-import PrescriptionForm from './component/PrescriptionForm';
-import PrescriptionList from './component/PrescriptionList';
-import PrescriptionDetails from './component/PrescriptionDetails';
-import TreatmentForm from './component/TreatmentForm';
-import TreatmentList from './component/TreatmentList';
-import TreatmentDetails from './component/TreatmentDetails';
-import RecordConsultation from './component/RecordConsultation';
-import ConsultationList from './component/ConsultationList';
-import ConsultationDetails from './component/ConsultationDetails';
-import MedicalRecordsList from './component/MedicalRecordsList';
-import MedicalRecordsForm from './component/MedicalRecordsForm';
-import MedicalRecordDetails from './component/MedicalRecordDetails';
-import PatientDetails from './component/PatientDetails';
-import PatientProfile from './component/PatientProfile';
-import DoctorProfile from './component/DoctorProfile';
-import DoctorDetails from './component/DoctorDetails';
+// Views
+import ConsultationsView from './views/ConsultationsView';
+import TreatmentView from './views/TreatmentView';
+import MedicalRecordsView from './views/MedicalRecordsView';
+import PatientsView from './views/PatientsView';
+import DoctorsView from './views/DoctorsView';
+import PrescriptionsView from './views/PrescriptionsView';
+import AccountView from './views/AccountView';
+
+// Components
 import Login from './component/Login';
 import Activate from './component/Activate';
+import Sidebar from './component/Sidebar';
+import PrivateRoute from './router/PrivateRoute';
 
 // API & Types
-import { getPatients, deletePatient, getDoctors, deleteDoctor, deleteConsultation, deleteMedicalRecord, deleteTreatment, deletePrescription } from './api';
-import { Patient, Doctor, Prescription, Consultation, Treatment, MedicalRecord } from './types'; 
+import { getPatients, getDoctors } from './api';
+import { Patient, Doctor } from './types'; 
 
-function App() {
-  // --- AUTH & ROLES ---
+function AppContent() {
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
   const [userRole, setUserRole] = useState<string | null>(localStorage.getItem('role') || 'patient'); 
   const userName = localStorage.getItem('userName') || 'User';
 
-  // --- STATE ---
-  const [activeTab, setActiveTab] = useState<'patients' | 'doctors' | 'consultations' | 'prescriptions' | 'treatment' | 'medical_records' | 'account'>('consultations');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  
   const [patients, setPatients] = useState<Patient[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
-  
-  // Form & Modal Visibility
-  const [showPatientForm, setShowPatientForm] = useState(false);
-  const [showDoctorForm, setShowDoctorForm] = useState(false);
-  const [showConsultationForm, setShowConsultationForm] = useState(false); 
-  const [showConsultationDetails, setShowConsultationDetails] = useState(false);
-  const [showTreatmentDetails, setShowTreatmentDetails] = useState(false);
-  const [showPrescriptionDetails, setShowPrescriptionDetails] = useState(false);
-  const [showPrescriptionForm, setShowPrescriptionForm] = useState(false);
-  const [showTreatmentForm, setShowTreatmentForm] = useState(false);
-  const [showMedicalRecordForm, setShowMedicalRecordForm] = useState(false);
-  const [showMedicalRecordDetails, setShowMedicalRecordDetails] = useState(false);
-  const [showPatientDetails, setShowPatientDetails] = useState(false);
-  const [showDoctorDetails, setShowDoctorDetails] = useState(false);
-
-
-  // Selected Items for Editing/Viewing
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
-  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
-  const [selectedPrescription, setSelectedPrescription] = useState<Prescription | null>(null);
-  const [selectedConsultation, setSelectedConsultation] = useState<Consultation | null>(null);
-  const [selectedTreatment, setSelectedTreatment] = useState<Treatment | null>(null);
-  const [selectedMedicalRecord, setSelectedMedicalRecord] = useState<MedicalRecord | null>(null);
-
   const [refreshKey, setRefreshKey] = useState(0);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // --- DATA FETCHING ---
+  const location = useLocation();
+  const navigate = useNavigate();
+
   useEffect(() => {
     if (!token) return;
     const fetchData = async () => {
       if (userRole === 'admin' || userRole === 'doctor' || userRole === 'patient') {
-          // Fetch Patients
           try {
               const pData = await getPatients();
               setPatients(pData);
           } catch (e) {
               console.error("Patient Fetch Error:", e);
           }
-
-          // Fetch Doctors (Not for patients)
           if (userRole !== 'patient') {
               try {
                   const dData = await getDoctors();
@@ -92,51 +55,56 @@ function App() {
       }
     };
     fetchData();
-  }, [activeTab, refreshKey, token, userRole]);
+  }, [token, userRole, refreshKey]);
 
-  // --- HANDLERS ---
   const handleLoginSuccess = (t: string, r: string) => {
     setToken(t);
     setUserRole(r);
     localStorage.setItem('token', t);
     localStorage.setItem('role', r);
-    if (r === 'admin') setActiveTab('patients');
-    if (r === 'doctor' || r === 'patient') setActiveTab('consultations');
+    if (r === 'admin') navigate('/patients');
+    if (r === 'doctor' || r === 'patient') navigate('/consultations');
   };
 
   const handleLogout = () => {
     localStorage.clear();
     setToken(null);
     setUserRole(null);
-    window.location.reload();
+    window.location.href = '/login';
   };
 
+  const canRegisterNew = () => {
+      const path = location.pathname;
+      if (path === '/account') return false;
+      if (userRole === 'admin') return true;
+      if (userRole === 'doctor') {
+          if (path === '/patients') return false;
+          return true;
+      } 
+      if (userRole === 'patient') return path === '/consultations';
+      return false;
+  };
+
+  const handleRefresh = () => setRefreshKey(k => k + 1);
+
+  if (!token && location.pathname !== '/login' && !location.pathname.startsWith('/activate')) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (location.pathname === '/login') {
+    return <Login onLoginSuccess={handleLoginSuccess} />;
+  }
+
   // Check if we're on an activation URL
-  const activationMatch = window.location.pathname.match(/^\/activate\/(.+)\/(.+)$/);
+  const activationMatch = location.pathname.match(/^\/activate\/(.+)\/(.+)$/);
   if (activationMatch) {
     return <Activate uid={activationMatch[1]} token={activationMatch[2]} />;
   }
 
-  if (!token) return <Login onLoginSuccess={handleLoginSuccess} />;
-
-    const canRegisterNew = () => {
-        if (activeTab === 'account') return false;
-        if (userRole === 'admin') return true;
-        if (userRole === 'doctor') {
-            if (activeTab === 'patients') return false;
-            return true;
-        } 
-        if (userRole === 'patient') return activeTab === 'consultations';
-        return false;
-    };
-
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-[#F0F2F5] font-sans">
-      
-      {/* --- TOP NAVBAR --- */}
       <header className="h-14 bg-[#3b5998] text-white flex items-center justify-between px-3 sm:px-5 shrink-0 shadow-sm z-30">
           <div className="flex items-center gap-3 sm:gap-4">
-              {/* Hamburger for mobile */}
               <button 
                   className="lg:hidden p-1.5 rounded-lg hover:bg-white/10 transition-colors"
                   onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -145,7 +113,6 @@ function App() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
               </button>
-              {/* Traffic Lights (Mac style) - hidden on mobile */}
               <div className="hidden sm:flex items-center gap-1.5 mr-2">
                   <div className="w-3 h-3 rounded-full bg-red-500"></div>
                   <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
@@ -154,6 +121,8 @@ function App() {
               <h1 className="text-sm font-black tracking-wide uppercase">MedFlow</h1>
           </div>
           
+
+
           <div className="flex items-center gap-3 sm:gap-6">
               <div className="hidden sm:flex flex-col text-right">
                   <span className="text-xs font-bold leading-tight">
@@ -163,15 +132,7 @@ function App() {
               </div>
               <div 
                   className={`w-8 h-8 rounded-full bg-[#2A3F6D] border border-white/20 flex items-center justify-center font-bold text-xs overflow-hidden ${(userRole === 'doctor' || userRole === 'patient') ? 'cursor-pointer hover:bg-white/20 transition-colors' : ''}`}
-                  onClick={() => {
-                      if (userRole === 'doctor' || userRole === 'patient') {
-                          setActiveTab('account');
-                          setShowConsultationForm(false);
-                          setShowConsultationDetails(false);
-                          setShowTreatmentForm(false);
-                          setShowMedicalRecordForm(false);
-                      }
-                  }}
+                  onClick={() => navigate('/account')}
                   title={userRole !== 'admin' ? "Account Settings" : "Profile"}
               >
                   {(() => {
@@ -203,423 +164,68 @@ function App() {
           </div>
       </header>
 
-      {/* --- BOTTOM SECTION (SIDEBAR + MAIN CONTENT) --- */}
       <div className="flex flex-1 overflow-hidden relative">
-          
-          {/* --- MOBILE BACKDROP --- */}
-          {sidebarOpen && (
-              <div 
-                  className="fixed inset-0 bg-black/50 z-30 lg:hidden" 
-                  onClick={() => setSidebarOpen(false)}
-              />
-          )}
+          <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-          {/* --- SIDEBAR --- */}
-          <aside className={`fixed lg:relative top-14 lg:top-0 left-0 h-[calc(100vh-3.5rem)] lg:h-auto w-[260px] bg-[#2b3240] text-[#9ba5b7] flex flex-col shrink-0 shadow-[4px_0_15px_rgba(0,0,0,0.05)] z-40 lg:z-20 py-4 overflow-y-auto transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-              <div className="px-6 mb-4 mt-2">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-[#6c7a93]">Main Navigation</span>
-              </div>
-              <nav className="flex flex-col space-y-1">
-                  {(['patients', 'doctors', 'consultations', 'prescriptions', 'treatment', 'medical_records', 'account'] as const)
-                  .filter(tab => {
-                      if (userRole === 'admin') return tab !== 'account';
-                      if (userRole === 'doctor') return tab !== 'doctors'; 
-                      if (userRole === 'patient') return tab === 'consultations' || tab === 'prescriptions' || tab === 'account';
-                      return false;
-                  })
-                  .map((tab) => {
-                      const isActive = activeTab === tab;
-                      
-                      // Assign an icon based on the tab
-                      let iconPath = "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"; // Default
-                      if(tab === 'patients') iconPath = "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z";
-                      if(tab === 'doctors') iconPath = "M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z";
-                      if(tab === 'consultations') iconPath = "M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z";
-                      if(tab === 'prescriptions') iconPath = "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4";
-                      if(tab === 'treatment') iconPath = "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z";
-                      if(tab === 'medical_records') iconPath = "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z";
-                      if(tab === 'account') iconPath = "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z";
- 
-                      return (
-                          <button key={tab} 
-                              onClick={() => { 
-                                  setActiveTab(tab); 
-                                  setSidebarOpen(false);
-                                  setShowConsultationForm(false); 
-                                  setShowConsultationDetails(false);
-                                  setShowTreatmentForm(false); 
-                                  setShowTreatmentDetails(false);
-                                  setShowPrescriptionForm(false);
-                                  setShowPrescriptionDetails(false);
-                                  setShowMedicalRecordForm(false); 
-                                  setShowMedicalRecordDetails(false);
-                              }} 
-                              className={`flex items-center gap-4 px-6 py-3.5 text-sm font-semibold tracking-wide transition-all ${isActive ? 'bg-[#556ee6] text-white border-l-4 border-white' : 'hover:bg-[#323947] hover:text-[#d3d9e3] border-l-4 border-transparent'}`}>
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d={iconPath} />
-                              </svg>
-                              <span className="capitalize">{tab.replace('_', ' ')}</span>
-                          </button>
-                      )
-                  })}
-              </nav>
-          </aside>
- 
-          {/* --- MAIN PAGE CONTENT --- */}
           <main className="flex-1 overflow-y-auto p-3 sm:p-5 lg:p-8 relative">
-              
-              {/* MAIN DATA CARD */}
-              <div className="bg-transparent min-h-[60vh]">
- 
-          {/* --- ACCOUNT VIEW --- */}
-          {activeTab === 'account' && (userRole === 'doctor' || userRole === 'patient') && (() => {
-               if (userRole === 'doctor') {
-                   const myDoctorRecord = doctors.find(d => d.id === parseInt(localStorage.getItem('doctorId') || '0'));
-                   return (
-                        <DoctorProfile 
-                             doctor={myDoctorRecord} 
-                             onUpdate={(d) => { 
-                                  localStorage.setItem('userName', `Dr. ${d.first_name} ${d.last_name}`);
-                                  setRefreshKey(k => k + 1); 
-                              }} 
-                        />
-                   );
-               } else {
-                   const myPatientRecord = patients.find(p => p.id === parseInt(localStorage.getItem('patientId') || '0'));
-                   return (
-                        <PatientProfile 
-                             patient={myPatientRecord} 
-                             onUpdate={() => setRefreshKey(k => k + 1)} 
-                        />
-                   );
-               }
-          })()}
- 
-          {/* --- CONSULTATIONS VIEW --- */}
-         {activeTab === 'consultations' && (
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200">
-             {!showConsultationForm && !showConsultationDetails && (
-               <div className="p-6 flex justify-between items-center border-b border-slate-100">
-                   <div className="flex items-center gap-3">
-                       <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-[#556ee6]">
-                           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                           </svg>
-                       </div>
-                       <div>
-                           <h3 className="text-lg font-black text-slate-800 tracking-tight uppercase leading-none">Consultations</h3>
-                           <p className="text-[10px] text-slate-400 font-bold tracking-[0.2em] mt-1.5 uppercase">MedFlow &gt; Consultations</p>
-                       </div>
-                   </div>
-                   {canRegisterNew() && (
-                       <button 
-                           onClick={() => { setSelectedConsultation(null); setShowConsultationForm(true); }}
-                           className="px-6 py-2.5 bg-[#556ee6] text-white rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-[#485ec4] transition-all flex items-center gap-2 shadow-lg shadow-[#556ee6]/10"
-                       >
-                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-                           Add New
-                       </button>
-                   )}
-               </div>
-             )}
-             {showConsultationDetails && selectedConsultation ? (
-               <ConsultationDetails 
-                 consultation={selectedConsultation}
-                 onClose={() => setShowConsultationDetails(false)}
-                 onEdit={() => { setShowConsultationDetails(false); setShowConsultationForm(true); }}
-                 onDelete={() => {
-                    if(selectedConsultation.id) {
-                      deleteConsultation(selectedConsultation.id).then(() => {
-                         setShowConsultationDetails(false);
-                         setRefreshKey(k => k + 1);
-                      });
-                    }
-                 }}
-               />
-             ) : showConsultationForm ? (
-                 <RecordConsultation 
-                     initialData={selectedConsultation} 
-                     onSuccess={() => { setShowConsultationForm(false); setSelectedConsultation(null); setRefreshKey(k => k + 1); }} 
-                     onCancel={() => setShowConsultationForm(false)}
-                 /> 
-             ) : (
-                 <ConsultationList 
-                     key={refreshKey} 
-                     patients={patients} 
-                     onUpdate={(c) => { 
-                       setSelectedConsultation(c); 
-                       setShowConsultationDetails(true); 
-                     }} 
-                 />
-             )}
-            </div>
-         )}
- 
-         {/* --- OTHER VIEWS --- */}
-         {activeTab === 'treatment' && userRole !== 'patient' && (
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200">
-             {!showTreatmentForm && !showTreatmentDetails && (
-               <div className="p-6 flex justify-between items-center border-b border-slate-100">
-                   <div className="flex items-center gap-3">
-                       <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-[#556ee6]">
-                           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                           </svg>
-                       </div>
-                       <div>
-                           <h3 className="text-lg font-black text-slate-800 tracking-tight uppercase leading-none">Treatment</h3>
-                           <p className="text-[10px] text-slate-400 font-bold tracking-[0.2em] mt-1.5 uppercase">MedFlow &gt; Treatment</p>
-                       </div>
-                   </div>
-                   {canRegisterNew() && (
-                       <button 
-                           onClick={() => { setSelectedTreatment(null); setShowTreatmentForm(true); }}
-                           className="px-6 py-2.5 bg-[#556ee6] text-white rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-[#485ec4] transition-all flex items-center gap-2 shadow-lg shadow-[#556ee6]/10"
-                       >
-                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-                           Add New
-                       </button>
-                   )}
-               </div>
-             )}
-             {showTreatmentDetails && selectedTreatment ? (
-                 <TreatmentDetails 
-                     treatment={selectedTreatment}
-                     onClose={() => setShowTreatmentDetails(false)}
-                     onEdit={() => { setShowTreatmentDetails(false); setShowTreatmentForm(true); }}
-                     onDelete={(id) => deleteTreatment(id).then(() => { setShowTreatmentDetails(false); setRefreshKey(k => k + 1); })}
-                 />
-             ) : showTreatmentForm ? (
-                 <TreatmentForm 
-                     initialData={selectedTreatment} 
-                     patients={patients} doctors={doctors} 
-                     onSuccess={() => { setShowTreatmentForm(false); setSelectedTreatment(null); setRefreshKey(k => k + 1); }} 
-                     onCancel={() => setShowTreatmentForm(false)}
-                 />
-             ) : (
-                 <TreatmentList 
-                     key={refreshKey} 
-                     patientId={selectedPatient?.id || 0} 
-                     patients={patients} 
-                     onUpdate={(t) => { setSelectedTreatment(t); setShowTreatmentDetails(true); }} 
-                 />
-             )}
-            </div>
-         )}
- 
-         {activeTab === 'medical_records' && userRole !== 'patient' && (
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200">
-             {!showMedicalRecordForm && !showMedicalRecordDetails && (
-               <div className="p-6 flex justify-between items-center border-b border-slate-100">
-                   <div className="flex items-center gap-3">
-                       <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-[#556ee6]">
-                           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                           </svg>
-                       </div>
-                       <div>
-                           <h3 className="text-lg font-black text-slate-800 tracking-tight uppercase leading-none">Medical Records</h3>
-                           <p className="text-[10px] text-slate-400 font-bold tracking-[0.2em] mt-1.5 uppercase">MedFlow &gt; Medical Records</p>
-                       </div>
-                   </div>
-                   {canRegisterNew() && (
-                       <button 
-                           onClick={() => { setSelectedMedicalRecord(null); setShowMedicalRecordForm(true); }}
-                           className="px-6 py-2.5 bg-[#556ee6] text-white rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-[#485ec4] transition-all flex items-center gap-2 shadow-lg shadow-[#556ee6]/10"
-                       >
-                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-                           Add New
-                       </button>
-                   )}
-               </div>
-             )}
-             {showMedicalRecordDetails && selectedMedicalRecord ? (
-                 <MedicalRecordDetails 
-                     record={selectedMedicalRecord} 
-                     onClose={() => setShowMedicalRecordDetails(false)} 
-                     onEdit={() => { setShowMedicalRecordDetails(false); setShowMedicalRecordForm(true); }} 
-                     onDelete={() => {
-                         if(selectedMedicalRecord?.id) {
-                             deleteMedicalRecord(selectedMedicalRecord.id).then(() => {
-                                 setShowMedicalRecordDetails(false);
-                                 setSelectedMedicalRecord(null);
-                                 setRefreshKey(k => k + 1);
-                             });
-                         }
-                     }} 
-                 />
-             ) : showMedicalRecordForm ? (
-                   <MedicalRecordsForm initialData={selectedMedicalRecord} patients={patients} onSuccess={() => { setShowMedicalRecordForm(false); setSelectedMedicalRecord(null); setRefreshKey(k => k + 1); }} onCancel={() => setShowMedicalRecordForm(false)} />
-             ) : (
-                 <MedicalRecordsList key={refreshKey} patients={patients} onUpdate={(r) => { setSelectedMedicalRecord(r); setShowMedicalRecordForm(true); }} onView={(r) => { setSelectedMedicalRecord(r); setShowMedicalRecordDetails(true); }} />
-             )}
-            </div>
-         )}
- 
-         {activeTab === 'patients' && userRole !== 'patient' && (
-             <div className={showPatientDetails || showPatientForm ? "bg-white rounded-xl shadow-sm border border-slate-200" : "bg-white rounded-xl shadow-sm border border-slate-200"}>
-                 {!showPatientForm && !showPatientDetails && (
-                   <div className="p-6 flex justify-between items-center border-b border-slate-100">
-                       <div className="flex items-center gap-3">
-                           <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-[#556ee6]">
-                               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                               </svg>
-                           </div>
-                           <div>
-                               <h3 className="text-lg font-black text-slate-800 tracking-tight uppercase leading-none">Patients Directory</h3>
-                               <p className="text-[10px] text-slate-400 font-bold tracking-[0.2em] mt-1.5 uppercase">MedFlow &gt; Patients</p>
-                           </div>
-                       </div>
-                       {canRegisterNew() && (
-                           <button 
-                               onClick={() => { setSelectedPatient(null); setShowPatientForm(true); }}
-                               className="px-6 py-2.5 bg-[#556ee6] text-white rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-[#485ec4] transition-all flex items-center gap-2 shadow-lg shadow-[#556ee6]/10"
-                           >
-                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-                               Add New
-                           </button>
-                       )}
-                   </div>
-                 )}
-                 {showPatientDetails && selectedPatient ? (
-                     <PatientDetails 
-                         patient={selectedPatient} 
-                         onClose={() => setShowPatientDetails(false)} 
-                         onEdit={() => { setShowPatientDetails(false); setShowPatientForm(true); }}
-                         readOnly={userRole === 'doctor'}
-                         onViewConsultation={(c) => {
-                             setSelectedConsultation(c);
-                             setShowConsultationDetails(true);
-                             setActiveTab('consultations');
-                         }}
-                     />
-                 ) : showPatientForm ? (
-                     <PatientForm patient={selectedPatient} onSubmit={() => { setShowPatientForm(false); setRefreshKey(k => k + 1); }} onCancel={() => setShowPatientForm(false)} />
-                 ) : (
-                     <PatientList patients={patients} onUpdate={(p) => {setSelectedPatient(p); setShowPatientForm(true);}} onDelete={(id) => deletePatient(id).then(() => setRefreshKey(k => k + 1))} onTrack={(p) => { setSelectedPatient(p); setShowPatientDetails(true); }} />
-                 )}
-             </div>
-         )}
- 
-          {activeTab === 'doctors' && userRole === 'admin' && (
-              <div className={showDoctorDetails || showDoctorForm ? "bg-white rounded-xl shadow-sm border border-slate-200" : "bg-white rounded-xl shadow-sm border border-slate-200"}>
-                  {!showDoctorForm && !showDoctorDetails && (
-                      <div className="p-6 flex justify-between items-center border-b border-slate-100">
-                          <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-[#556ee6]">
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                  </svg>
-                              </div>
-                              <div>
-                                  <h3 className="text-lg font-black text-slate-800 tracking-tight uppercase leading-none">Doctors Directory</h3>
-                                  <p className="text-[10px] text-slate-400 font-bold tracking-[0.2em] mt-1.5 uppercase">MedFlow &gt; Doctors</p>
-                              </div>
-                          </div>
-                      
-                          <button 
-                              onClick={() => { setSelectedDoctor(null); setShowDoctorForm(true); }}
-                              className="px-6 py-2.5 bg-[#556ee6] text-white rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-[#485ec4] transition-all flex items-center gap-2 shadow-lg shadow-[#556ee6]/10"
-                          >
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-                              Add New
-                          </button>
-                      </div>
-                  )}
+        <div className="bg-transparent min-h-[60vh]">
+          <Routes>
+            <Route path="/" element={<Navigate to={userRole === 'admin' ? "/patients" : "/consultations"} replace />} />
+            
+            <Route path="/consultations" element={
+              <PrivateRoute isAuthenticated={!!token}>
+                <ConsultationsView patients={patients} canRegisterNew={canRegisterNew()} />
+              </PrivateRoute>
+            } />
+            
+            <Route path="/treatment" element={
+              <PrivateRoute isAuthenticated={!!token}>
+                {userRole !== 'patient' ? <TreatmentView patients={patients} doctors={doctors} canRegisterNew={canRegisterNew()} /> : <Navigate to="/" />}
+              </PrivateRoute>
+            } />
+            
+            <Route path="/medical-records" element={
+              <PrivateRoute isAuthenticated={!!token}>
+                {userRole !== 'patient' ? <MedicalRecordsView patients={patients} canRegisterNew={canRegisterNew()} /> : <Navigate to="/" />}
+              </PrivateRoute>
+            } />
+            
+            <Route path="/patients" element={
+              <PrivateRoute isAuthenticated={!!token}>
+                {userRole !== 'patient' ? <PatientsView patients={patients} userRole={userRole} canRegisterNew={canRegisterNew()} onRefresh={handleRefresh} /> : <Navigate to="/" />}
+              </PrivateRoute>
+            } />
+            
+            <Route path="/doctors" element={
+              <PrivateRoute isAuthenticated={!!token}>
+                {userRole === 'admin' ? <DoctorsView doctors={doctors} onRefresh={handleRefresh} /> : <Navigate to="/" />}
+              </PrivateRoute>
+            } />
+            
+            <Route path="/prescriptions" element={
+              <PrivateRoute isAuthenticated={!!token}>
+                <PrescriptionsView patients={patients} doctors={doctors} canRegisterNew={canRegisterNew()} />
+              </PrivateRoute>
+            } />
+            
+            <Route path="/account" element={
+              <PrivateRoute isAuthenticated={!!token}>
+                <AccountView userRole={userRole} patients={patients} doctors={doctors} onRefresh={handleRefresh} />
+              </PrivateRoute>
+            } />
+          </Routes>
+        </div>
+      </main>
+      </div>
+    </div>
+  );
+}
 
-                  {showDoctorForm && (
-                      <div className="p-8">
-                           <div className="mb-0">
-                              <DoctorForm 
-                                  doctor={selectedDoctor || undefined} 
-                                  onSubmit={() => { setShowDoctorForm(false); setRefreshKey(k => k + 1); }} 
-                                  onCancel={() => setShowDoctorForm(false)} 
-                                  isInline={true}
-                              />
-                           </div>
-                      </div>
-                  )}
-
-                  {showDoctorDetails && selectedDoctor && !showDoctorForm && (
-                      <div className="p-4">
-                           <DoctorDetails 
-                              doctor={selectedDoctor} 
-                              onEdit={() => { setShowDoctorDetails(false); setShowDoctorForm(true); }} 
-                              onClose={() => setShowDoctorDetails(false)} 
-                          />
-                      </div>
-                  )}
-
-                  {!showDoctorForm && !showDoctorDetails && (
-                      <DoctorList 
-                          doctors={doctors} 
-                          onTrack={(d) => { setSelectedDoctor(d); setShowDoctorDetails(true); }}
-                          onUpdate={(d) => { setSelectedDoctor(d); setShowDoctorForm(true); }} 
-                          onDelete={(id) => deleteDoctor(id).then(() => setRefreshKey(k => k + 1))} 
-                      />
-                  )}
-              </div>
-          )}
- 
-         {activeTab === 'prescriptions' && (
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200">
-             {!showPrescriptionForm && !showPrescriptionDetails && (
-               <div className="p-6 flex justify-between items-center border-b border-slate-100">
-                   <div className="flex items-center gap-3">
-                       <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-[#556ee6]">
-                           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                           </svg>
-                       </div>
-                       <div>
-                           <h3 className="text-lg font-black text-slate-800 tracking-tight uppercase leading-none">Prescriptions</h3>
-                           <p className="text-[10px] text-slate-400 font-bold tracking-[0.2em] mt-1.5 uppercase">MedFlow &gt; Prescriptions</p>
-                       </div>
-                   </div>
-                   {canRegisterNew() && (
-                       <button 
-                           onClick={() => { setSelectedPrescription(null); setShowPrescriptionForm(true); }}
-                           className="px-6 py-2.5 bg-[#556ee6] text-white rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-[#485ec4] transition-all flex items-center gap-2 shadow-lg shadow-[#556ee6]/10"
-                       >
-                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-                           Add New
-                       </button>
-                   )}
-               </div>
-             )}
-             {showPrescriptionDetails && selectedPrescription ? (
-                 <PrescriptionDetails 
-                     prescription={selectedPrescription}
-                     onClose={() => setShowPrescriptionDetails(false)}
-                     onEdit={() => { setShowPrescriptionDetails(false); setShowPrescriptionForm(true); }}
-                     onDelete={(id) => deletePrescription(id).then(() => { setShowPrescriptionDetails(false); setRefreshKey(k => k + 1); })}
-                 />
-             ) : showPrescriptionForm ? (
-                 <PrescriptionForm 
-                     initialData={selectedPrescription} 
-                     patients={patients} 
-                     doctors={doctors} 
-                     onSuccess={() => { setShowPrescriptionForm(false); setSelectedPrescription(null); setRefreshKey(k => k + 1); }} 
-                     onCancel={() => setShowPrescriptionForm(false)} 
-                 />
-             ) : (
-                 <PrescriptionList 
-                     onUpdate={(p) => { setSelectedPrescription(p); setShowPrescriptionForm(true); }} 
-                     onView={(p) => { setSelectedPrescription(p); setShowPrescriptionDetails(true); }}
-                 />
-             )}
-            </div>
-         )}
- 
-         {/* --- SHARED MODALS --- */}
-         {showDoctorForm && !activeTab && <DoctorForm doctor={selectedDoctor} onSubmit={() => { setShowDoctorForm(true); setRefreshKey(k => k + 1); }} onCancel={() => setShowDoctorForm(false)} />}
- 
-         {/* --- CLOSE MAIN CONTAINER DIV --- */}
-         </div>
-       </main>
-       </div>
-     </div>
+function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   );
 }
 
