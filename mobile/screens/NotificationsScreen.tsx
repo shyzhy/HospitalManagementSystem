@@ -6,6 +6,7 @@ import { getNotifications } from '../services/api';
 export default function NotificationsScreen({ navigation }: any) {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchNotifications();
@@ -19,7 +20,13 @@ export default function NotificationsScreen({ navigation }: any) {
       console.error(error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchNotifications();
   };
 
   const renderItem = ({ item }: { item: any }) => (
@@ -73,6 +80,8 @@ export default function NotificationsScreen({ navigation }: any) {
           renderItem={renderItem}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <MaterialCommunityIcons name="bell-off-outline" size={48} color="#cbd5e1" />

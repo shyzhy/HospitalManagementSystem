@@ -6,6 +6,7 @@ import { getConsultations } from '../services/api';
 export default function ConsultationsScreen({ navigation }: any) {
   const [consultations, setConsultations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
@@ -20,7 +21,13 @@ export default function ConsultationsScreen({ navigation }: any) {
       console.error(error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchConsultations();
   };
 
   const filteredConsultations = consultations.filter(c =>
@@ -104,6 +111,8 @@ export default function ConsultationsScreen({ navigation }: any) {
           renderItem={renderItem}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
         />
       )}
     </View>

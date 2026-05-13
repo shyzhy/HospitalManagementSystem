@@ -6,6 +6,7 @@ import { getPrescriptions } from '../services/api';
 export default function PrescriptionsScreen({ navigation }: any) {
   const [prescriptions, setPrescriptions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
@@ -20,7 +21,13 @@ export default function PrescriptionsScreen({ navigation }: any) {
       console.error(error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchPrescriptions();
   };
 
   const filteredPrescriptions = prescriptions.filter(p => 
@@ -111,6 +118,8 @@ export default function PrescriptionsScreen({ navigation }: any) {
           renderItem={renderItem}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
         />
       )}
     </View>

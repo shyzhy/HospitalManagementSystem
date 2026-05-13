@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { Appbar } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -7,9 +7,21 @@ import Svg, { Path } from 'react-native-svg';
 
 export default function HomeScreen({ navigation }: any) {
   const [userName, setUserName] = useState<string | null>('');
+  const [refreshing, setRefreshing] = useState(false);
   
+  const fetchData = async () => {
+    const name = await SecureStore.getItemAsync('userName');
+    setUserName(name);
+  };
+
   useEffect(() => {
-    SecureStore.getItemAsync('userName').then(setUserName);
+    fetchData();
+  }, []);
+
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    await fetchData();
+    setRefreshing(false);
   }, []);
 
   const menuItems = [
@@ -82,7 +94,13 @@ export default function HomeScreen({ navigation }: any) {
         </View>
       </Appbar.Header>
 
-      <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={styles.scrollContent} 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#556ee6']} />
+        }
+      >
         <View style={styles.welcomeSection}>
           <Text style={styles.welcomeSubtitle}>VERIFIED PATIENT,</Text>
           <Text style={styles.welcomeTitle}>{userName || 'User'}</Text>
