@@ -16,8 +16,6 @@ const MedicalRecordsForm: React.FC<MedicalRecordsFormProps> = ({
     onCancel 
 }) => {
     // 1. Auth & Local State
-    const userRole = localStorage.getItem('role') || 'patient';
-    
     const [formData, setFormData] = useState({
         patient: '',
         blood_type: '',
