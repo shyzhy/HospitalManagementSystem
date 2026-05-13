@@ -26,7 +26,7 @@ const DoctorsView: React.FC<DoctorsViewProps> = ({ doctors, onRefresh }) => {
                         </svg>
                     </div>
                     <div>
-                        <h3 className="text-lg font-black text-slate-800 tracking-tight uppercase leading-none">Doctors Directory</h3>
+                        <h3 className="text-lg font-black text-slate-800 tracking-tight uppercase leading-none">Physician Directory</h3>
                         <p className="text-[10px] text-slate-400 font-bold tracking-[0.2em] mt-1.5 uppercase">MedFlow &gt; Doctors</p>
                     </div>
                 </div>
@@ -36,21 +36,21 @@ const DoctorsView: React.FC<DoctorsViewProps> = ({ doctors, onRefresh }) => {
                     className="px-6 py-2.5 bg-[#556ee6] text-white rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-[#485ec4] transition-all flex items-center gap-2 shadow-lg shadow-[#556ee6]/10"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-                    Add New
+                    Enroll Physician
                 </button>
             </div>
         )}
 
         {showDoctorForm && (
-            <div className="p-8">
-                 <div className="mb-0">
+            <div className="p-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <div className="mb-0">
                     <DoctorForm 
                         doctor={selectedDoctor || undefined} 
                         onSubmit={() => { setShowDoctorForm(false); onRefresh(); }} 
                         onCancel={() => setShowDoctorForm(false)} 
                         isInline={true}
                     />
-                 </div>
+                </div>
             </div>
         )}
 

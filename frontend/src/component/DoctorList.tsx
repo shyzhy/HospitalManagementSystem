@@ -19,9 +19,9 @@ const DoctorList: React.FC<DoctorListProps> = ({ doctors, onUpdate, onDelete, on
     );
 
     return (
-        <div className="space-y-6 px-4 pt-4 animate-in fade-in duration-500">
+        <div className="space-y-6 px-4 pt-4">
             {/* SEARCH AREA */}
-            <div className="bg-white p-3 rounded-xl border border-slate-200/80 flex items-center gap-3 transition-all focus-within:shadow-[0_4px_12px_rgba(0,0,0,0.03)] focus-within:border-[#4e5ec4]/30">
+            <div className="bg-white p-3 rounded-xl border border-slate-200/80 flex items-center gap-3 transition-all focus-within:shadow-[0_0_0_4px_rgba(85,110,230,0.05)] focus-within:border-[#556ee6]/30">
                 <div className="text-slate-400 pl-2">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -29,7 +29,7 @@ const DoctorList: React.FC<DoctorListProps> = ({ doctors, onUpdate, onDelete, on
                 </div>
                 <input 
                     type="text" 
-                    placeholder="Filter staff by name or specialty..." 
+                    placeholder="Search master staff directory..." 
                     className="w-full bg-transparent outline-none font-medium text-slate-800 placeholder:text-slate-400 text-sm"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -51,19 +51,27 @@ const DoctorList: React.FC<DoctorListProps> = ({ doctors, onUpdate, onDelete, on
                         {filteredDoctors.length === 0 ? (
                             <tr><td colSpan={5} className="px-6 py-20 text-center text-slate-300 font-bold text-xs uppercase tracking-[0.2em]">No medical staff found matching search criteria</td></tr>
                         ) : (
-                            filteredDoctors.map((doc, index) => (
+                            filteredDoctors.map((doc) => (
                                 <tr 
                                     key={doc.id} 
-                                    className="hover:bg-slate-50 group transition-all duration-300 cursor-pointer"
+                                    className="hover:bg-slate-50/50 transition-all duration-300 group cursor-pointer"
                                     onClick={() => onTrack(doc)}
                                 >
                                     <td className="px-4 sm:px-6 py-5">
-                                        <div className="flex items-center gap-4">
-                                            <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-black text-white text-xs border border-white/20 shadow-sm transition-transform group-hover:scale-105 ${index % 2 === 0 ? 'bg-[#4e5ec4]' : 'bg-slate-800'}`}>
-                                                {doc.first_name.charAt(0)}{doc.last_name.charAt(0)}
-                                            </div>
+                                        <div className="flex items-center gap-3">
+                                            {(doc.profile_picture_url || doc.profile_picture) ? (
+                                                <img 
+                                                    src={(doc.profile_picture_url || doc.profile_picture) as string} 
+                                                    alt={`Dr. ${doc.first_name} ${doc.last_name}`}
+                                                    className="w-10 h-10 rounded-full object-cover border border-slate-200 shadow-sm transition-transform group-hover:scale-105"
+                                                />
+                                            ) : (
+                                                <div className="w-10 h-10 rounded-full bg-slate-100 text-[#556ee6] flex items-center justify-center font-black text-xs border border-slate-200 shadow-sm transition-transform group-hover:scale-105">
+                                                    {doc.first_name.charAt(0)}{doc.last_name.charAt(0)}
+                                                </div>
+                                            )}
                                             <div>
-                                                <div className="font-black text-slate-800 tracking-tight text-sm group-hover:text-[#4e5ec4] transition-colors leading-none mb-1.5">
+                                                <div className="font-black text-slate-800 tracking-tight text-sm group-hover:text-[#556ee6] transition-colors leading-none mb-1">
                                                     Dr. {doc.first_name} {doc.last_name}
                                                 </div>
                                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Digital Registry Active</span>
@@ -71,32 +79,32 @@ const DoctorList: React.FC<DoctorListProps> = ({ doctors, onUpdate, onDelete, on
                                         </div>
                                     </td>
                                     <td className="px-4 sm:px-6 py-5 hidden md:table-cell">
-                                        <span className="text-xs font-mono font-bold text-slate-400 uppercase tracking-tighter">#{doc.license_number}</span>
+                                        <span className="text-xs font-bold text-slate-500">#{doc.license_number}</span>
                                     </td>
                                     <td className="px-4 sm:px-6 py-5 hidden lg:table-cell">
-                                        <div className="text-xs font-black text-slate-500 uppercase tracking-widest italic">{doc.specialization}</div>
+                                        <div className="text-xs font-medium text-slate-500 italic">{doc.specialization}</div>
                                     </td>
                                     <td className="px-4 sm:px-6 py-5">
                                         <div className="flex items-center gap-2">
-                                            <div className={`w-1.5 h-1.5 rounded-full ${doc.is_available ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-amber-500'}`}></div>
-                                            <span className={`text-[10px] font-black uppercase tracking-widest ${doc.is_available ? 'text-emerald-600' : 'text-amber-600'}`}>
+                                            <div className={`w-1.5 h-1.5 rounded-full ${doc.is_available ? 'bg-emerald-500' : 'bg-amber-500'}`}></div>
+                                            <span className={`text-[10px] font-bold uppercase tracking-widest ${doc.is_available ? 'text-emerald-600' : 'text-amber-600'}`}>
                                                 {doc.is_available ? 'Active' : 'Away'}
                                             </span>
                                         </div>
                                     </td>
-                                    <td className="px-4 sm:px-6 py-5 text-right">
-                                        <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <td className="px-4 sm:px-6 py-5 text-right opacity-60 group-hover:opacity-100 transition-opacity">
+                                        <div className="flex items-center justify-end gap-3">
                                             <button 
-                                                className="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-[#4e5ec4] hover:text-white transition-all shadow-sm"
+                                                className="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-[#556ee6] hover:text-white transition-all shadow-sm"
                                             >
                                                 Inspect
                                             </button>
                                             
                                             {userRole === 'admin' && (
-                                                <div className="flex gap-1.5 border-l border-slate-100 pl-3 ml-1">
+                                                <div className="flex gap-2 border-l border-slate-100 pl-3 ml-1">
                                                     <button 
                                                         onClick={(e) => { e.stopPropagation(); onUpdate(doc); }} 
-                                                        className="p-2 text-slate-400 hover:text-[#4e5ec4] hover:bg-white rounded-lg transition-all"
+                                                        className="p-1.5 text-slate-400 hover:text-[#556ee6] transition-colors"
                                                         title="Edit Credentials"
                                                     >
                                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -105,7 +113,7 @@ const DoctorList: React.FC<DoctorListProps> = ({ doctors, onUpdate, onDelete, on
                                                     </button>
                                                     <button 
                                                         onClick={(e) => { e.stopPropagation(); doc.id && onDelete(doc.id); }} 
-                                                        className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                                        className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"
                                                         title="Revoke Registry"
                                                     >
                                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
