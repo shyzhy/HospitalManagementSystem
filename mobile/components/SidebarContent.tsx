@@ -16,6 +16,7 @@ const SidebarContent = (props: DrawerContentComponentProps) => {
 
   const menuItems = [
     { title: 'Dashboard', icon: 'view-dashboard-outline', path: 'Main' },
+    { title: 'Notifications', icon: 'bell-outline', path: 'Notifications' },
     { title: 'Consultations', icon: 'stethoscope', path: 'Consultations' },
     { title: 'Prescriptions', icon: 'file-document-outline', path: 'Prescriptions' },
     { title: 'Settings', icon: 'cog-outline', path: 'Settings' },
@@ -48,7 +49,7 @@ const SidebarContent = (props: DrawerContentComponentProps) => {
       </View>
 
       <ScrollView style={styles.menuContainer} showsVerticalScrollIndicator={false}>
-        <Text style={styles.sectionTitle}>MAIN MENU</Text>
+        <Text style={styles.sectionTitle}>PATIENT PORTAL</Text>
         {visibleMenuItems.map((item, index) => {
           const isActive = activeRouteName === item.path;
           return (
@@ -69,6 +70,11 @@ const SidebarContent = (props: DrawerContentComponentProps) => {
             </TouchableOpacity>
           );
         })}
+        
+        <View style={styles.sidebarNote}>
+          <Text style={styles.noteTitle}>SUPPORT</Text>
+          <Text style={styles.noteText}>For technical issues, please contact system admin.</Text>
+        </View>
       </ScrollView>
 
       {/* Footer / User Info */}
@@ -90,7 +96,8 @@ const SidebarContent = (props: DrawerContentComponentProps) => {
       </View>
     </View>
   );
-};
+}
+;
 
 const styles = StyleSheet.create({
   container: {
@@ -215,6 +222,29 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#ef4444',
     marginLeft: 8,
+  },
+  sidebarNote: {
+    marginTop: 32,
+    padding: 16,
+    backgroundColor: '#f8fafc',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderStyle: 'dashed',
+    marginHorizontal: 8,
+  },
+  noteTitle: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#94a3b8',
+    letterSpacing: 1.5,
+    marginBottom: 6,
+  },
+  noteText: {
+    fontSize: 11,
+    color: '#64748b',
+    fontWeight: '600',
+    lineHeight: 16,
   },
 });
 

@@ -32,6 +32,7 @@ export default function PrescriptionsScreen({ navigation }: any) {
     <TouchableOpacity 
       style={styles.card} 
       activeOpacity={0.7}
+      onPress={() => navigation.navigate('PrescriptionDetail', { prescription: item })}
     >
       <View style={styles.cardHeader}>
         <View style={[styles.iconWrapper, { backgroundColor: '#fff7ed', borderColor: '#ffedd5' }]}>

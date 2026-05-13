@@ -11,6 +11,8 @@ import LoginScreen from './screens/LoginScreen';
 import HomeScreen from './screens/HomeScreen';
 import ConsultationsScreen from './screens/ConsultationsScreen';
 import PrescriptionsScreen from './screens/PrescriptionsScreen';
+import PrescriptionDetailScreen from './screens/PrescriptionDetailScreen';
+import NotificationsScreen from './screens/NotificationsScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import SidebarContent from './components/SidebarContent';
 import ConsultationDetailScreen from './screens/ConsultationDetailScreen';
@@ -39,6 +41,7 @@ function DrawerNavigator() {
       }}
     >
       <Drawer.Screen name="Main" component={HomeScreen} />
+      <Drawer.Screen name="Notifications" component={NotificationsScreen} />
       <Drawer.Screen name="Consultations" component={ConsultationsScreen} />
       <Drawer.Screen name="Prescriptions" component={PrescriptionsScreen} />
       <Drawer.Screen name="Settings" component={SettingsScreen} />
@@ -81,6 +84,8 @@ export default function App() {
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="AppDrawer" component={DrawerNavigator} />
             <Stack.Screen name="ConsultationDetail" component={ConsultationDetailScreen} />
+            <Stack.Screen name="PrescriptionDetail" component={PrescriptionDetailScreen} />
+            <Stack.Screen name="Notifications" component={NotificationsScreen} />
             <Stack.Screen name="ScheduleConsultation" component={ScheduleConsultationScreen} />
           </Stack.Navigator>
         </NavigationContainer>

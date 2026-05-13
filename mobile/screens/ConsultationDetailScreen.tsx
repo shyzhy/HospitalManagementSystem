@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Alert, Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { updateConsultation } from '../services/api';
 import * as SecureStore from 'expo-secure-store';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function ConsultationDetailScreen({ route, navigation }: any) {
   const { consultation } = route.params;
@@ -10,31 +11,36 @@ export default function ConsultationDetailScreen({ route, navigation }: any) {
   const [diagnosis, setDiagnosis] = useState(consultation.diagnosis || '');
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  
+  const [consultationDate, setConsultationDate] = useState(new Date(consultation.consultation_date));
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     SecureStore.getItemAsync('role').then(setRole);
   }, []);
 
   const handleUpdate = async () => {
-    if (!diagnosis.trim()) {
-      Alert.alert("Error", "Diagnosis cannot be empty.");
-      return;
-    }
-
     setLoading(true);
     try {
       await updateConsultation(consultation.id, {
         ...consultation,
-        diagnosis: diagnosis.trim()
+        diagnosis: diagnosis.trim(),
+        consultation_date: consultationDate.toISOString().split('T')[0]
       });
-      Alert.alert("Success", "Clinical record updated successfully.");
+      Alert.alert("Success", "Consultation record updated successfully.");
       setIsEditing(false);
-      // Ideally refresh the data or navigate back
     } catch (error) {
       console.error(error);
       Alert.alert("Error", "Failed to update record.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const onDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      setConsultationDate(selectedDate);
     }
   };
 
@@ -52,8 +58,24 @@ export default function ConsultationDetailScreen({ route, navigation }: any) {
         <View style={styles.encounterBadge}>
           <Text style={styles.badgeText}>ENCOUNTER #{consultation.id.toString().padStart(4, '0')}</Text>
         </View>
-        <Text style={styles.dateText}>{new Date(consultation.consultation_date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</Text>
+        <TouchableOpacity 
+          style={[styles.dateContainer, isEditing && styles.dateContainerEditing]}
+          onPress={() => isEditing && setShowDatePicker(true)}
+          disabled={!isEditing}
+        >
+          <MaterialCommunityIcons name="calendar-edit" size={18} color="#fff" style={{ marginRight: 8 }} />
+          <Text style={styles.dateText}>{consultationDate.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</Text>
+        </TouchableOpacity>
       </View>
+
+      {showDatePicker && (
+        <DateTimePicker
+          value={consultationDate}
+          mode="date"
+          display="default"
+          onChange={onDateChange}
+        />
+      )}
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Patient / Doctor Info */}
@@ -85,8 +107,8 @@ export default function ConsultationDetailScreen({ route, navigation }: any) {
           <Text style={styles.sectionTitle}>Clinical Diagnosis</Text>
         </View>
         
-        <View style={[styles.card, isEditing && styles.editingCard]}>
-          {isEditing ? (
+        <View style={[styles.card, isEditing && role !== 'patient' && styles.editingCard]}>
+          {isEditing && role !== 'patient' ? (
             <TextInput
               style={styles.diagnosisInput}
               value={diagnosis}
@@ -103,38 +125,37 @@ export default function ConsultationDetailScreen({ route, navigation }: any) {
         </View>
 
         {/* Actions */}
-        {(role === 'doctor' || role === 'admin') && (
-          <View style={styles.footer}>
-            {isEditing ? (
-              <View style={styles.editActions}>
-                <TouchableOpacity 
-                  style={[styles.btn, styles.cancelBtn]} 
-                  onPress={() => {
-                    setIsEditing(false);
-                    setDiagnosis(consultation.diagnosis || '');
-                  }}
-                >
-                  <Text style={styles.cancelBtnText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={[styles.btn, styles.saveBtn]} 
-                  onPress={handleUpdate}
-                  disabled={loading}
-                >
-                  {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Save Diagnosis</Text>}
-                </TouchableOpacity>
-              </View>
-            ) : (
+        <View style={styles.footer}>
+          {isEditing ? (
+            <View style={styles.editActions}>
               <TouchableOpacity 
-                style={[styles.btn, styles.editBtn]} 
-                onPress={() => setIsEditing(true)}
+                style={[styles.btn, styles.cancelBtn]} 
+                onPress={() => {
+                  setIsEditing(false);
+                  setDiagnosis(consultation.diagnosis || '');
+                  setConsultationDate(new Date(consultation.consultation_date));
+                }}
               >
-                <MaterialCommunityIcons name="pencil" size={18} color="#fff" />
-                <Text style={styles.editBtnText}>Edit Diagnosis</Text>
+                <Text style={styles.cancelBtnText}>Cancel</Text>
               </TouchableOpacity>
-            )}
-          </View>
-        )}
+              <TouchableOpacity 
+                style={[styles.btn, styles.saveBtn]} 
+                onPress={handleUpdate}
+                disabled={loading}
+              >
+                {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Save Changes</Text>}
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity 
+              style={[styles.btn, styles.editBtn]} 
+              onPress={() => setIsEditing(true)}
+            >
+              <MaterialCommunityIcons name={role === 'patient' ? "calendar-edit" : "pencil"} size={18} color="#fff" />
+              <Text style={styles.editBtnText}>{role === 'patient' ? "Reschedule Visit" : "Edit Record"}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
 
         <View style={{ height: 40 }} />
       </ScrollView>
@@ -193,6 +214,18 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '900',
     letterSpacing: 1,
+  },
+  dateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  dateContainerEditing: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.4)',
   },
   dateText: {
     color: '#fff',

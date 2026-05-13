@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-const API_URL = 'https://esteemed-filter-glutton.ngrok-free.dev';
+export const API_URL = 'https://esteemed-filter-glutton.ngrok-free.dev';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -76,6 +76,19 @@ export const createPrescription = async (data: any) => {
 
 export const getMedicalRecords = async () => {
   return api.get('/api/v1/medical-records/');
+};
+
+export const updatePatient = async (id: number, data: any) => {
+  return api.patch(`/api/v1/patients/${id}/`, data);
+};
+
+export const uploadProfilePicture = async (type: 'patient' | 'doctor', id: number, file: any) => {
+  const formData = new FormData();
+  // In React Native, the file object usually looks like { uri, name, type }
+  formData.append('profile_picture', file);
+  return api.post(`/api/v1/${type}s/${id}/upload_picture/`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
 };
 
 export default api;

@@ -32,6 +32,7 @@ export default function ConsultationsScreen({ navigation }: any) {
     <TouchableOpacity 
       style={styles.card} 
       activeOpacity={0.7}
+      onPress={() => navigation.navigate('ConsultationDetail', { consultation: item })}
     >
       <View style={styles.cardHeader}>
         <View style={styles.iconWrapper}>

@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ActivityIndicator, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Text, TouchableOpacity, ScrollView, Image, Alert, Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
-import { getUser } from '../services/api';
+import * as ImagePicker from 'expo-image-picker';
+import { getUser, uploadProfilePicture, API_URL } from '../services/api';
 
 export default function SettingsScreen({ navigation }: any) {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
   const [role, setRole] = useState<string | null>('');
 
   useEffect(() => {
@@ -23,6 +25,49 @@ export default function SettingsScreen({ navigation }: any) {
       console.error(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEditAvatar = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Denied', 'We need camera roll permissions to change your profile picture.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const asset = result.assets[0];
+      setUploading(true);
+      try {
+        const patientId = await SecureStore.getItemAsync('patientId');
+        if (!patientId) {
+          Alert.alert("Error", "Patient ID not found.");
+          return;
+        }
+
+        // Prepare file object for FormData
+        const fileToUpload = {
+          uri: asset.uri,
+          name: asset.fileName || 'profile.jpg',
+          type: asset.type || 'image/jpeg',
+        };
+
+        await uploadProfilePicture('patient', parseInt(patientId), fileToUpload as any);
+        fetchUserData(); // Refresh data
+        Alert.alert("Success", "Profile picture updated.");
+      } catch (error) {
+        console.error(error);
+        Alert.alert("Error", "Failed to upload picture.");
+      } finally {
+        setUploading(false);
+      }
     }
   };
 
@@ -43,6 +88,12 @@ export default function SettingsScreen({ navigation }: any) {
     );
   }
 
+  const getProfilePicUrl = () => {
+    if (!user?.profile_picture_url) return null;
+    if (user.profile_picture_url.startsWith('http')) return user.profile_picture_url;
+    return `${API_URL}${user.profile_picture_url}`;
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -61,42 +112,56 @@ export default function SettingsScreen({ navigation }: any) {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.profileCard}>
           <View style={styles.avatarWrapper}>
-            {user?.profile_picture_url ? (
-              <Image source={{ uri: user.profile_picture_url }} style={styles.avatar} />
+            {getProfilePicUrl() ? (
+              <Image source={{ uri: getProfilePicUrl() }} style={styles.avatar} />
             ) : (
               <View style={styles.placeholderAvatar}>
                 <Text style={styles.avatarText}>
-                  {user?.username?.substring(0, 2).toUpperCase() || 'ME'}
+                  {user?.first_name?.substring(0, 2).toUpperCase() || 'P'}
                 </Text>
               </View>
             )}
-            <TouchableOpacity style={styles.editAvatarBtn}>
-              <MaterialCommunityIcons name="camera" size={16} color="#ffffff" />
+            <TouchableOpacity 
+              style={styles.editAvatarBtn} 
+              onPress={handleEditAvatar}
+              disabled={uploading}
+            >
+              {uploading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <MaterialCommunityIcons name="camera" size={16} color="#ffffff" />
+              )}
             </TouchableOpacity>
           </View>
           
           <Text style={styles.userName}>{user?.first_name} {user?.last_name || user?.username}</Text>
           <View style={styles.roleBadge}>
-            <Text style={styles.roleText}>{role?.toUpperCase()}</Text>
+            <Text style={styles.roleText}>{role?.toUpperCase()} PORTAL</Text>
           </View>
           <Text style={styles.userEmail}>{user?.email}</Text>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>ACCOUNT SETTINGS</Text>
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity 
+            style={styles.menuItem}
+            onPress={() => Alert.alert("Profile", "Please use the MedFlow web dashboard for full profile updates.")}
+          >
             <View style={[styles.menuIcon, { backgroundColor: '#eff6ff' }]}>
               <MaterialCommunityIcons name="account-outline" size={20} color="#3b82f6" />
             </View>
-            <Text style={styles.menuLabel}>Edit Profile</Text>
+            <Text style={styles.menuLabel}>Clinical Information</Text>
             <MaterialCommunityIcons name="chevron-right" size={20} color="#cbd5e1" />
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity 
+            style={styles.menuItem}
+            onPress={() => Alert.alert("Security", "Password modification is handled via secure web gateway.")}
+          >
             <View style={[styles.menuIcon, { backgroundColor: '#f5f3ff' }]}>
               <MaterialCommunityIcons name="lock-outline" size={20} color="#8b5cf6" />
             </View>
-            <Text style={styles.menuLabel}>Change Password</Text>
+            <Text style={styles.menuLabel}>Security Settings</Text>
             <MaterialCommunityIcons name="chevron-right" size={20} color="#cbd5e1" />
           </TouchableOpacity>
           
@@ -109,15 +174,9 @@ export default function SettingsScreen({ navigation }: any) {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>SUPPORT</Text>
-          <TouchableOpacity style={styles.menuItem}>
-            <View style={[styles.menuIcon, { backgroundColor: '#fff7ed' }]}>
-              <MaterialCommunityIcons name="help-circle-outline" size={20} color="#f97316" />
-            </View>
-            <Text style={styles.menuLabel}>Help Center</Text>
-            <MaterialCommunityIcons name="chevron-right" size={20} color="#cbd5e1" />
-          </TouchableOpacity>
+        <View style={styles.adminNote}>
+          <MaterialCommunityIcons name="information-outline" size={16} color="#64748b" />
+          <Text style={styles.adminNoteText}>For system assistance, contact administrator.</Text>
         </View>
 
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
@@ -125,7 +184,7 @@ export default function SettingsScreen({ navigation }: any) {
           <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>
         
-        <Text style={styles.versionText}>MedFlow Mobile v1.0.0</Text>
+        <Text style={styles.versionText}>MedFlow Patient Mobile v1.1.0</Text>
       </ScrollView>
     </View>
   );
@@ -322,5 +381,23 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     fontWeight: 'bold',
     letterSpacing: 1,
-  }
+  },
+  adminNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    padding: 16,
+    backgroundColor: '#f8fafc',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderStyle: 'dashed',
+  },
+  adminNoteText: {
+    fontSize: 12,
+    color: '#64748b',
+    marginLeft: 8,
+    fontWeight: '600',
+  },
 });

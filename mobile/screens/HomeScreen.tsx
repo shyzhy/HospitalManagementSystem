@@ -20,26 +20,21 @@ export default function HomeScreen({ navigation }: any) {
 
   const renderPatientDashboard = () => (
     <View style={styles.dashboardContainer}>
-      <TouchableOpacity style={styles.healthCard} activeOpacity={0.9}>
-        <View style={styles.healthHeader}>
-          <MaterialCommunityIcons name="heart-pulse" size={24} color="#ef4444" />
-          <Text style={styles.healthTitle}>My Health Overview</Text>
+      <TouchableOpacity 
+        style={styles.aiBanner}
+        onPress={() => navigation.navigate('ScheduleConsultation')}
+      >
+        <View style={styles.aiIcon}>
+          <MaterialCommunityIcons name="calendar-check-outline" size={24} color="#ffffff" />
         </View>
-        <Text style={styles.healthDesc}>Your clinical records are up to date. Access your prescriptions and consultation history below.</Text>
-        <View style={styles.healthFooter}>
-          <View style={styles.healthStat}>
-            <Text style={styles.hStatLabel}>BLOOD</Text>
-            <Text style={styles.hStatValue}>A+</Text>
-          </View>
-          <View style={styles.hStatDivider} />
-          <View style={styles.healthStat}>
-            <Text style={styles.hStatLabel}>WEIGHT</Text>
-            <Text style={styles.hStatValue}>68kg</Text>
-          </View>
+        <View style={styles.aiTextContainer}>
+          <Text style={styles.aiTitle}>Book Appointment</Text>
+          <Text style={styles.aiSubtitle}>Schedule a new visit with your doctor</Text>
         </View>
+        <MaterialCommunityIcons name="chevron-right" size={20} color="#ffffff" />
       </TouchableOpacity>
 
-      <Text style={styles.sectionTitle}>My Services</Text>
+      <Text style={styles.sectionTitle}>My Clinical Services</Text>
       <View style={styles.grid}>
         {menuItems.map((item, index) => (
           <TouchableOpacity 
@@ -56,19 +51,10 @@ export default function HomeScreen({ navigation }: any) {
         ))}
       </View>
       
-      <TouchableOpacity 
-        style={styles.aiBanner}
-        onPress={() => navigation.navigate('ScheduleConsultation')}
-      >
-        <View style={styles.aiIcon}>
-          <MaterialCommunityIcons name="robot-outline" size={24} color="#ffffff" />
-        </View>
-        <View style={styles.aiTextContainer}>
-          <Text style={styles.aiTitle}>Book Appointment</Text>
-          <Text style={styles.aiSubtitle}>Schedule a new visit with your doctor</Text>
-        </View>
-        <MaterialCommunityIcons name="chevron-right" size={20} color="#ffffff" />
-      </TouchableOpacity>
+      <View style={styles.adminNote}>
+        <MaterialCommunityIcons name="information-outline" size={16} color="#64748b" />
+        <Text style={styles.adminNoteText}>Need help? Contact system administrator.</Text>
+      </View>
     </View>
   );
 
@@ -82,6 +68,13 @@ export default function HomeScreen({ navigation }: any) {
           <MaterialCommunityIcons name="menu" size={24} color="#1e293b" />
         </TouchableOpacity>
         <Appbar.Content title="MedFlow" titleStyle={styles.headerTitle} />
+        <TouchableOpacity 
+          style={styles.notificationBtn}
+          onPress={() => navigation.navigate('Notifications')}
+        >
+          <MaterialCommunityIcons name="bell-outline" size={24} color="#556ee6" />
+          <View style={styles.notificationDot} />
+        </TouchableOpacity>
         <View style={styles.headerLogo}>
           <Svg viewBox="0 0 24 24" fill="none" stroke="#556ee6" strokeWidth={2} width={24} height={24}>
             <Path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -91,9 +84,9 @@ export default function HomeScreen({ navigation }: any) {
 
       <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.welcomeSection}>
-          <Text style={styles.welcomeSubtitle}>WELCOME BACK,</Text>
+          <Text style={styles.welcomeSubtitle}>VERIFIED PATIENT,</Text>
           <Text style={styles.welcomeTitle}>{userName || 'User'}</Text>
-          <Text style={styles.welcomeDesc}>Access your patient dashboard anywhere.</Text>
+          <Text style={styles.welcomeDesc}>Manage your consultations and prescriptions.</Text>
         </View>
 
         {renderPatientDashboard()}
@@ -326,5 +319,40 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: 'rgba(255,255,255,0.8)',
     marginTop: 2,
+  },
+  notificationBtn: {
+    marginRight: 10,
+    position: 'relative',
+    padding: 8,
+  },
+  notificationDot: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    width: 8,
+    height: 8,
+    backgroundColor: '#ef4444',
+    borderRadius: 4,
+    borderWidth: 1.5,
+    borderColor: '#ffffff',
+  },
+  adminNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 32,
+    marginBottom: 20,
+    padding: 16,
+    backgroundColor: '#f8fafc',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderStyle: 'dashed',
+  },
+  adminNoteText: {
+    fontSize: 12,
+    color: '#64748b',
+    marginLeft: 8,
+    fontWeight: '600',
   },
 });
