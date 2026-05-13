@@ -15,16 +15,13 @@ const SidebarContent = (props: DrawerContentComponentProps) => {
   }, []);
 
   const menuItems = [
-    { title: 'Dashboard', icon: 'view-dashboard-outline', path: 'Main', roles: ['admin', 'doctor', 'patient'] },
-    { title: 'Patients', icon: 'account-multiple-outline', path: 'PatientList', roles: ['admin', 'doctor'] },
-    { title: 'Consultations', icon: 'stethoscope', path: 'Consultations', roles: ['admin', 'doctor', 'patient'] },
-    { title: 'Treatment', icon: 'pill', path: 'Treatment', roles: ['admin', 'doctor'] },
-    { title: 'Medical Records', icon: 'clipboard-text-outline', path: 'MedicalRecords', roles: ['admin', 'doctor'] },
-    { title: 'Prescriptions', icon: 'file-document-outline', path: 'Prescriptions', roles: ['admin', 'doctor', 'patient'] },
-    { title: 'Settings', icon: 'cog-outline', path: 'Settings', roles: ['admin', 'doctor', 'patient'] },
+    { title: 'Dashboard', icon: 'view-dashboard-outline', path: 'Main' },
+    { title: 'Consultations', icon: 'stethoscope', path: 'Consultations' },
+    { title: 'Prescriptions', icon: 'file-document-outline', path: 'Prescriptions' },
+    { title: 'Settings', icon: 'cog-outline', path: 'Settings' },
   ];
 
-  const visibleMenuItems = menuItems.filter(item => role && item.roles.includes(role));
+  const visibleMenuItems = menuItems;
 
   const handleLogout = async () => {
     await SecureStore.deleteItemAsync('token');

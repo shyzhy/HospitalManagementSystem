@@ -6,56 +6,17 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Svg, { Path } from 'react-native-svg';
 
 export default function HomeScreen({ navigation }: any) {
-  const [role, setRole] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>('');
   
   useEffect(() => {
-    SecureStore.getItemAsync('role').then(setRole);
     SecureStore.getItemAsync('userName').then(setUserName);
   }, []);
 
   const menuItems = [
-    { title: 'Patients', icon: 'account-multiple-outline', path: 'PatientList', roles: ['admin', 'doctor'] },
-    { title: 'Consultations', icon: 'stethoscope', path: 'Consultations', roles: ['admin', 'doctor', 'patient'] },
-    { title: 'Treatment', icon: 'pill', path: 'Treatment', roles: ['admin', 'doctor'] },
-    { title: 'Medical Records', icon: 'clipboard-text-outline', path: 'MedicalRecords', roles: ['admin', 'doctor'] },
-    { title: 'Prescriptions', icon: 'file-document-outline', path: 'Prescriptions', roles: ['admin', 'doctor', 'patient'] },
-    { title: 'Settings', icon: 'cog-outline', path: 'Settings', roles: ['admin', 'doctor', 'patient'] },
+    { title: 'Consultations', icon: 'stethoscope', path: 'Consultations' },
+    { title: 'Prescriptions', icon: 'file-document-outline', path: 'Prescriptions' },
+    { title: 'Settings', icon: 'cog-outline', path: 'Settings' },
   ];
-
-  const visibleMenuItems = menuItems.filter(item => role && item.roles.includes(role));
-
-  const renderDoctorDashboard = () => (
-    <View style={styles.dashboardContainer}>
-      <View style={styles.statsGrid}>
-        <View style={[styles.statCard, { borderLeftColor: '#556ee6' }]}>
-          <Text style={styles.statLabel}>PATIENTS</Text>
-          <Text style={styles.statValue}>24</Text>
-        </View>
-        <View style={[styles.statCard, { borderLeftColor: '#34c38f' }]}>
-          <Text style={styles.statLabel}>TODAY</Text>
-          <Text style={styles.statValue}>8</Text>
-        </View>
-      </View>
-
-      <Text style={styles.sectionTitle}>Management Tools</Text>
-      <View style={styles.grid}>
-        {visibleMenuItems.map((item, index) => (
-          <TouchableOpacity 
-            key={index} 
-            style={styles.card}
-            onPress={() => navigation.navigate(item.path)}
-            activeOpacity={0.7}
-          >
-            <View style={styles.iconWrapper}>
-              <MaterialCommunityIcons name={item.icon as any} size={28} color="#556ee6" />
-            </View>
-            <Text style={styles.cardTitle}>{item.title}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </View>
-  );
 
   const renderPatientDashboard = () => (
     <View style={styles.dashboardContainer}>
@@ -64,7 +25,7 @@ export default function HomeScreen({ navigation }: any) {
           <MaterialCommunityIcons name="heart-pulse" size={24} color="#ef4444" />
           <Text style={styles.healthTitle}>My Health Overview</Text>
         </View>
-        <Text style={styles.healthDesc}>Your clinical records are up to date. Next visit scheduled for tomorrow.</Text>
+        <Text style={styles.healthDesc}>Your clinical records are up to date. Access your prescriptions and consultation history below.</Text>
         <View style={styles.healthFooter}>
           <View style={styles.healthStat}>
             <Text style={styles.hStatLabel}>BLOOD</Text>
@@ -80,7 +41,7 @@ export default function HomeScreen({ navigation }: any) {
 
       <Text style={styles.sectionTitle}>My Services</Text>
       <View style={styles.grid}>
-        {visibleMenuItems.map((item, index) => (
+        {menuItems.map((item, index) => (
           <TouchableOpacity 
             key={index} 
             style={styles.card}
@@ -103,8 +64,8 @@ export default function HomeScreen({ navigation }: any) {
           <MaterialCommunityIcons name="robot-outline" size={24} color="#ffffff" />
         </View>
         <View style={styles.aiTextContainer}>
-          <Text style={styles.aiTitle}>AI Health Assistant</Text>
-          <Text style={styles.aiSubtitle}>Predict health risks and get insights</Text>
+          <Text style={styles.aiTitle}>Book Appointment</Text>
+          <Text style={styles.aiSubtitle}>Schedule a new visit with your doctor</Text>
         </View>
         <MaterialCommunityIcons name="chevron-right" size={20} color="#ffffff" />
       </TouchableOpacity>
@@ -132,10 +93,10 @@ export default function HomeScreen({ navigation }: any) {
         <View style={styles.welcomeSection}>
           <Text style={styles.welcomeSubtitle}>WELCOME BACK,</Text>
           <Text style={styles.welcomeTitle}>{userName || 'User'}</Text>
-          <Text style={styles.welcomeDesc}>Access your clinical dashboard anywhere.</Text>
+          <Text style={styles.welcomeDesc}>Access your patient dashboard anywhere.</Text>
         </View>
 
-        {role === 'patient' ? renderPatientDashboard() : renderDoctorDashboard()}
+        {renderPatientDashboard()}
       </ScrollView>
     </View>
   );

@@ -65,11 +65,11 @@ WSGI_APPLICATION = 'hospital.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'medflow',
+        'NAME': 'railway',
         'USER': 'postgres',
-        'PASSWORD': 'shuri',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'PASSWORD': 'RokFDTPGVWXOFAfWadzKhGazCXVOzyZF',
+        'HOST': 'yamabiko.proxy.rlwy.net',
+        'PORT': '19892',
     }
 }
 

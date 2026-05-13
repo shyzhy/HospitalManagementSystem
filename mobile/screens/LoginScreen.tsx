@@ -50,17 +50,21 @@ export default function LoginScreen({ navigation }: any) {
         role = 'doctor';
       }
       
+      if (role !== 'patient') {
+        await SecureStore.deleteItemAsync('token');
+        setLoginError("Access Denied: Only patients can log in to the mobile app.");
+        setLoading(false);
+        return;
+      }
+      
       await SecureStore.setItemAsync('role', role);
       await SecureStore.setItemAsync('userName', userData.first_name || userData.username);
       
-      if (userData.doctor_id) {
-        await SecureStore.setItemAsync('doctorId', userData.doctor_id.toString());
-      }
       if (userData.patient_id) {
         await SecureStore.setItemAsync('patientId', userData.patient_id.toString());
       }
       
-      navigation.replace('Main');
+      navigation.replace('AppDrawer');
     } catch (err: any) {
       console.error(err);
       setLoginError("Login Failed: Please check your credentials.");
