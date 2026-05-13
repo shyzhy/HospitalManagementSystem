@@ -39,8 +39,8 @@ export default function ConsultationsScreen({ navigation }: any) {
           <MaterialCommunityIcons name="stethoscope" size={24} color="#556ee6" />
         </View>
         <View style={styles.cardInfo}>
-          <Text style={styles.patientName}>{item.patient_name || `Patient #${item.patient}`}</Text>
-          <Text style={styles.complaintText} numberOfLines={1}>{item.primary_complaint || 'No primary complaint'}</Text>
+          <Text style={styles.patientName}>{item.doctor_name || `Dr. ${item.doctor}`}</Text>
+          <Text style={styles.complaintText} numberOfLines={1}>{item.primary_complaint || 'General Consultation'}</Text>
         </View>
         <View style={styles.dateBadge}>
           <Text style={styles.dateText}>{new Date(item.consultation_date).toLocaleDateString()}</Text>
@@ -55,8 +55,8 @@ export default function ConsultationsScreen({ navigation }: any) {
           <Text style={styles.footerText}>{item.consultation_time || 'N/A'}</Text>
         </View>
         <View style={styles.footerItem}>
-          <MaterialCommunityIcons name="doctor" size={14} color="#94a3b8" />
-          <Text style={styles.footerText}> {item.doctor_name || item.doctor}</Text>
+          <MaterialCommunityIcons name="account" size={14} color="#94a3b8" />
+          <Text style={styles.footerText}>{item.patient_name || `Patient #${item.patient}`}</Text>
         </View>
       </View>
     </TouchableOpacity>

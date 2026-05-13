@@ -39,8 +39,8 @@ export default function PrescriptionsScreen({ navigation }: any) {
           <MaterialCommunityIcons name="file-document-outline" size={24} color="#f97316" />
         </View>
         <View style={styles.cardInfo}>
-          <Text style={styles.patientName}>{item.patient_name || `Patient #${item.patient}`}</Text>
-          <Text style={styles.medicationName} numberOfLines={1}>{item.medication_name || 'Prescribed Medication'}</Text>
+          <Text style={styles.patientName}>{item.medication || 'Prescribed Medication'}</Text>
+          <Text style={styles.medicationName} numberOfLines={1}>{item.patient_name || `Patient #${item.patient}`}</Text>
         </View>
         <View style={styles.dosageBadge}>
           <Text style={styles.dosageText}>{item.dosage || 'N/A'}</Text>
@@ -53,6 +53,10 @@ export default function PrescriptionsScreen({ navigation }: any) {
         <View style={styles.footerItem}>
           <MaterialCommunityIcons name="repeat" size={14} color="#94a3b8" />
           <Text style={styles.footerText}>{item.frequency || 'As directed'}</Text>
+        </View>
+        <View style={styles.footerItem}>
+          <MaterialCommunityIcons name="clock-outline" size={14} color="#94a3b8" />
+          <Text style={styles.footerText}>{item.duration || 'N/A'}</Text>
         </View>
         <View style={styles.footerItem}>
           <MaterialCommunityIcons name="calendar-clock" size={14} color="#94a3b8" />

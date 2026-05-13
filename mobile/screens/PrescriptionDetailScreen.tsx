@@ -21,7 +21,7 @@ export default function PrescriptionDetailScreen({ route, navigation }: any) {
             <Text style={styles.badgeText}>ORDER #RX-{prescription.id.toString().padStart(4, '0')}</Text>
           </View>
         </View>
-        <Text style={styles.medicationName}>{prescription.medication_name || 'Prescribed Medication'}</Text>
+        <Text style={styles.medicationName}>{prescription.medication || 'Prescribed Medication'}</Text>
         <Text style={styles.dateText}>Issued on {new Date(prescription.date_prescribed).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</Text>
       </View>
 
@@ -51,6 +51,10 @@ export default function PrescriptionDetailScreen({ route, navigation }: any) {
           <View style={styles.detailCard}>
             <Text style={styles.detailLabel}>FREQUENCY</Text>
             <Text style={styles.detailValue}>{prescription.frequency || 'N/A'}</Text>
+          </View>
+          <View style={styles.detailCard}>
+            <Text style={styles.detailLabel}>DURATION</Text>
+            <Text style={styles.detailValue}>{prescription.duration || 'N/A'}</Text>
           </View>
         </View>
 
