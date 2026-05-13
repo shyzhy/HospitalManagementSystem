@@ -17,6 +17,7 @@ import SettingsScreen from './screens/SettingsScreen';
 import SidebarContent from './components/SidebarContent';
 import ConsultationDetailScreen from './screens/ConsultationDetailScreen';
 import ScheduleConsultationScreen from './screens/ScheduleConsultationScreen';
+import UpdateAccountScreen from './screens/UpdateAccountScreen';
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -87,6 +88,7 @@ export default function App() {
             <Stack.Screen name="PrescriptionDetail" component={PrescriptionDetailScreen} />
             <Stack.Screen name="Notifications" component={NotificationsScreen} />
             <Stack.Screen name="ScheduleConsultation" component={ScheduleConsultationScreen} />
+            <Stack.Screen name="UpdateAccount" component={UpdateAccountScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </PaperProvider>

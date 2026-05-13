@@ -42,6 +42,10 @@ export const getPatients = async () => {
   return api.get('/api/v1/patients/');
 };
 
+export const getPatient = async (id: number) => {
+  return api.get(`/api/v1/patients/${id}/`);
+};
+
 export const getDoctors = async () => {
   return api.get('/api/v1/doctors/');
 };
@@ -97,6 +101,14 @@ export const uploadProfilePicture = async (type: 'patient' | 'doctor', id: numbe
   return api.post(`/api/v1/${type}s/${id}/upload_picture/`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
+};
+
+export const changePassword = async (data: any) => {
+  return api.post('/auth/users/set_password/', data);
+};
+
+export const updatePatientProfile = async (id: number, data: any) => {
+  return api.patch(`/api/v1/patients/${id}/`, data);
 };
 
 export default api;

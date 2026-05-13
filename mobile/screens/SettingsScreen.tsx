@@ -115,9 +115,9 @@ export default function SettingsScreen({ navigation }: any) {
         <View style={styles.profileCard}>
           <View style={styles.avatarWrapper}>
             {getProfilePicUrl() ? (
-              <Image 
-                source={{ uri: getProfilePicUrl() }} 
-                style={styles.avatar} 
+              <Image
+                source={{ uri: getProfilePicUrl() }}
+                style={styles.avatar}
                 key={getProfilePicUrl()} // Force refresh
               />
             ) : (
@@ -127,8 +127,8 @@ export default function SettingsScreen({ navigation }: any) {
                 </Text>
               </View>
             )}
-            <TouchableOpacity 
-              style={styles.editAvatarBtn} 
+            <TouchableOpacity
+              style={styles.editAvatarBtn}
               onPress={handleEditAvatar}
               disabled={uploading}
             >
@@ -139,7 +139,7 @@ export default function SettingsScreen({ navigation }: any) {
               )}
             </TouchableOpacity>
           </View>
-          
+
           <Text style={styles.userName}>{user?.profile_name || `${user?.first_name} ${user?.last_name}`}</Text>
           <View style={styles.roleBadge}>
             <Text style={styles.roleText}>{role?.toUpperCase()} PORTAL</Text>
@@ -149,21 +149,21 @@ export default function SettingsScreen({ navigation }: any) {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>ACCOUNT SETTINGS</Text>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.menuItem}
-            onPress={() => Alert.alert("Clinical Records", "Full medical history is available in the Consultations module.")}
+            onPress={() => navigation.navigate('UpdateAccount')}
           >
             <View style={[styles.menuIcon, { backgroundColor: '#eff6ff' }]}>
-              <MaterialCommunityIcons name="account-outline" size={20} color="#3b82f6" />
+              <MaterialCommunityIcons name="account-edit-outline" size={20} color="#3b82f6" />
             </View>
-            <Text style={styles.menuLabel}>Clinical Information</Text>
+            <Text style={styles.menuLabel}>Update Account</Text>
             <MaterialCommunityIcons name="chevron-right" size={20} color="#cbd5e1" />
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.menuItem}
-            onPress={() => Alert.alert("Security", "Password modification is handled via secure web gateway for your protection.")}
+            onPress={() => navigation.navigate('UpdateAccount')}
           >
             <View style={[styles.menuIcon, { backgroundColor: '#f5f3ff' }]}>
               <MaterialCommunityIcons name="lock-outline" size={20} color="#8b5cf6" />
@@ -171,8 +171,8 @@ export default function SettingsScreen({ navigation }: any) {
             <Text style={styles.menuLabel}>Security Settings</Text>
             <MaterialCommunityIcons name="chevron-right" size={20} color="#cbd5e1" />
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.menuItem}
             onPress={() => navigation.navigate('Notifications')}
           >
@@ -193,7 +193,7 @@ export default function SettingsScreen({ navigation }: any) {
           <MaterialCommunityIcons name="logout" size={20} color="#ef4444" />
           <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>
-        
+
         <Text style={styles.versionText}>MedFlow Patient Mobile v1.1.0</Text>
       </ScrollView>
     </View>
