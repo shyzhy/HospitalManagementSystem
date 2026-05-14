@@ -12,6 +12,7 @@ interface PatientDetailsProps {
     onViewTreatment?: (treatment: Treatment) => void;
     onAddTreatment?: (patient: Patient) => void;
     onAddPrescription?: (patient: Patient) => void;
+    onDeletePrescription?: (id: number) => void;
 }
 
 interface ClinicalRecord {
@@ -32,11 +33,14 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({
     onViewPrescription,
     onViewTreatment,
     onAddTreatment,
-    onAddPrescription
+    onAddPrescription,
+    onDeletePrescription
 }) => {
+    const userRole = localStorage.getItem('role') || 'patient';
     const [records, setRecords] = useState<ClinicalRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'all' | 'consultation' | 'prescription' | 'treatment'>('all');
+    const [refreshKey, setRefreshKey] = useState(0);
 
     useEffect(() => {
         const fetchAllRecords = async () => {
@@ -86,7 +90,9 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({
             }
         };
         fetchAllRecords();
-    }, [patient.id]);
+    }, [patient.id, refreshKey]);
+
+    const handleRefresh = () => setRefreshKey(k => k + 1);
 
     const handleInspect = (record: ClinicalRecord) => {
         if (record.type === 'consultation') onViewConsultation?.(record.original as Consultation);
@@ -258,15 +264,38 @@ const PatientDetails: React.FC<PatientDetailsProps> = ({
                                                     </p>
                                                 </div>
                                             </div>
-                                            <button 
-                                                className="opacity-0 group-hover:opacity-100 px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-[#556ee6] hover:text-white transition-all shadow-sm active:scale-95"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleInspect(record);
-                                                }}
-                                            >
-                                                Inspect
-                                            </button>
+                                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                {record.type === 'prescription' && (userRole === 'doctor' || userRole === 'admin') && (
+                                                    <button 
+                                                        className="p-2 text-slate-300 hover:text-red-500 transition-colors active:scale-90"
+                                                        onClick={async (e) => {
+                                                            e.stopPropagation();
+                                                            if (window.confirm("Clinical Action: Are you sure you want to permanently void this prescription?")) {
+                                                                try {
+                                                                    await onDeletePrescription?.(record.id);
+                                                                    handleRefresh();
+                                                                } catch (err) {
+                                                                    console.error("Failed to void prescription:", err);
+                                                                }
+                                                            }
+                                                        }}
+                                                        title="Void Prescription"
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
+                                                )}
+                                                <button 
+                                                    className="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-[#556ee6] hover:text-white transition-all shadow-sm active:scale-95"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleInspect(record);
+                                                    }}
+                                                >
+                                                    Inspect
+                                                </button>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>

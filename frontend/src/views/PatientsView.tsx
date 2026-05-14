@@ -74,6 +74,10 @@ const PatientsView: React.FC<PatientsViewProps> = ({ patients, doctors, userRole
                 onViewTreatment={(t) => { setSelectedTreatment(t); setShowTreatmentDetails(true); setShowPatientDetails(false); }}
                 onAddTreatment={() => { setShowPatientDetails(false); setShowTreatmentForm(true); }}
                 onAddPrescription={() => { setShowPatientDetails(false); setShowPrescriptionForm(true); }}
+                onDeletePrescription={async (id) => {
+                    await deletePrescription(id);
+                    onRefresh(); // Refresh global patient list
+                }}
             />
         ) : showConsultationDetails && selectedConsultation ? (
             <ConsultationDetails 

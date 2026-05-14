@@ -30,14 +30,14 @@ export default function PrescriptionsScreen({ navigation }: any) {
     fetchPrescriptions();
   };
 
-  const filteredPrescriptions = prescriptions.filter(p => 
+  const filteredPrescriptions = prescriptions.filter(p =>
     (p.patient_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
     (p.medication_name || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const renderItem = ({ item }: { item: any }) => (
-    <TouchableOpacity 
-      style={styles.card} 
+    <TouchableOpacity
+      style={styles.card}
       activeOpacity={0.7}
       onPress={() => navigation.navigate('PrescriptionDetail', { prescription: item })}
     >
@@ -53,9 +53,9 @@ export default function PrescriptionsScreen({ navigation }: any) {
           <Text style={styles.dosageText}>{item.dosage || 'N/A'}</Text>
         </View>
       </View>
-      
+
       <View style={styles.divider} />
-      
+
       <View style={styles.cardFooter}>
         <View style={styles.footerItem}>
           <MaterialCommunityIcons name="repeat" size={14} color="#94a3b8" />
@@ -70,7 +70,7 @@ export default function PrescriptionsScreen({ navigation }: any) {
           <Text style={styles.footerText}>{item.date_prescribed || 'N/A'}</Text>
         </View>
       </View>
-      
+
       {item.instructions && (
         <View style={styles.instructionsBox}>
           <Text style={styles.instructionsText} numberOfLines={2}>{item.instructions}</Text>
@@ -101,7 +101,7 @@ export default function PrescriptionsScreen({ navigation }: any) {
           style={styles.searchInput}
         />
       </View>
-      
+
       {loading ? (
         <View style={styles.center}>
           <ActivityIndicator size="large" color="#556ee6" />
