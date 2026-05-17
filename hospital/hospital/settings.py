@@ -28,7 +28,6 @@ INSTALLED_APPS = [
     'djoser',
 
     'medflow',
-    'chatbot',
 ]
 
 MIDDLEWARE = [

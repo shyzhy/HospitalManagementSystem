@@ -5,11 +5,11 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.contrib.auth.models import User
 from django.db import models
-from .models import Patient, Doctor, Consultation, Prescription, Treatment, MedicalRecord, Notification
+from .models import Patient, Doctor, Consultation, Prescription, Treatment, MedicalRecord, Notification, ChatMessage, KnowledgeBase
 from .serializers import (
     PatientSerializer, DoctorSerializer, ConsultationSerializer,
     PrescriptionSerializer, TreatmentSerializer, MedicalRecordSerializer,
-    NotificationSerializer
+    NotificationSerializer, ChatMessageSerializer, KnowledgeBaseSerializer
 )
 
 
@@ -451,3 +451,65 @@ class NotificationUpdateView(RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return Notification.objects.filter(patient__user=self.request.user)
+
+class ChatbotView(ListCreateAPIView):
+
+    queryset = ChatMessage.objects.all()
+    serializer_class = ChatMessageSerializer
+
+    def create(self, request, *args, **kwargs):
+
+        user_message = request.data.get("message")
+
+        # save user message
+        user_chat = ChatMessage.objects.create(
+            role='user',
+            message=user_message
+        )
+
+        # get knowledge
+        knowledge = KnowledgeBase.objects.all()
+
+        context = ""
+
+        for item in knowledge:
+            if item.text_content:
+                context += item.text_content + "\n"
+
+        prompt = f"""
+You are a helpful assistant.
+
+Knowledge:
+{context}
+
+User:
+{user_message}
+"""
+
+        response = requests.post(
+            "http://localhost:11434/api/generate",
+            json={
+                "model": "qwen2.5:0.5b",
+                "prompt": prompt,
+                "stream": False
+            }
+        )
+
+        data = response.json()
+
+        ai_response = data["response"]
+
+        # save AI response
+        ai_chat = ChatMessage.objects.create(
+            role='assistant',
+            message=ai_response
+        )
+
+        return Response({
+            "user": ChatMessageSerializer(user_chat).data,
+            "assistant": ChatMessageSerializer(ai_chat).data
+        })
+
+class KnowledgeBaseView(ListCreateAPIView):
+    queryset = KnowledgeBase.objects.all()
+    serializer_class = KnowledgeBaseSerializer

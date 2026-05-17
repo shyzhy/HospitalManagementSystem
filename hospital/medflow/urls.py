@@ -34,4 +34,10 @@ urlpatterns = [
     # Notifications
     path('notifications/', views.NotificationListView.as_view(), name='notification-list'),
     path('notifications/<int:pk>/', views.NotificationUpdateView.as_view(), name='notification-detail'),
+
+    # Chatbot
+    path('chat/', views.ChatbotView.as_view(), name='chat'),   
+    
+    # Knowledge Base
+    path('knowledge-base/', views.KnowledgeBaseView.as_view(), name='knowledge-base'),
 ]

@@ -1,7 +1,7 @@
 from djoser.serializers import UserSerializer as DjoserUserSerializer
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Patient, Doctor, Consultation, Prescription, Treatment, MedicalRecord, Notification
+from .models import Patient, Doctor, Consultation, Prescription, Treatment, MedicalRecord, Notification, KnowledgeBase, ChatMessage
 
 
 # --- USER SERIALIZER ---
@@ -51,6 +51,18 @@ class CustomUserSerializer(DjoserUserSerializer):
         if patient:
             return f"{patient.first_name} {patient.last_name}"
         return ""
+
+# --- CHATBOT SERIALIZER ---
+class KnowledgeBaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = KnowledgeBase
+        fields = '__all__'
+
+
+class ChatMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChatMessage
+        fields = '__all__'
 
 
 # --- PATIENT SERIALIZER ---

@@ -35,9 +35,28 @@ function Chatbot() {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://127.0.0.1:8000/api/v1/chat/", {
-        message,
-      });
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setMessages(prev => [
+          ...prev,
+          {
+            role: 'assistant',
+            text: 'You must be logged in to use the chat.',
+          },
+        ]);
+        setLoading(false);
+        return;
+      }
+
+      const res = await axios.post(
+        "http://127.0.0.1:8000/api/v1/chat/",
+        { message },
+        {
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        },
+      );
 
       const botMessage: Message = {
         role: "assistant",

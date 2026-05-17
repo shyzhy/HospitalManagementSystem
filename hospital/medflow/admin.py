@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Patient, Doctor, Consultation, Prescription, Treatment, MedicalRecord
+from .models import Patient, Doctor, Consultation, Prescription, Treatment, MedicalRecord, Notification, KnowledgeBase, ChatMessage
 
 
 # ----------------- PATIENT -----------------
@@ -62,3 +62,27 @@ class MedicalRecordAdmin(admin.ModelAdmin):
 
     # Show related Treatments & Prescriptions in the MedicalRecord page
     inlines = [TreatmentInline, PrescriptionInline]
+
+# ----------------- NOTIFICATION -----------------
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('recipient', 'message', 'is_read', 'created_at')
+    search_fields = ('recipient__first_name', 'recipient__last_name', 'message')
+    list_filter = ('is_read', 'created_at')
+    readonly_fields = ('created_at',)
+
+# ----------------- KNOWLEDGE BASE -----------------
+@admin.register(KnowledgeBase)
+class KnowledgeBaseAdmin(admin.ModelAdmin):
+    list_display = ('title', 'created_at')
+    search_fields = ('title',)
+    list_filter = ('created_at',)
+    readonly_fields = ('created_at',)
+
+# ----------------- CHAT MESSAGES -----------------
+@admin.register(ChatMessage)
+class ChatMessageAdmin(admin.ModelAdmin):       
+    list_display = ('sender', 'message_type', 'created_at')
+    search_fields = ('sender__first_name', 'sender__last_name', 'message')
+    list_filter = ('message_type', 'created_at')
+    readonly_fields = ('created_at',)

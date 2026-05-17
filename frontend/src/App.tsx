@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+
+// @ts-ignore: allow importing CSS without type declarations
 import './App.css';
 
 // Views
@@ -16,6 +18,7 @@ import Login from './component/Login';
 import Activate from './component/Activate';
 import Sidebar from './component/Sidebar';
 import PrivateRoute from './router/PrivateRoute';
+import Chatbot from './component/Chatbot';
 
 // API & Types
 import { getPatients, getDoctors } from './api';
@@ -232,6 +235,7 @@ function AppContent() {
           </Routes>
         </div>
       </main>
+      <Chatbot />
       </div>
     </div>
   );
