@@ -1,24 +1,18 @@
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-# pyrefly: ignore [missing-import]
 from rest_framework.views import APIView
-# pyrefly: ignore [missing-import]
 from rest_framework import permissions, status
-# pyrefly: ignore [missing-import]
 from rest_framework.response import Response
-# pyrefly: ignore [missing-import]
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.contrib.auth.models import User
 from django.db import models
-# pyrefly: ignore [missing-import]
 from .models import Patient, Doctor, Consultation, Prescription, Treatment, MedicalRecord, Notification
-# pyrefly: ignore [missing-import]
 from .serializers import (
     PatientSerializer, DoctorSerializer, ConsultationSerializer,
     PrescriptionSerializer, TreatmentSerializer, MedicalRecordSerializer,
     NotificationSerializer
 )
 
-# pyrefly: ignore [missing-import]
+
 from .emails import CustomActivationEmail
 
 
