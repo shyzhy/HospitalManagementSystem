@@ -66,23 +66,30 @@ class MedicalRecordAdmin(admin.ModelAdmin):
 # ----------------- NOTIFICATION -----------------
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
-    list_display = ('recipient', 'message', 'is_read', 'created_at')
-    search_fields = ('recipient__first_name', 'recipient__last_name', 'message')
-    list_filter = ('is_read', 'created_at')
+    list_display = ('patient', 'title', 'notification_type', 'is_read', 'created_at')
+    search_fields = ('patient__first_name', 'patient__last_name', 'title', 'message')
+    list_filter = ('notification_type', 'is_read', 'created_at')
     readonly_fields = ('created_at',)
+
 
 # ----------------- KNOWLEDGE BASE -----------------
 @admin.register(KnowledgeBase)
 class KnowledgeBaseAdmin(admin.ModelAdmin):
-    list_display = ('title', 'created_at')
-    search_fields = ('title',)
+    list_display = ('title', 'website_url', 'created_at')
+    search_fields = ('title', 'text_content', 'website_url')
     list_filter = ('created_at',)
     readonly_fields = ('created_at',)
 
+
 # ----------------- CHAT MESSAGES -----------------
 @admin.register(ChatMessage)
-class ChatMessageAdmin(admin.ModelAdmin):       
-    list_display = ('sender', 'message_type', 'created_at')
-    search_fields = ('sender__first_name', 'sender__last_name', 'message')
-    list_filter = ('message_type', 'created_at')
+class ChatMessageAdmin(admin.ModelAdmin):
+    list_display = ('role', 'short_message', 'created_at')
+    search_fields = ('role', 'message')
+    list_filter = ('role', 'created_at')
     readonly_fields = ('created_at',)
+
+    def short_message(self, obj):
+        return obj.message[:80]
+
+    short_message.short_description = 'Message'
