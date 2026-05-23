@@ -182,7 +182,14 @@ class DoctorListCreateView(ListCreateAPIView):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
-        return Doctor.objects.filter(is_deleted=False)
+        queryset = Doctor.objects.filter(is_deleted=False)
+
+        available = self.request.query_params.get('available')
+
+        if available == 'true':
+            queryset = queryset.filter(is_available=True)
+
+        return queryset
 
     def perform_create(self, serializer):
         email = serializer.validated_data.pop('email', None)

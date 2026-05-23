@@ -50,6 +50,10 @@ export const getDoctors = async () => {
   return api.get('/api/v1/doctors/');
 };
 
+export const getAvailableDoctors = async () => {
+    return api.get('/api/v1/doctors/?available=true');
+};
+
 export const getConsultations = async () => {
   return api.get('/api/v1/consultations/');
 };
@@ -110,5 +114,7 @@ export const changePassword = async (data: any) => {
 export const updatePatientProfile = async (id: number, data: any) => {
   return api.patch(`/api/v1/patients/${id}/`, data);
 };
+
+
 
 export default api;

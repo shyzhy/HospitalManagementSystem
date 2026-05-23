@@ -139,6 +139,9 @@ class BaseRecordSerializer(serializers.ModelSerializer):
 
 # --- SPECIFIC RECORD SERIALIZERS ---
 class ConsultationSerializer(BaseRecordSerializer):
+    patient_name = serializers.SerializerMethodField()
+    doctor_name = serializers.SerializerMethodField()
+    doctor_specialization = serializers.SerializerMethodField()
     consultation_date = serializers.DateField(
         format="%Y-%m-%d",
         input_formats=['%Y-%m-%d', 'iso-8601']
@@ -148,6 +151,15 @@ class ConsultationSerializer(BaseRecordSerializer):
         model = Consultation
         fields = '__all__'
         read_only_fields = ['created_at', 'updated_at']
+        
+    def get_patient_name(self, obj):
+        return f"{obj.patient.first_name} {obj.patient.last_name}"
+
+    def get_doctor_name(self, obj):
+        return f"Dr. {obj.doctor.first_name} {obj.doctor.last_name}"
+
+    def get_doctor_specialization(self, obj):
+        return obj.doctor.specialization
 
 class PrescriptionSerializer(BaseRecordSerializer):
     class Meta:

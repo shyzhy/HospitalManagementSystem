@@ -18,6 +18,7 @@ import SidebarContent from './components/SidebarContent';
 import ConsultationDetailScreen from './screens/ConsultationDetailScreen';
 import ScheduleConsultationScreen from './screens/ScheduleConsultationScreen';
 import UpdateAccountScreen from './screens/UpdateAccountScreen';
+import MyAppointmentsScreen from './screens/MyAppointmentsScreen';
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -89,6 +90,7 @@ export default function App() {
             <Stack.Screen name="Notifications" component={NotificationsScreen} />
             <Stack.Screen name="ScheduleConsultation" component={ScheduleConsultationScreen} />
             <Stack.Screen name="UpdateAccount" component={UpdateAccountScreen} />
+            <Stack.Screen name="MyAppointments"component={MyAppointmentsScreen} options={{ headerShown: false }}/>
           </Stack.Navigator>
         </NavigationContainer>
       </PaperProvider>
