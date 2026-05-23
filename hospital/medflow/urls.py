@@ -18,7 +18,7 @@ urlpatterns = [
     # Consultations
     path('consultations/', views.ConsultationListCreateView.as_view(), name='consultation-list'),
     path('consultations/<int:pk>/', views.ConsultationRetrieveUpdateDestroyView.as_view(), name='consultation-detail'),
-
+    path('consultations/<int:pk>/status/', views.ConsultationStatusUpdateView.as_view(), name='consultation-status-update'),
     # Prescriptions
     path('prescriptions/', views.PrescriptionListCreateView.as_view(), name='prescription-list'),
     path('prescriptions/<int:pk>/', views.PrescriptionRetrieveUpdateDestroyView.as_view(), name='prescription-detail'),

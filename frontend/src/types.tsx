@@ -46,6 +46,7 @@ export interface Consultation {
     patient_first_name?: string;
     patient_last_name?: string;
     patient_profile_picture_url?: string;
+    
     doctor: number;
     doctor_name?: string;
     doctor_profile_picture_url?: string;
@@ -53,6 +54,12 @@ export interface Consultation {
     symptoms: string;
     diagnosis: string;
     notes?: string;
+
+    appointment_status?: 'pending' | 'approved' | 'rejected';
+    rejection_reason?: string;
+
+    created_at?: string;
+    updated_at?: string;
 }
 
 // --- TREATMENT ---

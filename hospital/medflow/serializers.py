@@ -139,12 +139,15 @@ class BaseRecordSerializer(serializers.ModelSerializer):
 
 # --- SPECIFIC RECORD SERIALIZERS ---
 class ConsultationSerializer(BaseRecordSerializer):
-    consultation_date = serializers.DateField(format="%Y-%m-%d", input_formats=['%Y-%m-%d', 'iso-8601'])
+    consultation_date = serializers.DateField(
+        format="%Y-%m-%d",
+        input_formats=['%Y-%m-%d', 'iso-8601']
+    )
 
     class Meta:
         model = Consultation
         fields = '__all__'
-
+        read_only_fields = ['created_at', 'updated_at']
 
 class PrescriptionSerializer(BaseRecordSerializer):
     class Meta:

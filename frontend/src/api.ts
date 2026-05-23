@@ -80,6 +80,10 @@ export const updateConsultation = async (id: number, data: Partial<Consultation>
     const response = await API.put<Consultation>(`consultations/${id}/`, data);
     return response.data;
 };
+export const updateConsultationStatus = async (id: number, appointment_status: 'approved' | 'rejected', rejection_reason: string = ''): Promise<Consultation> => {
+    const response = await API.patch<Consultation>( `consultations/${id}/status/`,{appointment_status,rejection_reason,});
+    return response.data;
+};
 export const deleteConsultation = async (id: number): Promise<void> => {
     await API.delete(`consultations/${id}/`);
 };

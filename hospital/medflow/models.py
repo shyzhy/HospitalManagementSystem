@@ -61,12 +61,17 @@ class MedicalRecord(models.Model):
 
 
 class Consultation(models.Model):
+    STATUS_CHOICES = [ ('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected'),]
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='consultations')
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='consultations')
-    consultation_date = models.DateField(default=timezone.now) 
+    consultation_date = models.DateField(default=timezone.now)
+    appointment_status = models.CharField(max_length=20,choices=STATUS_CHOICES, default='pending')
+    rejection_reason = models.TextField(blank=True)
     diagnosis = models.TextField(blank=True)
     symptoms = models.TextField(blank=True)
     notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Consultation: {self.patient} with Dr. {self.doctor.first_name} {self.doctor.last_name}"

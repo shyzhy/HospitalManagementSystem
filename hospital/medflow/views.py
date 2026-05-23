@@ -1,6 +1,7 @@
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.views import APIView
 from rest_framework import permissions, status
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.contrib.auth.models import User
@@ -295,6 +296,70 @@ class ConsultationRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
                 notification_type='consultation',
                 related_id=instance.id
             )
+class ConsultationStatusUpdateView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, pk):
+        try:
+            consultation = Consultation.objects.select_related(
+                'patient',
+                'doctor'
+            ).get(pk=pk)
+        except Consultation.DoesNotExist:
+            return Response(
+                {'error': 'Consultation not found.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        user = request.user
+        doctor = getattr(user, 'doctor_profile', None)
+
+        # Only assigned doctor, staff, or superuser can approve/reject
+        if not user.is_staff and not user.is_superuser:
+            if not doctor or consultation.doctor != doctor:
+                return Response(
+                    {'error': 'You are not allowed to update this appointment.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+        appointment_status = request.data.get('appointment_status')
+        rejection_reason = request.data.get('rejection_reason', '')
+
+        if appointment_status not in ['approved', 'rejected']:
+            return Response(
+                {'error': 'appointment_status must be approved or rejected.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        consultation.appointment_status = appointment_status
+
+        if appointment_status == 'rejected':
+            consultation.rejection_reason = rejection_reason
+        else:
+            consultation.rejection_reason = ''
+
+        consultation.save()
+
+        if appointment_status == 'approved':
+            Notification.objects.create(
+                patient=consultation.patient,
+                title='Appointment Approved',
+                message=f'Dr. {consultation.doctor.first_name} {consultation.doctor.last_name} approved your appointment.',
+                notification_type='consultation',
+                related_id=consultation.id
+            )
+
+        if appointment_status == 'rejected':
+            Notification.objects.create(
+                patient=consultation.patient,
+                title='Appointment Rejected',
+                message=f'Dr. {consultation.doctor.first_name} {consultation.doctor.last_name} rejected your appointment. Reason: {rejection_reason or "No reason provided."}',
+                notification_type='consultation',
+                related_id=consultation.id
+            )
+
+        serializer = ConsultationSerializer(consultation)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 # ==========================================
 # PRESCRIPTION VIEWS
