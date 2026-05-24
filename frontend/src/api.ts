@@ -1,10 +1,16 @@
 import axios from "axios";
 import { Patient, Doctor, Consultation, Prescription, Treatment, MedicalRecord } from "./types";
 
-const API_URL = "https://hospitalmanagementsystem-production-968a.up.railway.app/api/v1"; 
+export const BACKEND_URL = "https://hospitalmanagementsystem-production-7cbf.up.railway.app";
+
+const API_URL = `${BACKEND_URL}/api/v1`;
 
 const API = axios.create({
     baseURL: API_URL,
+});
+
+export const AUTH_API = axios.create({
+    baseURL: BACKEND_URL,
 });
 
 // AUTH INTERCEPTOR

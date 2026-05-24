@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import axios from 'axios';
+import { AUTH_API } from '../api';
 
 interface ActivateProps {
     uid: string;
@@ -17,7 +17,7 @@ const Activate: React.FC<ActivateProps> = ({ uid, token }) => {
 
         const activate = async () => {
             try {
-                await axios.post('http://127.0.0.1:8000/auth/users/activation/', { uid, token });
+                await AUTH_API.post('/auth/users/activation/', { uid, token });                
                 setStatus('success');
                 setMessage('Your account has been activated successfully! You can now sign in.');
             } catch (err: any) {

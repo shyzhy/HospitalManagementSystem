@@ -1,4 +1,4 @@
-import axios from "axios";
+import API from "../api";
 import { useState, useEffect, useRef } from "react";
 
 interface Message {
@@ -48,15 +48,7 @@ function Chatbot() {
         return;
       }
 
-      const res = await axios.post(
-        "http://127.0.0.1:8000/api/v1/chat/",
-        { message },
-        {
-          headers: {
-            Authorization: `Token ${token}`,
-          },
-        },
-      );
+      const res = await API.post("/chat/", { message });
 
       const botMessage: Message = {
         role: "assistant",
