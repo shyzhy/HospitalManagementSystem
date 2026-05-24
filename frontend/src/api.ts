@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Patient, Doctor, Consultation, Prescription, Treatment, MedicalRecord } from "./types";
 
-const API_URL = "http://127.0.0.1:8000/api/v1/";
+const API_URL = "https://hospitalmanagementsystem-production-968a.up.railway.app/api/v1"; 
 
 const API = axios.create({
     baseURL: API_URL,
