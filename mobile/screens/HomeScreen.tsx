@@ -36,6 +36,11 @@
         path: 'MyAppointments',
       },
       {
+        title: 'Notifications',
+        icon: 'bell-outline',
+        path: 'Notifications',
+      },
+      {
         title: 'Prescriptions',
         icon: 'file-document-outline',
         path: 'Prescriptions',
