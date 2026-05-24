@@ -124,16 +124,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
-
-STORAGES = {
-    'default': {
-        'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage',
-    },
-    'staticfiles': {
-        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
-    },
-}
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 CLOUDINARY_STORAGE = {
@@ -147,7 +138,7 @@ STORAGES = {
         'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage',
     },
     'staticfiles': {
-        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
     },
 }
 
