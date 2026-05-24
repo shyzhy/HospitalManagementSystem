@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
+const BACKEND_URL = "https://hospitalmanagementsystem-production-7cbf.up.railway.app";
+
 interface LoginProps {
     onLoginSuccess: (token: string, role: string) => void;
 }
@@ -29,10 +31,10 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         setLoading(true);
         setLoginError('');
         try {
-            const tokenRes = await axios.post('http://127.0.0.1:8000/auth/token/login/', { username: email, password });
+           const tokenRes = await axios.post(`${BACKEND_URL}/auth/token/login/`, {username: email, password});
             const token = tokenRes.data.auth_token;
 
-            const userRes = await axios.get('http://127.0.0.1:8000/auth/users/me/', {
+            const userRes = await axios.get(`${BACKEND_URL}/auth/users/me/`, {
                 headers: { Authorization: `Token ${token}` }
             });
             
@@ -73,7 +75,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         setRegError('');
         setRegSuccess('');
         try {
-            await axios.post('http://127.0.0.1:8000/api/v1/register/', regData);
+            await axios.post(`${BACKEND_URL}/api/v1/register/`, regData);
             setRegSuccess('Account created! Please check your email to activate your account before signing in.');
         } catch (err: any) {
             const msg = err.response?.data?.error || 'Registration failed. Please try again.';
