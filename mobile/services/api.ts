@@ -1,13 +1,12 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-export const API_URL = 'https://esteemed-filter-glutton.ngrok-free.dev';
+export const API_URL = 'https://hospitalmanagementsystem-production-7cbf.up.railway.app';
 
 const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
-    'ngrok-skip-browser-warning': 'true',
   },
 });
 
