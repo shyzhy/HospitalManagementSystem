@@ -1,0 +1,26 @@
+# Node
+node_modules/
+frontend/node_modules/
+mobile/node_modules/
+hospital/node_modules/
+
+# Build outputs
+frontend/dist/
+mobile/.expo/
+.expo/
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.env
+
+# Django
+hospital/db.sqlite3
+hospital/media/
+hospital/staticfiles/
+
+# OS/editor
+.DS_Store
+.vscode/
+.idea/
