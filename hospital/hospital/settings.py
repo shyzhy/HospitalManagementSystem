@@ -148,5 +148,10 @@ EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'shemkyle20@gmail.com'
 
 CORS_ALLOW_ALL_ORIGINS = True 
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://hospitalmanagementsystem-production-7cbf.up.railway.app",
+]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
