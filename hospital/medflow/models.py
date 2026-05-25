@@ -23,6 +23,13 @@ class Patient(models.Model):
         self.save()
         if user:
             user.delete()
+        
+        # Delete all consultations, prescriptions, treatments, and notifications connected to the patient
+        self.consultations.all().delete()
+        self.prescriptions.all().delete()
+        self.treatments.all().delete()
+        self.notifications.all().delete()
+
         # Also delete the patient's medical record
         if hasattr(self, 'medical_record'):
             self.medical_record.delete()
