@@ -1,22 +1,27 @@
 import traceback
 import os
 import requests
+from datetime import datetime
+
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.tokens import default_token_generator
+from django.core.exceptions import ValidationError
+from django.db import models, transaction
+from django.db.models import Q
+from django.template.loader import render_to_string
+from django.utils.encoding import force_bytes
+from django.utils.html import strip_tags
+from django.utils.http import urlsafe_base64_encode
+
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.views import APIView
 from rest_framework import permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from django.contrib.auth.models import User
-from django.db import models, transaction
-from django.contrib.auth.password_validation import validate_password
-from django.core.exceptions import ValidationError
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
-from django.contrib.auth.tokens import default_token_generator
-from datetime import datetime
-from django.conf import settings
-from django.db.models import Q
+
 from .models import Patient, Doctor, Consultation, Prescription, Treatment, MedicalRecord, Notification, ChatMessage, KnowledgeBase
 from .serializers import (
     PatientSerializer, DoctorSerializer, ConsultationSerializer,
@@ -24,8 +29,6 @@ from .serializers import (
     NotificationSerializer, ChatMessageSerializer, KnowledgeBaseSerializer
 )
 
-
-from .emails import CustomActivationEmail
 
 
 # ==========================================
