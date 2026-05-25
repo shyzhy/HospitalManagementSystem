@@ -532,7 +532,7 @@ class ChatbotView(ListCreateAPIView):
     serializer_class = ChatMessageSerializer
 
     def create(self, request, *args, **kwargs):
-        user_message = request.data.get("message")
+        user_message = request.data.get("message", "").strip()
 
         if not user_message:
             return Response(
@@ -545,14 +545,7 @@ class ChatbotView(ListCreateAPIView):
             message=user_message
         )
 
-        # ---------------- KNOWLEDGE BASE CONTEXT ----------------
-        knowledge_context = ""
-
-        knowledge = KnowledgeBase.objects.all()
-        for item in knowledge:
-            if item.text_content:
-                knowledge_context += f"Title: {item.title}\n"
-                knowledge_context += f"{item.text_content}\n\n"
+        message_lower = user_message.lower()
 
         # ---------------- DETECT CURRENT DOCTOR ----------------
         current_doctor = None
@@ -564,89 +557,171 @@ class ChatbotView(ListCreateAPIView):
         if current_doctor:
             doctor_filter = {"doctor": current_doctor}
 
-        # ---------------- SYSTEM DATA CONTEXT ----------------
-        system_context = ""
+        # ---------------- HELPER FUNCTIONS ----------------
+        def consultation_status_value(consultation):
+            return getattr(consultation, "appointment_status", "pending") or "pending"
 
-        # 1. Pending consultations
-        pending_consultations = Consultation.objects.filter(
-            Q(diagnosis__isnull=True) | Q(diagnosis__exact=""),
-            **doctor_filter
-        ).select_related("patient", "doctor")
+        def format_consultation(consultation):
+            return (
+                f"Consultation ID: {consultation.id}\n"
+                f"Patient: {consultation.patient.first_name} {consultation.patient.last_name}\n"
+                f"Doctor: Dr. {consultation.doctor.first_name} {consultation.doctor.last_name}\n"
+                f"Date: {consultation.consultation_date}\n"
+                f"Symptoms: {consultation.symptoms or 'None'}\n"
+                f"Notes: {consultation.notes or 'None'}\n"
+                f"Appointment Status: {consultation_status_value(consultation).title()}\n"
+                f"Diagnosis: {consultation.diagnosis or 'Pending Diagnosis'}"
+            )
 
-        system_context += "=== PENDING CONSULTATIONS ===\n"
+        def save_and_return_ai_response(ai_response):
+            ai_chat = ChatMessage.objects.create(
+                role="assistant",
+                message=ai_response
+            )
 
-        if pending_consultations.exists():
+            return Response({
+                "user": ChatMessageSerializer(user_chat).data,
+                "assistant": ChatMessageSerializer(ai_chat).data
+            })
+
+        # ======================================================
+        # DIRECT ANSWERS FOR COMMON SYSTEM QUESTIONS
+        # ======================================================
+
+        # -------- Pending appointments / pending consultations --------
+        if "pending" in message_lower and ("consultation" in message_lower or "appointment" in message_lower):
+            pending_consultations = Consultation.objects.filter(
+                appointment_status="pending",
+                **doctor_filter
+            ).select_related("patient", "doctor").order_by("-consultation_date")
+
+            if not pending_consultations.exists():
+                return save_and_return_ai_response("No pending consultations found.")
+
+            response_text = "Pending consultations:\n\n"
+
             for consultation in pending_consultations:
-                system_context += (
-                    f"- Consultation ID: {consultation.id}\n"
-                    f"  Patient: {consultation.patient.first_name} {consultation.patient.last_name}\n"
-                    f"  Doctor: Dr. {consultation.doctor.first_name} {consultation.doctor.last_name}\n"
-                    f"  Date: {consultation.consultation_date}\n"
-                    f"  Symptoms: {consultation.symptoms or 'None'}\n"
-                    f"  Notes: {consultation.notes or 'None'}\n"
-                    f"  Appointment Status: {getattr(consultation, 'appointment_status', 'pending')}\n"
-                    f"  Diagnosis Status: Pending Diagnosis\n\n"
+                response_text += format_consultation(consultation) + "\n\n"
+
+            return save_and_return_ai_response(response_text.strip())
+
+        # -------- Approved appointments / approved consultations --------
+        if "approved" in message_lower and ("consultation" in message_lower or "appointment" in message_lower):
+            approved_consultations = Consultation.objects.filter(
+                appointment_status="approved",
+                **doctor_filter
+            ).select_related("patient", "doctor").order_by("-consultation_date")
+
+            if not approved_consultations.exists():
+                return save_and_return_ai_response("No approved consultations found.")
+
+            response_text = "Approved consultations:\n\n"
+
+            for consultation in approved_consultations:
+                response_text += format_consultation(consultation) + "\n\n"
+
+            return save_and_return_ai_response(response_text.strip())
+
+        # -------- Rejected appointments / rejected consultations --------
+        if "rejected" in message_lower and ("consultation" in message_lower or "appointment" in message_lower):
+            rejected_consultations = Consultation.objects.filter(
+                appointment_status="rejected",
+                **doctor_filter
+            ).select_related("patient", "doctor").order_by("-consultation_date")
+
+            if not rejected_consultations.exists():
+                return save_and_return_ai_response("No rejected consultations found.")
+
+            response_text = "Rejected consultations:\n\n"
+
+            for consultation in rejected_consultations:
+                response_text += (
+                    format_consultation(consultation)
+                    + f"\nRejection Reason: {getattr(consultation, 'rejection_reason', '') or 'No reason provided.'}"
+                    + "\n\n"
                 )
-        else:
-            system_context += "No pending consultations found.\n\n"
 
-        # 2. Completed diagnoses
-        completed_consultations = Consultation.objects.filter(
-            diagnosis__isnull=False,
-            **doctor_filter
-        ).exclude(
-            diagnosis__exact=""
-        ).select_related("patient", "doctor")
+            return save_and_return_ai_response(response_text.strip())
 
-        system_context += "=== COMPLETED DIAGNOSES ===\n"
+        # -------- List patients consulted --------
+        if (
+            "patient" in message_lower
+            and (
+                "consulted" in message_lower
+                or "consultation" in message_lower
+                or "list" in message_lower
+                or "patients" in message_lower
+            )
+        ):
+            consulted_patient_ids = Consultation.objects.filter(
+                **doctor_filter
+            ).values_list("patient_id", flat=True).distinct()
 
-        if completed_consultations.exists():
-            for consultation in completed_consultations:
-                system_context += (
-                    f"- Consultation ID: {consultation.id}\n"
-                    f"  Patient: {consultation.patient.first_name} {consultation.patient.last_name}\n"
-                    f"  Doctor: Dr. {consultation.doctor.first_name} {consultation.doctor.last_name}\n"
-                    f"  Date: {consultation.consultation_date}\n"
-                    f"  Symptoms: {consultation.symptoms or 'None'}\n"
-                    f"  Notes: {consultation.notes or 'None'}\n"
-                    f"  Appointment Status: {getattr(consultation, 'appointment_status', 'pending')}\n"
-                    f"  Diagnosis: {consultation.diagnosis}\n\n"
-                )
-        else:
-            system_context += "No completed diagnoses found.\n\n"
+            consulted_patients = Patient.objects.filter(
+                id__in=consulted_patient_ids,
+                is_deleted=False
+            ).order_by("last_name", "first_name")
 
-        # 3. Patients who consulted the doctor
-        consulted_patient_ids = Consultation.objects.filter(
-            **doctor_filter
-        ).values_list("patient_id", flat=True).distinct()
+            if not consulted_patients.exists():
+                return save_and_return_ai_response("No consulted patients found.")
 
-        consulted_patients = Patient.objects.filter(
-            id__in=consulted_patient_ids,
-            is_deleted=False
-        )
+            response_text = "Patients who consulted you:\n\n"
 
-        system_context += "=== PATIENTS WHO CONSULTED THE DOCTOR ===\n"
-
-        if consulted_patients.exists():
             for patient in consulted_patients:
                 consultation_count = Consultation.objects.filter(
                     patient=patient,
                     **doctor_filter
                 ).count()
 
-                system_context += (
-                    f"- Patient ID: {patient.id}\n"
-                    f"  Name: {patient.first_name} {patient.last_name}\n"
-                    f"  Gender: {patient.gender}\n"
-                    f"  Date of Birth: {patient.dob}\n"
-                    f"  Phone: {patient.phone or 'None'}\n"
-                    f"  Address: {patient.address or 'None'}\n"
-                    f"  Total Consultations With Doctor: {consultation_count}\n\n"
+                response_text += (
+                    f"Patient ID: {patient.id}\n"
+                    f"Name: {patient.first_name} {patient.last_name}\n"
+                    f"Gender: {patient.gender}\n"
+                    f"Date of Birth: {patient.dob}\n"
+                    f"Phone: {patient.phone or 'None'}\n"
+                    f"Address: {patient.address or 'None'}\n"
+                    f"Total Consultations: {consultation_count}\n\n"
                 )
-        else:
-            system_context += "No consulted patients found.\n\n"
 
-        # 4. Consultation records
+            return save_and_return_ai_response(response_text.strip())
+
+        # -------- Completed diagnoses --------
+        if (
+            "completed" in message_lower
+            or "diagnosed" in message_lower
+            or "diagnosis" in message_lower
+        ) and "pending" not in message_lower:
+            completed_consultations = Consultation.objects.filter(
+                diagnosis__isnull=False,
+                **doctor_filter
+            ).exclude(
+                diagnosis__exact=""
+            ).select_related("patient", "doctor").order_by("-consultation_date")
+
+            if not completed_consultations.exists():
+                return save_and_return_ai_response("No completed diagnoses found.")
+
+            response_text = "Completed diagnoses:\n\n"
+
+            for consultation in completed_consultations:
+                response_text += format_consultation(consultation) + "\n\n"
+
+            return save_and_return_ai_response(response_text.strip())
+
+        # ======================================================
+        # OLLAMA FALLBACK FOR GENERAL QUESTIONS
+        # ======================================================
+
+        knowledge_context = ""
+
+        knowledge = KnowledgeBase.objects.all()
+        for item in knowledge:
+            if item.text_content:
+                knowledge_context += f"Title: {item.title}\n"
+                knowledge_context += f"{item.text_content}\n\n"
+
+        system_context = ""
+
         all_consultations = Consultation.objects.filter(
             **doctor_filter
         ).select_related("patient", "doctor").order_by("-consultation_date")
@@ -655,12 +730,6 @@ class ChatbotView(ListCreateAPIView):
 
         if all_consultations.exists():
             for consultation in all_consultations:
-                diagnosis_status = (
-                    "Completed Diagnosis"
-                    if consultation.diagnosis
-                    else "Pending Diagnosis"
-                )
-
                 system_context += (
                     f"- Consultation ID: {consultation.id}\n"
                     f"  Patient: {consultation.patient.first_name} {consultation.patient.last_name}\n"
@@ -668,15 +737,13 @@ class ChatbotView(ListCreateAPIView):
                     f"  Date: {consultation.consultation_date}\n"
                     f"  Symptoms: {consultation.symptoms or 'None'}\n"
                     f"  Notes: {consultation.notes or 'None'}\n"
-                    f"  Appointment Status: {getattr(consultation, 'appointment_status', 'pending')}\n"
+                    f"  Appointment Status: {consultation_status_value(consultation)}\n"
                     f"  Rejection Reason: {getattr(consultation, 'rejection_reason', '') or 'None'}\n"
-                    f"  Diagnosis: {consultation.diagnosis or 'Pending Diagnosis'}\n"
-                    f"  Status: {diagnosis_status}\n\n"
+                    f"  Diagnosis: {consultation.diagnosis or 'Pending Diagnosis'}\n\n"
                 )
         else:
             system_context += "No consultation records found.\n\n"
 
-        # 5. Treatments
         treatments = Treatment.objects.filter(
             **doctor_filter
         ).select_related("patient", "doctor", "medical_record").order_by("-treatment_date")
@@ -702,7 +769,6 @@ class ChatbotView(ListCreateAPIView):
         else:
             system_context += "No treatments found.\n\n"
 
-        # 6. Prescriptions
         prescriptions = Prescription.objects.filter(
             **doctor_filter
         ).select_related("patient", "doctor", "medical_record").order_by("-date_prescribed")
@@ -730,7 +796,6 @@ class ChatbotView(ListCreateAPIView):
         else:
             system_context += "No prescriptions found.\n\n"
 
-        # 7. Medical records
         medical_records = MedicalRecord.objects.select_related("patient").filter(
             patient__is_deleted=False
         )
@@ -753,26 +818,16 @@ class ChatbotView(ListCreateAPIView):
         else:
             system_context += "No medical records found.\n\n"
 
-        # ---------------- FINAL AI PROMPT ----------------
         prompt = f"""
 You are the AI assistant for the MedFlow hospital management system.
 
 You are assisting a doctor.
 
-Rules:
-1. Answer only using the System Data and Knowledge Base below.
-2. If the doctor asks for pending consultations, use the PENDING CONSULTATIONS section.
-3. If the doctor asks for completed diagnosis or completed consultations, use the COMPLETED DIAGNOSES section.
-4. If the doctor asks for treatments for a specific patient, look in the TREATMENTS section and match the patient name.
-5. If the doctor asks for prescriptions for a specific patient, look in the PRESCRIPTIONS section and match the patient name.
-6. If the doctor asks for medical records for a specific patient, look in the MEDICAL RECORDS section and match the patient name.
-7. If the doctor asks for patients who consulted them, use the PATIENTS WHO CONSULTED THE DOCTOR section.
-8. If the doctor asks for consultation history or consultation records, use the CONSULTATION RECORDS section.
-9. If the doctor asks about approved, pending, or rejected appointments, use the Appointment Status field in the consultation records.
-10. If a specific patient is mentioned, only answer about that patient.
-11. If the requested information is not found, say that no matching record was found.
-12. Keep answers concise and useful.
-13. Do not invent patient data, diagnosis, prescriptions, treatments, or records.
+Important:
+- Answer only using the System Data and Knowledge Base below.
+- Do not invent patient data.
+- If the record is not found, say no matching record was found.
+- Keep the answer short and direct.
 
 Knowledge Base:
 {knowledge_context}
@@ -793,7 +848,7 @@ Answer:
 
         ollama_model = os.environ.get(
             "OLLAMA_MODEL",
-            "llama3.2:1b"
+            "qwen2.5:0.5b"
         )
 
         try:
@@ -816,21 +871,9 @@ Answer:
             )
 
         except requests.exceptions.RequestException as e:
-            ai_response = (
-                "Sorry, I could not connect to the AI assistant service. "
-                "Please make sure Ollama is running and the selected model is available."
-            )
+            ai_response = f"Ollama error: {str(e)}"
 
-        ai_chat = ChatMessage.objects.create(
-            role="assistant",
-            message=ai_response
-        )
-
-        return Response({
-            "user": ChatMessageSerializer(user_chat).data,
-            "assistant": ChatMessageSerializer(ai_chat).data
-        })
-
+        return save_and_return_ai_response(ai_response)
 
 class KnowledgeBaseView(ListCreateAPIView):
     queryset = KnowledgeBase.objects.all()
