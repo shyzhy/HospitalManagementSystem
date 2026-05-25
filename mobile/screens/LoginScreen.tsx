@@ -6,9 +6,29 @@ import {
 import { login, register, getUser } from '../services/api';
 import * as SecureStore from 'expo-secure-store';
 import Svg, { Path, Circle, G } from 'react-native-svg';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function LoginScreen({ navigation }: any) {
   const [isRegister, setIsRegister] = useState(false);
+
+  // Password and date visibility states
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegPassword, setShowRegPassword] = useState(false);
+  const [showRegRePassword, setShowRegRePassword] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [dobDate, setDobDate] = useState(new Date());
+
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setDobDate(selectedDate);
+      const year = selectedDate.getFullYear();
+      const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+      const day = String(selectedDate.getDate()).padStart(2, '0');
+      handleRegChange('dob', `${year}-${month}-${day}`);
+    }
+  };
 
   // Login state
   const [email, setEmail] = useState('');
@@ -153,14 +173,26 @@ export default function LoginScreen({ navigation }: any) {
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Password</Text>
-                <TextInput 
-                  style={styles.input}
-                  placeholder="••••••••"
-                  placeholderTextColor="#94a3b8"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                />
+                <View style={styles.passwordInputContainer}>
+                  <TextInput 
+                    style={styles.passwordInput}
+                    placeholder="••••••••"
+                    placeholderTextColor="#94a3b8"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={!showLoginPassword}
+                  />
+                  <TouchableOpacity 
+                    style={styles.eyeButton} 
+                    onPress={() => setShowLoginPassword(!showLoginPassword)}
+                  >
+                    <MaterialCommunityIcons 
+                      name={showLoginPassword ? "eye-off" : "eye"} 
+                      size={20} 
+                      color="#94a3b8" 
+                    />
+                  </TouchableOpacity>
+                </View>
               </View>
 
               <TouchableOpacity 
@@ -205,11 +237,49 @@ export default function LoginScreen({ navigation }: any) {
               <View style={styles.row}>
                 <View style={[styles.inputGroup, styles.flex1, { marginRight: 10 }]}>
                   <Text style={styles.label}>Password</Text>
-                  <TextInput style={styles.input} placeholder="••••••••" placeholderTextColor="#94a3b8" value={regData.password} onChangeText={(v) => handleRegChange('password', v)} secureTextEntry />
+                  <View style={styles.passwordInputContainer}>
+                    <TextInput 
+                      style={styles.passwordInput} 
+                      placeholder="••••••••" 
+                      placeholderTextColor="#94a3b8" 
+                      value={regData.password} 
+                      onChangeText={(v) => handleRegChange('password', v)} 
+                      secureTextEntry={!showRegPassword} 
+                    />
+                    <TouchableOpacity 
+                      style={styles.eyeButton} 
+                      onPress={() => setShowRegPassword(!showRegPassword)}
+                    >
+                      <MaterialCommunityIcons 
+                        name={showRegPassword ? "eye-off" : "eye"} 
+                        size={20} 
+                        color="#94a3b8" 
+                      />
+                    </TouchableOpacity>
+                  </View>
                 </View>
                 <View style={[styles.inputGroup, styles.flex1]}>
                   <Text style={styles.label}>Confirm Password</Text>
-                  <TextInput style={styles.input} placeholder="••••••••" placeholderTextColor="#94a3b8" value={regData.re_password} onChangeText={(v) => handleRegChange('re_password', v)} secureTextEntry />
+                  <View style={styles.passwordInputContainer}>
+                    <TextInput 
+                      style={styles.passwordInput} 
+                      placeholder="••••••••" 
+                      placeholderTextColor="#94a3b8" 
+                      value={regData.re_password} 
+                      onChangeText={(v) => handleRegChange('re_password', v)} 
+                      secureTextEntry={!showRegRePassword} 
+                    />
+                    <TouchableOpacity 
+                      style={styles.eyeButton} 
+                      onPress={() => setShowRegRePassword(!showRegRePassword)}
+                    >
+                      <MaterialCommunityIcons 
+                        name={showRegRePassword ? "eye-off" : "eye"} 
+                        size={20} 
+                        color="#94a3b8" 
+                      />
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
 
@@ -233,7 +303,24 @@ export default function LoginScreen({ navigation }: any) {
               <View style={styles.row}>
                 <View style={[styles.inputGroup, styles.flex1, { marginRight: 10 }]}>
                   <Text style={styles.label}>Date of Birth</Text>
-                  <TextInput style={styles.input} placeholder="YYYY-MM-DD" placeholderTextColor="#94a3b8" value={regData.dob} onChangeText={(v) => handleRegChange('dob', v)} />
+                  <TouchableOpacity 
+                    style={[styles.input, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]} 
+                    onPress={() => setShowDatePicker(true)}
+                  >
+                    <Text style={{ color: regData.dob ? '#1e293b' : '#94a3b8', fontSize: 14 }}>
+                      {regData.dob || 'YYYY-MM-DD'}
+                    </Text>
+                    <MaterialCommunityIcons name="calendar" size={18} color="#556ee6" />
+                  </TouchableOpacity>
+                  {showDatePicker && (
+                    <DateTimePicker
+                      value={dobDate}
+                      mode="date"
+                      display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                      onChange={handleDateChange}
+                      maximumDate={new Date()}
+                    />
+                  )}
                 </View>
                 <View style={[styles.inputGroup, styles.flex1]}>
                   <Text style={styles.label}>Gender</Text>
@@ -408,6 +495,26 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 14,
     color: '#1e293b',
+  },
+  passwordInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 12,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 14,
+    color: '#1e293b',
+  },
+  eyeButton: {
+    paddingHorizontal: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   row: {
     flexDirection: 'row',

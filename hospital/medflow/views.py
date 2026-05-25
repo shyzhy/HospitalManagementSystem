@@ -670,8 +670,14 @@ class NotificationUpdateView(RetrieveUpdateDestroyAPIView):
         return Notification.objects.filter(patient__user=self.request.user)
 
 class ChatbotView(ListCreateAPIView):
-    queryset = ChatMessage.objects.all().order_by("created_at")
     serializer_class = ChatMessageSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user and user.is_authenticated:
+            return ChatMessage.objects.filter(user=user).order_by("created_at")
+        return ChatMessage.objects.none()
 
     def create(self, request, *args, **kwargs):
         user_message = request.data.get("message", "").strip()
@@ -683,6 +689,7 @@ class ChatbotView(ListCreateAPIView):
             )
 
         user_chat = ChatMessage.objects.create(
+            user=request.user if request.user and request.user.is_authenticated else None,
             role="user",
             message=user_message
         )
@@ -718,6 +725,7 @@ class ChatbotView(ListCreateAPIView):
 
         def save_and_return_ai_response(ai_response):
             ai_chat = ChatMessage.objects.create(
+                user=request.user if request.user and request.user.is_authenticated else None,
                 role="assistant",
                 message=ai_response
             )

@@ -22,6 +22,26 @@ function Chatbot() {
     scrollToBottom();
   }, [messages, loading]);
 
+  useEffect(() => {
+    if (isOpen) {
+      const fetchChatHistory = async () => {
+        try {
+          const token = localStorage.getItem('token');
+          if (!token) return;
+          const res = await API.get("chat/");
+          const history = res.data.map((msg: any) => ({
+            role: msg.role,
+            text: msg.message,
+          }));
+          setMessages(history);
+        } catch (error) {
+          console.error("Failed to fetch chat history:", error);
+        }
+      };
+      fetchChatHistory();
+    }
+  }, [isOpen]);
+
   const sendMessage = async () => {
     if (!message.trim()) return;
 

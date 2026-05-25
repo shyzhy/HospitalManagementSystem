@@ -13,7 +13,7 @@ import {
   Keyboard,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { sendChatMessage } from '../services/api';
+import { sendChatMessage, getChatHistory } from '../services/api';
 import * as SecureStore from 'expo-secure-store';
 
 interface Message {
@@ -42,6 +42,25 @@ export default function ChatbotScreen({ navigation }: any) {
     SecureStore.getItemAsync('userName').then((name) => {
       if (name) setUserName(name);
     });
+
+    const fetchHistory = async () => {
+      try {
+        const response = await getChatHistory();
+        if (response.data && response.data.length > 0) {
+          const loadedMessages: Message[] = response.data.map((msg: any) => ({
+            id: msg.id.toString(),
+            role: msg.role,
+            text: msg.message,
+            timestamp: new Date(msg.created_at),
+          }));
+          setMessages(loadedMessages);
+          scrollToBottom();
+        }
+      } catch (error) {
+        console.error('Error fetching chat history:', error);
+      }
+    };
+    fetchHistory();
   }, []);
 
   const scrollToBottom = () => {
