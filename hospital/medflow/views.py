@@ -5,7 +5,11 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.contrib.auth.models import User
-from django.db import models
+from django.db import models, transaction
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from datetime import datetime
+import traceback
 import os
 import requests
 from django.db.models import Q
@@ -28,48 +32,104 @@ class PatientRegisterView(APIView):
 
     def post(self, request):
         data = request.data
-        email = data.get('email', '').strip()
+
+        email = data.get('email', '').strip().lower()
         password = data.get('password', '').strip()
         re_password = data.get('re_password', '').strip()
         first_name = data.get('first_name', '').strip()
         last_name = data.get('last_name', '').strip()
-        dob = data.get('dob', '')
+        dob = data.get('dob', '').strip()
         gender = data.get('gender', 'M')
         phone = data.get('phone', '').strip()
         address = data.get('address', '').strip()
 
-        # Validation
+        # ---------------- VALIDATION ----------------
         if not all([email, password, re_password, first_name, last_name, dob]):
-            return Response({'error': 'All required fields must be filled.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'error': 'All required fields must be filled.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         if password != re_password:
-            return Response({'error': 'Passwords do not match.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'error': 'Passwords do not match.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        if User.objects.filter(username=email).exists():
-            return Response({'error': 'An account with this email already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+        if User.objects.filter(username__iexact=email).exists() or User.objects.filter(email__iexact=email).exists():
+            return Response(
+                {'error': 'An account with this email already exists.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        # Create INACTIVE User + Patient (requires email activation)
-        user = User.objects.create_user(
-            username=email, email=email, password=password,
-            first_name=first_name, last_name=last_name,
-            is_active=False
-        )
-        Patient.objects.create(
-            user=user,
-            first_name=first_name,
-            last_name=last_name,
-            dob=dob,
-            gender=gender,
-            phone=phone,
-            address=address,
-        )
+        # Validate password strength
+        try:
+            validate_password(password)
+        except ValidationError as e:
+            return Response(
+                {'error': ' '.join(e.messages)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        # Send activation email
-        context = {'user': user}
-        CustomActivationEmail(request, context).send([email])
+        # Accept both YYYY-MM-DD and MM/DD/YYYY from frontend
+        parsed_dob = None
+        for date_format in ("%Y-%m-%d", "%m/%d/%Y", "%m-%d-%Y"):
+            try:
+                parsed_dob = datetime.strptime(dob, date_format).date()
+                break
+            except ValueError:
+                pass
 
-        return Response({'message': 'Account created! Please check your email to activate your account.'}, status=status.HTTP_201_CREATED)
+        if not parsed_dob:
+            return Response(
+                {'error': 'Invalid date of birth format. Use YYYY-MM-DD or MM/DD/YYYY.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
+        try:
+            with transaction.atomic():
+                # Create INACTIVE User + Patient
+                user = User.objects.create_user(
+                    username=email,
+                    email=email,
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name,
+                    is_active=False
+                )
+
+                Patient.objects.create(
+                    user=user,
+                    first_name=first_name,
+                    last_name=last_name,
+                    dob=parsed_dob,
+                    gender=gender,
+                    phone=phone,
+                    address=address,
+                )
+
+                # Send activation email
+                context = {'user': user}
+                CustomActivationEmail(request, context).send([email])
+
+            return Response(
+                {
+                    'message': 'Account created! Please check your email to activate your account.'
+                },
+                status=status.HTTP_201_CREATED
+            )
+
+        except Exception as e:
+            print("REGISTER ERROR:", str(e))
+            print(traceback.format_exc())
+
+            return Response(
+                {
+                    'error': 'Registration failed while sending the activation email.',
+                    'details': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 # ==========================================
 # PAITENT VIEWS
 # ==========================================
@@ -972,7 +1032,7 @@ Answer:
             ai_response = f"Ollama error: {str(e)}"
 
         return save_and_return_ai_response(ai_response)
-        
+
 class KnowledgeBaseView(ListCreateAPIView):
     queryset = KnowledgeBase.objects.all()
     serializer_class = KnowledgeBaseSerializer
