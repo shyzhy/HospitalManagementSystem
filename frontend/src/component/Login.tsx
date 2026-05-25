@@ -284,7 +284,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                                     <button
                                         type="button"
                                         onClick={() => setShowLoginPassword(!showLoginPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 z-10 text-slate-400 hover:text-slate-600 transition-colors"
                                     >
                                         {showLoginPassword ? (
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -367,7 +367,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                                     <button
                                         type="button"
                                         onClick={() => setShowRegPassword(!showRegPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 z-10 text-slate-400 hover:text-slate-600 transition-colors"
                                     >
                                         {showRegPassword ? (
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -398,7 +398,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                                     <button
                                         type="button"
                                         onClick={() => setShowRegRePassword(!showRegRePassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 z-10 text-slate-400 hover:text-slate-600 transition-colors"
                                     >
                                         {showRegRePassword ? (
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
