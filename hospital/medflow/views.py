@@ -74,8 +74,13 @@ class PatientRegisterView(APIView):
             timeout=20,
         )
 
-        if response.status_code >= 400:
-            raise Exception(f"Resend email error: {response.status_code} - {response.text}")
+       if response.status_code >= 400:
+    print("RESEND STATUS:", response.status_code)
+    print("RESEND RESPONSE:", response.text)
+
+    raise Exception(
+        f"Resend email error: {response.status_code} - {response.text}"
+    )
 
     def post(self, request):
         data = request.data
