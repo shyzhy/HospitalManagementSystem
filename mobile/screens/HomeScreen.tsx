@@ -68,6 +68,20 @@
           <MaterialCommunityIcons name="chevron-right" size={20} color="#ffffff" />
         </TouchableOpacity>
 
+        <TouchableOpacity 
+          style={[styles.aiBanner, { backgroundColor: '#8b5cf6', marginTop: -16 }]}
+          onPress={() => navigation.navigate('Chatbot')}
+        >
+          <View style={[styles.aiIcon, { backgroundColor: 'rgba(255, 255, 255, 0.2)' }]}>
+            <MaterialCommunityIcons name="robot" size={24} color="#ffffff" />
+          </View>
+          <View style={styles.aiTextContainer}>
+            <Text style={styles.aiTitle}>AI Health Assistant</Text>
+            <Text style={styles.aiSubtitle}>Consult regarding prescriptions, appointments & symptoms</Text>
+          </View>
+          <MaterialCommunityIcons name="chevron-right" size={20} color="#ffffff" />
+        </TouchableOpacity>
+
         <Text style={styles.sectionTitle}>My Clinical Services</Text>
         <View style={styles.grid}>
           {menuItems.map((item, index) => (

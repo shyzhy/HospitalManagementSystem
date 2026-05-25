@@ -114,6 +114,8 @@ export const updatePatientProfile = async (id: number, data: any) => {
   return api.patch(`/api/v1/patients/${id}/`, data);
 };
 
-
+export const sendChatMessage = async (message: string) => {
+  return api.post('/chat/', { message });
+};
 
 export default api;

@@ -16,6 +16,7 @@ const SidebarContent = (props: DrawerContentComponentProps) => {
 
   const menuItems = [
     { title: 'Dashboard', icon: 'view-dashboard-outline', path: 'Main' },
+    { title: 'AI Health Assistant', icon: 'robot', path: 'Chatbot' },
     { title: 'Notifications', icon: 'bell-outline', path: 'Notifications' },
     { title: 'Consultations', icon: 'stethoscope', path: 'Consultations' },
     { title: 'Prescriptions', icon: 'file-document-outline', path: 'Prescriptions' },
