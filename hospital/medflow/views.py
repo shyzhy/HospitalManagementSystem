@@ -30,49 +30,87 @@ from .emails import CustomActivationEmail
 class PatientRegisterView(APIView):
     permission_classes = [permissions.AllowAny]
 
+    def send_activation_email(self, request, user, email):
+        resend_api_key = os.environ.get("RESEND_API_KEY")
+
+        if not resend_api_key:
+            raise Exception("RESEND_API_KEY is missing in Railway variables.")
+
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+
+        frontend_url = getattr(settings, "FRONTEND_URL", "http://localhost:3000")
+
+        context = {
+            "user": user,
+            "uid": uid,
+            "token": token,
+            "frontend_url": frontend_url,
+        }
+
+        html_content = render_to_string("emails/activation.html", context)
+        plain_text = strip_tags(html_content)
+
+        response = requests.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {resend_api_key}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "from": os.environ.get("DEFAULT_FROM_EMAIL", "onboarding@resend.dev"),
+                "to": [email],
+                "subject": "Activate your MedFlow Account",
+                "html": html_content,
+                "text": plain_text,
+            },
+            timeout=20,
+        )
+
+        if response.status_code >= 400:
+            raise Exception(f"Resend email error: {response.status_code} - {response.text}")
+
     def post(self, request):
         data = request.data
 
-        email = data.get('email', '').strip().lower()
-        password = data.get('password', '').strip()
-        re_password = data.get('re_password', '').strip()
-        first_name = data.get('first_name', '').strip()
-        last_name = data.get('last_name', '').strip()
-        dob = data.get('dob', '').strip()
-        gender = data.get('gender', 'M')
-        phone = data.get('phone', '').strip()
-        address = data.get('address', '').strip()
+        email = data.get("email", "").strip().lower()
+        password = data.get("password", "").strip()
+        re_password = data.get("re_password", "").strip()
+        first_name = data.get("first_name", "").strip()
+        last_name = data.get("last_name", "").strip()
+        dob = data.get("dob", "").strip()
+        gender = data.get("gender", "M")
+        phone = data.get("phone", "").strip()
+        address = data.get("address", "").strip()
 
-        # ---------------- VALIDATION ----------------
         if not all([email, password, re_password, first_name, last_name, dob]):
             return Response(
-                {'error': 'All required fields must be filled.'},
+                {"error": "All required fields must be filled."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         if password != re_password:
             return Response(
-                {'error': 'Passwords do not match.'},
+                {"error": "Passwords do not match."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         if User.objects.filter(username__iexact=email).exists() or User.objects.filter(email__iexact=email).exists():
             return Response(
-                {'error': 'An account with this email already exists.'},
+                {"error": "An account with this email already exists."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Validate password strength
         try:
             validate_password(password)
         except ValidationError as e:
             return Response(
-                {'error': ' '.join(e.messages)},
+                {"error": " ".join(e.messages)},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Accept both YYYY-MM-DD and MM/DD/YYYY from frontend
         parsed_dob = None
+
         for date_format in ("%Y-%m-%d", "%m/%d/%Y", "%m-%d-%Y"):
             try:
                 parsed_dob = datetime.strptime(dob, date_format).date()
@@ -82,20 +120,19 @@ class PatientRegisterView(APIView):
 
         if not parsed_dob:
             return Response(
-                {'error': 'Invalid date of birth format. Use YYYY-MM-DD or MM/DD/YYYY.'},
+                {"error": "Invalid date of birth format. Use YYYY-MM-DD or MM/DD/YYYY."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         try:
             with transaction.atomic():
-                # Create INACTIVE User + Patient
                 user = User.objects.create_user(
                     username=email,
                     email=email,
                     password=password,
                     first_name=first_name,
                     last_name=last_name,
-                    is_active=False
+                    is_active=False,
                 )
 
                 Patient.objects.create(
@@ -108,13 +145,11 @@ class PatientRegisterView(APIView):
                     address=address,
                 )
 
-                # Send activation email
-                context = {'user': user}
-                CustomActivationEmail(request, context).send([email])
+                self.send_activation_email(request, user, email)
 
             return Response(
                 {
-                    'message': 'Account created! Please check your email to activate your account.'
+                    "message": "Account created! Please check your email to activate your account."
                 },
                 status=status.HTTP_201_CREATED
             )
@@ -125,11 +160,13 @@ class PatientRegisterView(APIView):
 
             return Response(
                 {
-                    'error': 'Registration failed while sending the activation email.',
-                    'details': str(e)
+                    "error": "Registration failed while sending the activation email.",
+                    "details": str(e),
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+            
 # ==========================================
 # PAITENT VIEWS
 # ==========================================
