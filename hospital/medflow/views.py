@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.contrib.auth.models import User
 from django.db import models
+import os
 import requests
 from django.db.models import Q
 from .models import Patient, Doctor, Consultation, Prescription, Treatment, MedicalRecord, Notification, ChatMessage, KnowledgeBase
@@ -830,7 +831,7 @@ Answer:
             "assistant": ChatMessageSerializer(ai_chat).data
         })
 
-        
+
 class KnowledgeBaseView(ListCreateAPIView):
     queryset = KnowledgeBase.objects.all()
     serializer_class = KnowledgeBaseSerializer
