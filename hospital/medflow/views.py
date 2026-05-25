@@ -1,3 +1,6 @@
+import traceback
+import os
+import requests
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.views import APIView
 from rest_framework import permissions, status
@@ -12,9 +15,7 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from datetime import datetime
-import traceback
-import os
-import requests
+from django.conf import settings
 from django.db.models import Q
 from .models import Patient, Doctor, Consultation, Prescription, Treatment, MedicalRecord, Notification, ChatMessage, KnowledgeBase
 from .serializers import (
