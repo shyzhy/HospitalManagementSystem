@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getMedicalRecords, deleteMedicalRecord } from '../api';
+import { getMedicalRecords } from '../api';
 import { MedicalRecord, Patient } from '../types';
 
 interface MedicalRecordsListProps {
