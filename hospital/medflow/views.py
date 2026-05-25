@@ -8,6 +8,9 @@ from django.contrib.auth.models import User
 from django.db import models, transaction
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
 from datetime import datetime
 import traceback
 import os
@@ -166,7 +169,7 @@ class PatientRegisterView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-            
+
 # ==========================================
 # PAITENT VIEWS
 # ==========================================
