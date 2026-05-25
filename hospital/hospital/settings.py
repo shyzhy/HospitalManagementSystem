@@ -75,17 +75,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'hospital.wsgi.application'
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'railway',
-        'USER': 'postgres',
-        'PASSWORD': 'RokFDTPGVWXOFAfWadzKhGazCXVOzyZF',
-        'HOST': 'yamabiko.proxy.rlwy.net',
-        'PORT': '19892',
-    }
-}
-
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
