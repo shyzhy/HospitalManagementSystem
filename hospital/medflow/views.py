@@ -559,8 +559,6 @@ class ChatbotView(ListCreateAPIView):
         if request.user and request.user.is_authenticated:
             current_doctor = Doctor.objects.filter(user=request.user).first()
 
-        # If no logged-in doctor is detected, fallback to all data.
-        # Useful during testing.
         doctor_filter = {}
         if current_doctor:
             doctor_filter = {"doctor": current_doctor}
@@ -585,6 +583,7 @@ class ChatbotView(ListCreateAPIView):
                     f"  Date: {consultation.consultation_date}\n"
                     f"  Symptoms: {consultation.symptoms or 'None'}\n"
                     f"  Notes: {consultation.notes or 'None'}\n"
+                    f"  Appointment Status: {getattr(consultation, 'appointment_status', 'pending')}\n"
                     f"  Diagnosis Status: Pending Diagnosis\n\n"
                 )
         else:
@@ -609,6 +608,7 @@ class ChatbotView(ListCreateAPIView):
                     f"  Date: {consultation.consultation_date}\n"
                     f"  Symptoms: {consultation.symptoms or 'None'}\n"
                     f"  Notes: {consultation.notes or 'None'}\n"
+                    f"  Appointment Status: {getattr(consultation, 'appointment_status', 'pending')}\n"
                     f"  Diagnosis: {consultation.diagnosis}\n\n"
                 )
         else:
@@ -667,6 +667,8 @@ class ChatbotView(ListCreateAPIView):
                     f"  Date: {consultation.consultation_date}\n"
                     f"  Symptoms: {consultation.symptoms or 'None'}\n"
                     f"  Notes: {consultation.notes or 'None'}\n"
+                    f"  Appointment Status: {getattr(consultation, 'appointment_status', 'pending')}\n"
+                    f"  Rejection Reason: {getattr(consultation, 'rejection_reason', '') or 'None'}\n"
                     f"  Diagnosis: {consultation.diagnosis or 'Pending Diagnosis'}\n"
                     f"  Status: {diagnosis_status}\n\n"
                 )
@@ -765,10 +767,11 @@ Rules:
 6. If the doctor asks for medical records for a specific patient, look in the MEDICAL RECORDS section and match the patient name.
 7. If the doctor asks for patients who consulted them, use the PATIENTS WHO CONSULTED THE DOCTOR section.
 8. If the doctor asks for consultation history or consultation records, use the CONSULTATION RECORDS section.
-9. If a specific patient is mentioned, only answer about that patient.
-10. If the requested information is not found, say that no matching record was found.
-11. Keep answers concise and useful.
-12. Do not invent patient data, diagnosis, prescriptions, treatments, or records.
+9. If the doctor asks about approved, pending, or rejected appointments, use the Appointment Status field in the consultation records.
+10. If a specific patient is mentioned, only answer about that patient.
+11. If the requested information is not found, say that no matching record was found.
+12. Keep answers concise and useful.
+13. Do not invent patient data, diagnosis, prescriptions, treatments, or records.
 
 Knowledge Base:
 {knowledge_context}
@@ -782,15 +785,25 @@ Doctor Question:
 Answer:
 """
 
+        ollama_url = os.environ.get(
+            "OLLAMA_URL",
+            "http://localhost:11434/api/generate"
+        )
+
+        ollama_model = os.environ.get(
+            "OLLAMA_MODEL",
+            "llama3.2:1b"
+        )
+
         try:
             response = requests.post(
-                "http://localhost:11434/api/generate",
+                ollama_url,
                 json={
-                    "model": "qwen2.5:0.5b",
+                    "model": ollama_model,
                     "prompt": prompt,
                     "stream": False
                 },
-                timeout=60
+                timeout=120
             )
 
             response.raise_for_status()
@@ -802,7 +815,10 @@ Answer:
             )
 
         except requests.exceptions.RequestException as e:
-            ai_response = f"Sorry, I could not connect to the local AI server. Error: {str(e)}"
+            ai_response = (
+                "Sorry, I could not connect to the AI assistant service. "
+                "Please make sure Ollama is running and the selected model is available."
+            )
 
         ai_chat = ChatMessage.objects.create(
             role="assistant",
@@ -814,6 +830,7 @@ Answer:
             "assistant": ChatMessageSerializer(ai_chat).data
         })
 
+        
 class KnowledgeBaseView(ListCreateAPIView):
     queryset = KnowledgeBase.objects.all()
     serializer_class = KnowledgeBaseSerializer
