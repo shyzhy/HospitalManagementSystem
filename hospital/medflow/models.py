@@ -17,7 +17,12 @@ class Patient(models.Model):
     def soft_delete(self):
         self.is_deleted = True
         self.deleted_at = timezone.now()
+        user = self.user
+        if user:
+            self.user = None
         self.save()
+        if user:
+            user.delete()
         # Also delete the patient's medical record
         if hasattr(self, 'medical_record'):
             self.medical_record.delete()
@@ -39,7 +44,12 @@ class Doctor(models.Model):
     def soft_delete(self):
         self.is_deleted = True
         self.deleted_at = timezone.now()
+        user = self.user
+        if user:
+            self.user = None
         self.save()
+        if user:
+            user.delete()
 
     def __str__(self):
         return f"Dr. {self.first_name} {self.last_name} - {self.specialization}"
