@@ -56,7 +56,7 @@ const TreatmentDetails: React.FC<TreatmentDetailsProps> = ({ treatment, onEdit, 
                             </p>
                             <div className="flex items-center gap-2 mt-2">
                                 <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">INTERNAL ID: #{treatment.patient}</span>
-                                <span className="text-[10px] font-bold text-slate-400">Verified Identity</span>
+                                <span className="text-[10px] font-bold text-slate-400">Verified Identity.</span>
                             </div>
                         </div>
                     </div>
