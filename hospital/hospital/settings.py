@@ -20,6 +20,7 @@ SECRET_KEY = 'django-insecure-7rwyqhc^u&micuoif5cf+xxebp@*sqz7o8gju$z+xg!!mvw31p
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*']
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 
 
 INSTALLED_APPS = [
@@ -74,6 +75,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'hospital.wsgi.application'
 
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'railway',
+        'USER': 'postgres',
+        'PASSWORD': 'RokFDTPGVWXOFAfWadzKhGazCXVOzyZF',
+        'HOST': 'yamabiko.proxy.rlwy.net',
+        'PORT': '19892',
+    }
+}
 
 
 REST_FRAMEWORK = {
@@ -140,7 +152,6 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-
 # --- CORS ---
 CORS_ALLOW_ALL_ORIGINS = True
 
