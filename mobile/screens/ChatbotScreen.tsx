@@ -78,12 +78,13 @@ export default function ChatbotScreen({ navigation }: any) {
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending chat message:', error);
+      const errDetail = error.response?.data?.detail || error.response?.data?.error || error.message || String(error);
       const errorMessage: Message = {
         id: Math.random().toString(),
         role: 'assistant',
-        text: "Sorry, I'm having trouble connecting to the MedFlow AI engine. Please verify your connection and try again.",
+        text: `Sorry, I'm having trouble connecting to the MedFlow AI engine.\n\n[Diagnostic Info]: ${errDetail}`,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
@@ -330,11 +331,9 @@ const styles = StyleSheet.create({
     maxWidth: '85%',
   },
   userRow: {
-    self: 'flex-end',
     alignSelf: 'flex-end',
   },
   assistantRow: {
-    self: 'flex-start',
     alignSelf: 'flex-start',
   },
   botAvatar: {
