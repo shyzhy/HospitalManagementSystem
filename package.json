@@ -8,5 +8,8 @@
     "install:frontend": "cd frontend && npm install",
     "install:mobile": "cd mobile && npm install",
     "install:all": "npm run install:frontend && npm run install:mobile"
+  },
+  "dependencies": {
+    "@getbrevo/brevo": "^5.0.4"
   }
 }

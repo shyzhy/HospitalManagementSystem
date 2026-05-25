@@ -38,10 +38,10 @@ class PatientRegisterView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def send_activation_email(self, request, user, email):
-        resend_api_key = os.environ.get("RESEND_API_KEY")
+        brevo_api_key = os.environ.get("BREVO_API_KEY")
 
-        if not resend_api_key:
-            raise Exception("RESEND_API_KEY is missing in Railway variables.")
+        if not brevo_api_key:
+            raise Exception("BREVO_API_KEY is missing in Railway variables.")
 
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
@@ -58,28 +58,37 @@ class PatientRegisterView(APIView):
         html_content = render_to_string("emails/activation.html", context)
         plain_text = strip_tags(html_content)
 
+        # Brevo API transactional email payload
         response = requests.post(
-            "https://api.resend.com/emails",
+            "https://api.brevo.com/v3/smtp/email",
             headers={
-                "Authorization": f"Bearer {resend_api_key}",
+                "api-key": brevo_api_key,
                 "Content-Type": "application/json",
+                "Accept": "application/json",
             },
             json={
-                "from": os.environ.get("DEFAULT_FROM_EMAIL", "onboarding@resend.dev"),
-                "to": [email],
+                "sender": {
+                    "email": os.environ.get("DEFAULT_FROM_EMAIL")
+                },
+                "to": [
+                    {
+                        "email": email,
+                        "name": f"{user.first_name} {user.last_name}".strip()
+                    }
+                ],
                 "subject": "Activate your MedFlow Account",
-                "html": html_content,
-                "text": plain_text,
+                "htmlContent": html_content,
+                "textContent": plain_text,
             },
             timeout=20,
         )
 
         if response.status_code >= 400:
-            print("RESEND STATUS:", response.status_code)
-            print("RESEND RESPONSE:", response.text)
+            print("BREVO STATUS:", response.status_code)
+            print("BREVO RESPONSE:", response.text)
 
             raise Exception(
-                f"Resend email error: {response.status_code} - {response.text}"
+                f"Brevo email error: {response.status_code} - {response.text}"
             )
 
     def post(self, request):
