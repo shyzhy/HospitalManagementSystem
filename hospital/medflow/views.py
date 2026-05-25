@@ -377,18 +377,24 @@ class ConsultationListCreateView(ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        queryset = Consultation.objects.all()
+        
+        patient_id = self.request.query_params.get('patient')
+        if patient_id:
+            queryset = queryset.filter(patient_id=patient_id)
+
         if user.is_staff or user.is_superuser:
-            return Consultation.objects.all()
+            return queryset
         
         doctor = getattr(user, 'doctor_profile', None)
         if doctor:
-            return Consultation.objects.filter(doctor=doctor)
+            return queryset.filter(doctor=doctor)
         
         patient = getattr(user, 'patient_profile', None)
         if patient:
-            return self.queryset.filter(patient=patient)
+            return queryset.filter(patient=patient)
             
-        return self.queryset.none()
+        return Consultation.objects.none()
 
 class ConsultationRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = Consultation.objects.all()
@@ -496,18 +502,24 @@ class PrescriptionListCreateView(ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        queryset = Prescription.objects.all()
+        
+        patient_id = self.request.query_params.get('patient')
+        if patient_id:
+            queryset = queryset.filter(patient_id=patient_id)
+
         if user.is_staff or user.is_superuser:
-            return Prescription.objects.all()
+            return queryset
         
         doctor = getattr(user, 'doctor_profile', None)
         if doctor:
-            return Prescription.objects.filter(doctor=doctor)
+            return queryset.filter(doctor=doctor)
         
         patient = getattr(user, 'patient_profile', None)
         if patient:
-            return self.queryset.filter(patient=patient)
+            return queryset.filter(patient=patient)
             
-        return self.queryset.none()
+        return Prescription.objects.none()
 
     def perform_create(self, serializer):
         instance = serializer.save()
@@ -548,18 +560,24 @@ class TreatmentListCreateView(ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        queryset = Treatment.objects.all()
+        
+        patient_id = self.request.query_params.get('patient')
+        if patient_id:
+            queryset = queryset.filter(patient_id=patient_id)
+
         if user.is_staff or user.is_superuser:
-            return Treatment.objects.all()
+            return queryset
         
         doctor = getattr(user, 'doctor_profile', None)
         if doctor:
-            return Treatment.objects.filter(doctor=doctor)
+            return queryset.filter(doctor=doctor)
         
         patient = getattr(user, 'patient_profile', None)
         if patient:
-            return self.queryset.filter(patient=patient)
+            return queryset.filter(patient=patient)
             
-        return self.queryset.none()
+        return Treatment.objects.none()
 
 class TreatmentRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = Treatment.objects.all()
@@ -590,20 +608,26 @@ class MedicalRecordListCreateView(ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        queryset = MedicalRecord.objects.all()
+        
+        patient_id = self.request.query_params.get('patient')
+        if patient_id:
+            queryset = queryset.filter(patient_id=patient_id)
+
         if user.is_staff or user.is_superuser:
-            return MedicalRecord.objects.all()
+            return queryset
         
         doctor = getattr(user, 'doctor_profile', None)
         if doctor:
-            return MedicalRecord.objects.filter(
+            return queryset.filter(
                 patient__consultations__doctor=doctor
             ).distinct()
         
         patient = getattr(user, 'patient_profile', None)
         if patient:
-            return self.queryset.filter(patient=patient)
+            return queryset.filter(patient=patient)
             
-        return self.queryset.none()
+        return MedicalRecord.objects.none()
 
 class MedicalRecordRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     queryset = MedicalRecord.objects.all()
