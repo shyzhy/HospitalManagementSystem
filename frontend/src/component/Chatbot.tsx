@@ -48,7 +48,7 @@ function Chatbot() {
         return;
       }
 
-      const res = await API.post("/chat/", { message });
+      const res = await API.post("chat/", { message });
 
       const botMessage: Message = {
         role: "assistant",

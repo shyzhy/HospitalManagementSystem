@@ -115,7 +115,7 @@ export const updatePatientProfile = async (id: number, data: any) => {
 };
 
 export const sendChatMessage = async (message: string) => {
-  return api.post('/chat/', { message });
+  return api.post('/api/v1/chat/', { message });
 };
 
 export default api;
